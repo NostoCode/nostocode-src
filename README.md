@@ -1,10 +1,52 @@
-# LeetCode Clone – Competitive Programming Platform
-
-**Live Link:** 
+# NostoCode - Ancient Coding Mode
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-## Website Preview
+> **NostoCode** is a modified version of LeetCode Clone with "Ancient Coding Mode" - an anti-cheat system that enforces manual typing and tracks coding behavior.
+
+## What's Changed
+
+This version includes the following major modifications:
+
+### ❌ Removed AI Features
+- Removed `ProblemPageAiTab` component (AI chat bot)
+- Removed `/api/code/chat-output` endpoint
+- Removed Sparkles button from problem page
+
+### 🚫 External Paste Disabled
+- Global paste events are blocked
+- Right-click context menu disabled in editor
+- Drag & drop text disabled
+
+### ✅ Internal Clipboard System
+- Copy/paste works ONLY inside the editor
+- Uses internal buffer, never system clipboard
+- Keyboard shortcuts: `Ctrl+C` / `Ctrl+V`
+
+### 🧠 Ancient Coding Score System
+Each submission includes a score based on:
+- **Typing Ratio**: manual typing vs paste usage
+- **Rhythm Score**: time interval variance between inputs
+- **Edit Activity**: delete frequency
+- **Large Inserts**: burst detection (>30 chars in <50ms)
+- **Anti-Paste Score**: penalizes paste usage
+
+**Level Mapping:**
+- 🟢 Ancient Master: 90-100
+- 🟡 Skilled Human: 70-90
+- 🟠 Suspicious: 40-70
+- 🔴 Likely AI Generated: 0-40
+
+---
+
+## Original Repository
+
+This project is based on [Leetcode-Clone](https://github.com/Avijit200318/Leetcode-Clone) by Avijit200318.
+
+# LeetCode Clone – Competitive Programming Platform (Original)
+
+**Live Link:** 
+
 ### Code Editor
 ![ride1](https://github.com/user-attachments/assets/04705a8d-f19f-4df3-8c03-b5e61473881f)
 
