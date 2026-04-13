@@ -22,7 +22,7 @@ import ProblemPageDescription from '@/components/ProblemPageDescription';
 import ProblemPageCodeEditor from '@/components/ProblemPageCodeEditor';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
-import { CloudUpload, Loader2, Play, Sparkles } from 'lucide-react';
+import { CloudUpload, Loader2, Play } from 'lucide-react';
 
 import { useSession } from 'next-auth/react';
 import { codeRunValidation } from '@/schemas/codeRunSchema';
@@ -30,8 +30,9 @@ import ProblemPageSoluction from '@/components/ProblemPageSoluction';
 import ProblemPageSubmission from '@/components/ProblemPageSubmission';
 import ProblemPageTestResult from '@/components/ProblemPageTestResult';
 import { codeSubmissionValidation } from '@/schemas/codeSubmissionSchema';
-import ProblemPageAiTab from '@/components/ProblemPageAiTab';
 import confetti from "canvas-confetti";
+
+// Ancient Coding Mode - AI features removed
 
 export default function page() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -112,9 +113,8 @@ export default function page() {
       setCodeOutput(res.data.results ?? null);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log("Code run error: ", error.response.data.message || "Please check your code and try again. You can also ask Leet for help.");
-        toast.error(error.response.data.message || "Please check your code and try again. You can also ask Leet for help.");
-        setCurrentTab("chatBot");
+        console.log("Code run error: ", error.response.data.message || "Please check your code and try again.");
+        toast.error(error.response.data.message || "Please check your code and try again.");
       } else {
         console.log("Error while running the code", error);
         toast.error("Error while running the code");
@@ -132,8 +132,19 @@ export default function page() {
     });
   }
 
+  // Ancient Coding Mode: Get score from editor
+  const getScoringResult = () => {
+    if (typeof window !== 'undefined' && (window as any).getAncientCodeScore) {
+      return (window as any).getAncientCodeScore();
+    }
+    return null;
+  };
+
   const handleCodeSubmission = async () => {
     if (!problemInfo || !session) return;
+
+    // Get Ancient Code Score from editor
+    const scoringResult = getScoringResult();
 
     setIsSubmitLoading(true);
     try {
@@ -143,7 +154,9 @@ export default function page() {
         problemId: problemInfo._id,
         sourceCode,
         languageId: selectedLanguageCode,
-        testCases: problemInfo.testCases
+        testCases: problemInfo.testCases,
+        ancientCodeScore: scoringResult ? scoringResult.score : 100,
+        ancientCodeLevel: scoringResult ? scoringResult.level : "🟢 Ancient Master"
       }
 
       const parsedData = codeSubmissionValidation.safeParse(data);
@@ -155,13 +168,26 @@ export default function page() {
 
       const res = await axios.post<ApiResponse>("/api/code/submit-code", data);
       toast.success("Code submitted successfully");
+
+      // Show Ancient Code Score
+      if (scoringResult) {
+        let scoreMsg = `Ancient Level: ${scoringResult.level} (${scoringResult.score})\n\n`;
+        scoreMsg += `Details:\n`;
+        scoreMsg += `- Typing Ratio: ${scoringResult.details.typingRatio}%\n`;
+        scoreMsg += `- Rhythm Score: ${scoringResult.details.rhythmScore}\n`;
+        scoreMsg += `- Edit Activity: ${scoringResult.details.editActivity}%\n`;
+        scoreMsg += `- Large Inserts: ${scoringResult.details.largeInserts}\n`;
+        scoreMsg += `- Anti-Paste Score: ${scoringResult.details.antiPasteScore}`;
+        alert(scoreMsg);
+      }
+
       showConfetti()
       console.log("Code submitted successfully: ", res.data.submissionOutput);
       setSubmissionOutput(res.data.submissionOutput ?? null);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        toast.error(error.response.data.message || "Please check your code and try again. You can also ask Leet for help.");
-        console.log("Code submission error: ", error.response.data.message || "Please check your code and try again. You can also ask Leet for help.");
+        toast.error(error.response.data.message || "Please check your code and try again.");
+        console.log("Code submission error: ", error.response.data.message || "Please check your code and try again.");
       } else {
         toast.error("Error while submitting the code");
         console.log("Error while submitting the code ", error);
@@ -183,7 +209,6 @@ export default function page() {
           <Button disabled={session?.user ? false : true} onClick={handleCodeSubmission} variant="secondary" className='w-30 cursor-pointer relative z-40 text-base flex items-center gap-2 font-semibold'>
             {isSubmitLoading ? <><Loader2 className='resize-custom w-5 animate-spin' />Running</> : <><CloudUpload className='resize-custom w-5' /> Submit</>}
           </Button>
-          <Button onClick={() => setCurrentTab("chatBot")} disabled={session?.user ? false : true} variant="secondary" className='cursor-pointer relative z-40'><Sparkles /></Button>
         </div>
       </div>
 
@@ -204,7 +229,6 @@ export default function page() {
             {(problemInfo && currentTab === "solutions") && <ProblemPageSoluction problemId={problemId?.toString() || ""} />}
             {(problemInfo && currentTab === "submissions") && <ProblemPageSubmission theme={theme} problemInfo={problemInfo} setCurrentTab={setCurrentTab} setSubmissionOutput={setSubmissionOutput} />}
             {(problemInfo && currentTab === "testResult") && <ProblemPageTestResult codeOutput={codeOutput} isCodeRunning={isCodeRunning} theme={theme} problemInfo={problemInfo} session={session} submissionOutput={submissionOutput} setSubmissionOutput={setSubmissionOutput} />}
-            {(problemInfo && currentTab === "chatBot") && <ProblemPageAiTab sourceCode={sourceCode} theme={theme} />}
             <ProblemSideFooter />
           </ScrollArea>
 
