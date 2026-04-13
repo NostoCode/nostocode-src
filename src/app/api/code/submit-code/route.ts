@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { userId, language, problemId, sourceCode, languageId, testCases } = body;
+        const { userId, language, problemId, sourceCode, languageId, testCases, ancientCodeScore, ancientCodeLevel } = body;
 
         const parsedData1 = codeSubmissionValidation.safeParse({ userId, language, sourceCode, problemId });
 
@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        // Ancient Coding Mode: Save score with submission
         const newSubmission = await submissionModel.create({
             userId,
             status: currentStatus,
@@ -73,6 +74,8 @@ export async function POST(req: NextRequest) {
             time: sumOfTime / apiResponse.result.length,
             memory: (sumOfMemory / apiResponse.result.length) / 1024,
             sourceCode,
+            ancientCodeScore: ancientCodeScore || 100,
+            ancientCodeLevel: ancientCodeLevel || "🟢 Ancient Master",
             problemId
         });
 

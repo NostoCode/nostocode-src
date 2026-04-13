@@ -7,6 +7,8 @@ export interface ISubmission extends Document {
     time: number,
     memory: number,
     sourceCode: string,
+    ancientCodeScore: number,
+    ancientCodeLevel: string,
     problemId: Types.ObjectId,
     createdAt?: Date,
     updatedAt?: Date
@@ -42,6 +44,14 @@ const submissionSchema = new Schema<ISubmission>({
         type: Schema.Types.ObjectId,
         required: [true, "User id is required"],
         ref: "Problem"
+    },
+    ancientCodeScore: {
+        type: Number,
+        default: 100
+    },
+    ancientCodeLevel: {
+        type: String,
+        default: "🟢 Ancient Master"
     }
 }, { timestamps: true });
 
