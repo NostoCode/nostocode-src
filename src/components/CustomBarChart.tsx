@@ -17,7 +17,7 @@ import { Session } from "next-auth";
 export const description = "Runtime vs Performance Chart";
 
 export default function CustomBarChart({ session, labelValue }: { session: Session | null, labelValue: number }) {
-    // Simulated LeetCode-like performance data
+    // Simulated NostoCode-like performance data
     const chartData = [
         { time: 5, performance: 90 },
         { time: 10, performance: 60 },

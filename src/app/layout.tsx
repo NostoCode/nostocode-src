@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Leetcode Clone",
-  description: "Developed a Leetcode like coding platform using Nextjs",
+  title: "NostoCode",
+  description: "Ancient Coding Mode — A coding platform where cheating is impossible.",
   icons: "/favicon.ico"
 };
 

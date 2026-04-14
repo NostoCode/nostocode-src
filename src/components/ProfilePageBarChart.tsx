@@ -19,7 +19,7 @@ import {
 export const description = "Runtime vs Performance Chart";
 
 export default function ProblemPageBarChart() {
-    // Simulated LeetCode-like performance data
+    // Simulated NostoCode-like performance data
     const chartData = [
         { time: 5, performance: 5 },
         { time: 10, performance: 10 },

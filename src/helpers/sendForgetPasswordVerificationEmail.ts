@@ -8,7 +8,7 @@ export const sendForgetPasswordVerificationEmail = async (email: string, usernam
         await resend.emails.send({
             from: 'onboarding@resend.dev',
             to: email,
-            subject: "Leetcode-Clone (NEXT JS Project) Forget Password",
+            subject: "NostoCode — Password Reset",
             react: ForgetPasswordVerificationEmail({username, otp: verifyCode})
         });
         

@@ -63,7 +63,7 @@ export default function page() {
       }
 
       if (res?.ok && res?.url) {
-        toast.success("Login Successfull");
+        toast.success("Login Successful");
         router.replace('/problems');
       }
     } catch (error) {

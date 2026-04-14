@@ -67,7 +67,8 @@ const problemSchema = new Schema<IProblem>({
     },
     topics: {
         type: String,
-        required: [true, "topics is required (is separated by ',')"]
+        required: false,
+        default: ""
     },
     companies: {
         type: String

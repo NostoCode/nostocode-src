@@ -16,13 +16,13 @@ export default function DiscussPageSideBox() {
                     <h3 className="text-lg">Explore</h3>
                 </div>
                 <p className="text-gray-500 py-3">#Interview</p>
-                <h2 className="line-clamp-2">Oracle On-Campus Interview Experience | Google vs Atlasian</h2>
-                <p className="text-gray-500 py-3">#Compensetion</p>
-                <h2 className="line-clamp-2">Oracle On-Campus Interview Experience | Google vs Atlasian</h2>
+                <h2 className="line-clamp-2">Oracle On-Campus Interview Experience | Google vs Atlassian</h2>
+                <p className="text-gray-500 py-3">#Compensation</p>
+                <h2 className="line-clamp-2">Oracle On-Campus Interview Experience | Google vs Atlassian</h2>
                 <p className="text-gray-500 py-3">#Career</p>
-                <h2 className="line-clamp-2">Oracle On-Campus Interview Experience | Google vs Atlasian</h2>
+                <h2 className="line-clamp-2">Oracle On-Campus Interview Experience | Google vs Atlassian</h2>
                 <p className="text-gray-500 py-3">#Google</p>
-                <h2 className="line-clamp-2">Oracle On-Campus Interview Experience | Google vs Atlasian</h2>
+                <h2 className="line-clamp-2">Oracle On-Campus Interview Experience | Google vs Atlassian</h2>
                 <p className="text-blue-600 cursor-pointer pt-6">Show More</p>
             </div>
         </div>

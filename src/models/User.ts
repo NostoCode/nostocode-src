@@ -17,7 +17,7 @@ export interface IUser extends Document{
     forgetPasswordExpiry: Date | null,
     solvedProblems: number,
     skills: string[],
-    linkdin: string,
+    linkedin: string,
     solutions: Types.ObjectId[],
     submissions: Types.ObjectId[],
     solvedQuestions: Types.ObjectId[] | IProblem[],
@@ -52,7 +52,7 @@ const userSchema = new Schema<IUser>({
     github: {
         type: String
     },
-    linkdin: {
+    linkedin: {
         type: String
     },
     university: {
