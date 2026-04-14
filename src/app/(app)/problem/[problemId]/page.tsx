@@ -178,7 +178,13 @@ export default function page() {
         scoreMsg += `- Edit Activity: ${scoringResult.details.editActivity}%\n`;
         scoreMsg += `- Large Inserts: ${scoringResult.details.largeInserts}\n`;
         scoreMsg += `- Anti-Paste Score: ${scoringResult.details.antiPasteScore}`;
-        alert(scoreMsg);
+        toast.info(
+          `${scoringResult.level} (${scoringResult.score}/100)`,
+          {
+            description: `Typing: ${scoringResult.details.typingRatio}% · Rhythm: ${scoringResult.details.rhythmScore} · Edit: ${scoringResult.details.editActivity}% · Inserts: ${scoringResult.details.largeInserts}`,
+            duration: 8000,
+          }
+        );
       }
 
       showConfetti()

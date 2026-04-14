@@ -2,11 +2,15 @@ import axios from "axios";
 
 const judge0ApiLink = process.env.JUDGE0_BATCH_API_BATCH_LINK || '';
 
-const judge0Headers = {
+// Only include RapidAPI headers when using the cloud Judge0 CE API.
+// Self-hosted Judge0 (local or via Tailscale Funnel) does not require these.
+const judge0Headers: Record<string, string> = {
     "content-type": "application/json",
-    "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-    "X-RapidAPI-Key": process.env.JUDGE0_BATCH_API_KEY
 };
+if (process.env.JUDGE0_BATCH_API_KEY) {
+    judge0Headers["X-RapidAPI-Host"] = "judge0-ce.p.rapidapi.com";
+    judge0Headers["X-RapidAPI-Key"] = process.env.JUDGE0_BATCH_API_KEY;
+}
 
 export const runJudge0Batch = async (sourceCode: string, languageId: string, testCases: [{ input: string, output: string }]) => {
     try {

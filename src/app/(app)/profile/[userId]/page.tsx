@@ -35,7 +35,7 @@ export default function page() {
             country: "",
             university: "",
             github: "",
-            linkdin: "",
+            linkedin: "",
             skills: []
         }
     })
@@ -56,7 +56,7 @@ export default function page() {
                 country: res.data.user.country,
                 university: res.data.user.university,
                 github: res.data.user.github,
-                linkdin: res.data.user.linkdin,
+                linkedin: res.data.user.linkedin,
                 skills: res.data.user.skills || []
             });
         } catch (error) {
@@ -101,7 +101,7 @@ export default function page() {
                 </div>
                 <div className="">
                     <h1 className="text-2xl font-semibold flex items-center gap-4">{fullUserInfo?.username} <ExternalLink className='resize-custom w-5 text-blue-500' /></h1>
-                    <p className="text-gray-500">Leetcode ID: {(fullUserInfo?._id || "").toString()}</p>
+                    <p className="text-gray-500">NostoCode ID: {(fullUserInfo?._id || "").toString()}</p>
                 </div>
             </div>
             <div className="w-full h-[100%] relative customBackground">
@@ -201,13 +201,13 @@ export default function page() {
                                     )}
                                 />
                                 <FormField
-                                    name="linkdin"
+                                    name="linkedin"
                                     control={form.control}
                                     render={({ field }) => (
                                         <FormItem className='flex gap-12'>
-                                            <FormLabel className='w-32'>Linkdin</FormLabel>
+                                            <FormLabel className='w-32'>LinkedIn</FormLabel>
                                             <FormControl>
-                                                <Input placeholder="Linkdin" {...field} className='text-base p-4 h-11 w-[60%]' />
+                                                <Input placeholder="LinkedIn" {...field} className='text-base p-4 h-11 w-[60%]' />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

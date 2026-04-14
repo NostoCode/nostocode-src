@@ -75,7 +75,7 @@ export default function ProblemPageDescription({ problemInfo, session }: { probl
             </div>
 
             <ProblemPageCollapseButton problemInfo={problemInfo} />
-            <p className={`${theme === "dark" ? 'text-neutral-400' : ''} text-xs font-semibold mt-8`}>Copyright © {new Date().getFullYear()} LeetCode-Clone (Next JS Project Created by Avijit). All rights reserved.</p>
+            <p className={`${theme === "dark" ? 'text-neutral-400' : ''} text-xs font-semibold mt-8`}>Copyright © {new Date().getFullYear()} NostoCode. All rights reserved.</p>
         </div>
     )
 }

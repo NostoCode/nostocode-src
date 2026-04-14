@@ -95,8 +95,8 @@ export default function page() {
                 <img src="/navLogo light.png" alt="" className="w-full h-full scale-75" />
               </div>
               <div className="w-[90%] border-b-2 pb-4">
-                <p className="text-sm dark:text-gray-400">Leetcode {formatDate(new Date())}</p>
-                <h2 className="font-semibold text-xl my-2">Leetcode's Thanks Giving Sale Is Now Live! Get $40 OFF - Your Final Offer of The Year</h2>
+                <p className="text-sm dark:text-gray-400">NostoCode {formatDate(new Date())}</p>
+                <h2 className="font-semibold text-xl my-2">NostoCode — Ancient Coding Mode, where your real skill speaks.</h2>
                 <p className="text-sm dark:text-gray-400">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Debitis eligendi amet beatae. Atque dignissimos vel, harum ex repudiandae consectetur quisquam laboriosam deserunt magnam fugit. Perspiciatis incidunt accusantium fugit dicta recusandae?</p>
                 <div className="flex items-center gap-6 mt-4 dark:text-gray-400">
                   <div className="flex items-center gap-1">
@@ -125,7 +125,7 @@ export default function page() {
                 </div>
                 <div className="w-[90%] border-b-2 pb-4">
                   <Link href={`/solution-post/${ele._id}`} key={index}>
-                    <p className="text-sm dark:text-gray-400">Leetcode {formatDate(ele.createdAt as Date)}</p>
+                    <p className="text-sm dark:text-gray-400">NostoCode {formatDate(ele.createdAt as Date)}</p>
                     <h2 className="font-semibold text-xl my-2">{ele.title}</h2>
                     <p className="text-sm dark:text-gray-400 line-clamp-2">{ele.explanation.split("Explanation:\n\n")[1]}</p>
                     <div className="flex items-center gap-6 mt-4 dark:text-gray-400">
