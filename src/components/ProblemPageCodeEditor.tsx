@@ -262,12 +262,14 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         );
     };
 
+    // Language IDs for local Judge0 extra instance (judge0/judge0:1.13.1-extra)
+    // C=1, C++=2, Java=4, Python(ML)=10
     const coddingLanguages = {
-        "C": { "compilorId": "c", "apiId": 50 },
-        "C++": { "compilorId": "cpp", "apiId": 54 },
-        "Java": { "compilorId": "java", "apiId": 62 },
+        "C": { "compilorId": "c", "apiId": 1 },
+        "C++": { "compilorId": "cpp", "apiId": 2 },
+        "Java": { "compilorId": "java", "apiId": 4 },
         "Javascript": { "compilorId": "javascript", "apiId": 93 },
-        "Python": { "compilorId": "python", "apiId": 71 }
+        "Python": { "compilorId": "python", "apiId": 10 }
     }
 
     type coddingLanguagesType = keyof typeof coddingLanguages;
