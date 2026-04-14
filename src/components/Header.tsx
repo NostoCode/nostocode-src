@@ -9,6 +9,7 @@ import Link from 'next/link';
 import NavLinks from './NavLinks';
 import NavRunButtonsContainer from './NavRunButtonsContainer';
 import { usePathname } from 'next/navigation';
+import { ThemeToggle } from './ThemeToggle';
 
 export default function Header() {
   const [mounted, setMounted] = useState<boolean>(false);
@@ -37,6 +38,7 @@ export default function Header() {
         {(theme === "dark") ? <img src="/navLogo dark.png" alt="" className='h-6' /> : <img src="/navLogo light.png" alt="" className='h-6' />}
         {pathname.startsWith("/problem/")? <NavRunButtonsContainer theme={theme} session={session} /> : <NavLinks theme={theme} session={session} pathname={pathname} />}
       <div className="flex items-center gap-4">
+        <ThemeToggle />
         {!session && <div className='flex gap-4 items-center'>
           <Link href="/sign-up">
             <Button variant="outline" className='cursor-pointer font-semibold'>Sign up</Button>

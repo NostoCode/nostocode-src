@@ -1,0 +1,403 @@
+/* ============================================================
+   Windows 98 Theme — scoped to html[data-win98="true"]
+   ============================================================ */
+
+/* ---------- CSS Variables ---------- */
+[data-win98="true"] {
+  /* Win98 palette */
+  --win98-gray: #c0c0c0;
+  --win98-light: #dfdfdf;
+  --win98-dark: #808080;
+  --win98-darker: #404040;
+  --win98-black: #0a0a0a;
+  --win98-white: #ffffff;
+  --win98-blue: #000080;
+  --win98-blue-light: #1084d0;
+  --win98-teal: #008080;
+  --win98-raised: inset -1px -1px #0a0a0a, inset 1px 1px #dfdfdf,
+    inset -2px -2px #808080, inset 2px 2px #ffffff;
+  --win98-sunken: inset -1px -1px #ffffff, inset 1px 1px #808080,
+    inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
+  --win98-font: "MS Sans Serif", "Microsoft Sans Serif", "Segoe UI", Arial,
+    sans-serif;
+
+  /* Override Tailwind / Shadcn CSS variables to Win98 palette */
+  --background: #c0c0c0;
+  --foreground: #0a0a0a;
+  --card: #c0c0c0;
+  --card-foreground: #0a0a0a;
+  --popover: #c0c0c0;
+  --popover-foreground: #0a0a0a;
+  --primary: #000080;
+  --primary-foreground: #ffffff;
+  --secondary: #dfdfdf;
+  --secondary-foreground: #0a0a0a;
+  --muted: #dfdfdf;
+  --muted-foreground: #808080;
+  --accent: #dfdfdf;
+  --accent-foreground: #0a0a0a;
+  --destructive: #cc0000;
+  --border: #808080;
+  --input: #ffffff;
+  --ring: #000080;
+  --radius: 0rem;
+}
+
+/* ---------- Base ---------- */
+[data-win98="true"] body {
+  background-color: var(--win98-teal);
+  font-family: var(--win98-font);
+  font-size: 11px;
+  color: var(--win98-black);
+  padding-bottom: 40px;
+}
+
+[data-win98="true"] * {
+  border-radius: 0 !important;
+}
+
+[data-win98="true"] *:focus-visible {
+  outline: 1px dotted var(--win98-black) !important;
+  outline-offset: 1px !important;
+}
+
+/* ---------- Main App Window Frame ---------- */
+/* Always in DOM — CSS controls visibility */
+.win98-app-window {
+  display: contents; /* transparent passthrough in modern mode */
+}
+
+[data-win98="true"] .win98-app-window {
+  display: flex;
+  flex-direction: column;
+  background: var(--win98-gray);
+  box-shadow: inset -1px -1px var(--win98-black), inset 1px 1px var(--win98-light),
+    inset -2px -2px var(--win98-dark), inset 2px 2px var(--win98-white);
+  margin: 4px 4px 0 4px;
+  min-height: calc(100vh - 48px);
+}
+
+/* ---------- Chrome Title Bar ---------- */
+.win98-chrome-titlebar {
+  display: none;
+}
+
+[data-win98="true"] .win98-chrome-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(
+    to right,
+    var(--win98-blue) 0%,
+    var(--win98-blue-light) 100%
+  );
+  padding: 3px 3px 3px 6px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+[data-win98="true"] .win98-titlebar-text {
+  color: var(--win98-white);
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--win98-font);
+}
+
+[data-win98="true"] .win98-titlebar-icon {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+[data-win98="true"] .win98-window-controls {
+  display: flex;
+  gap: 2px;
+}
+
+[data-win98="true"] .win98-chrome-btn {
+  width: 16px;
+  height: 14px;
+  min-height: 14px !important;
+  min-width: 0 !important;
+  background: var(--win98-gray);
+  border: none !important;
+  box-shadow: var(--win98-raised) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  cursor: pointer;
+  padding: 0 !important;
+  color: var(--win98-black);
+  font-family: var(--win98-font);
+  line-height: 1;
+}
+
+[data-win98="true"] .win98-chrome-btn:active {
+  box-shadow: var(--win98-sunken) !important;
+}
+
+/* ---------- Header / Menu Bar ---------- */
+[data-win98="true"] header {
+  background: var(--win98-gray) !important;
+  border-bottom: 1px solid var(--win98-dark) !important;
+  box-shadow: 0 1px 0 var(--win98-white) !important;
+  height: auto !important;
+  min-height: 24px;
+  padding: 2px 8px !important;
+  font-size: 11px;
+}
+
+[data-win98="true"] header img {
+  filter: brightness(0);
+}
+
+/* ---------- Buttons ---------- */
+[data-win98="true"] button:not(.no-win98) {
+  background: var(--win98-gray) !important;
+  border: none !important;
+  box-shadow: var(--win98-raised) !important;
+  padding: 4px 10px !important;
+  font-family: var(--win98-font) !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  color: var(--win98-black) !important;
+  min-height: 22px;
+}
+
+[data-win98="true"] button:not(.no-win98):active {
+  box-shadow: var(--win98-sunken) !important;
+  padding: 5px 9px 3px 11px !important;
+}
+
+[data-win98="true"] button:not(.no-win98):disabled {
+  color: var(--win98-dark) !important;
+  text-shadow: 1px 1px 0 var(--win98-white);
+  cursor: default !important;
+}
+
+/* ---------- Inputs / Textareas / Selects ---------- */
+[data-win98="true"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(.no-win98),
+[data-win98="true"] textarea:not(.no-win98),
+[data-win98="true"] select:not(.no-win98) {
+  background: var(--win98-white) !important;
+  border: none !important;
+  box-shadow: var(--win98-sunken) !important;
+  padding: 3px 4px !important;
+  font-family: var(--win98-font) !important;
+  font-size: 11px !important;
+  color: var(--win98-black) !important;
+}
+
+/* ---------- Checkboxes / Radios ---------- */
+[data-win98="true"] input[type="checkbox"]:not(.no-win98),
+[data-win98="true"] input[type="radio"]:not(.no-win98) {
+  accent-color: var(--win98-blue);
+}
+
+/* ---------- Links ---------- */
+[data-win98="true"] a:not([class*="button"]):not(.no-win98) {
+  color: var(--win98-blue);
+}
+
+/* ---------- Scrollbars ---------- */
+[data-win98="true"] ::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+[data-win98="true"] ::-webkit-scrollbar-track {
+  background: var(--win98-light);
+  box-shadow: var(--win98-sunken);
+}
+
+[data-win98="true"] ::-webkit-scrollbar-thumb {
+  background: var(--win98-gray);
+  box-shadow: var(--win98-raised);
+}
+
+[data-win98="true"] ::-webkit-scrollbar-button {
+  background: var(--win98-gray);
+  box-shadow: var(--win98-raised);
+  width: 16px;
+  height: 16px;
+}
+
+[data-win98="true"] ::-webkit-scrollbar-corner {
+  background: var(--win98-gray);
+}
+
+/* ---------- Taskbar ---------- */
+.win98-taskbar {
+  display: none;
+}
+
+[data-win98="true"] .win98-taskbar {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 36px;
+  background: var(--win98-gray);
+  box-shadow: inset 0 1px 0 var(--win98-white);
+  padding: 2px 4px;
+  z-index: 9999;
+  gap: 4px;
+}
+
+[data-win98="true"] .win98-start-button {
+  background: var(--win98-gray) !important;
+  box-shadow: var(--win98-raised) !important;
+  border: none !important;
+  height: 28px;
+  padding: 2px 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-weight: bold;
+  font-size: 11px !important;
+  font-family: var(--win98-font) !important;
+  cursor: pointer !important;
+  color: var(--win98-black) !important;
+}
+
+[data-win98="true"] .win98-start-button:active {
+  box-shadow: var(--win98-sunken) !important;
+}
+
+[data-win98="true"] .win98-taskbar-spacer {
+  flex: 1;
+}
+
+[data-win98="true"] .win98-taskbar-clock {
+  box-shadow: var(--win98-sunken);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-family: var(--win98-font);
+  background: var(--win98-gray);
+  min-width: 60px;
+  text-align: center;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Shadcn DropdownMenu ---------- */
+[data-win98="true"] [data-radix-popper-content-wrapper] [role="menu"],
+[data-win98="true"] [data-radix-popper-content-wrapper] [data-radix-collection-item] {
+  background: var(--win98-gray) !important;
+  border: none !important;
+  box-shadow: var(--win98-raised) !important;
+}
+
+[data-win98="true"] [role="menuitem"],
+[data-win98="true"] [role="menuitemcheckbox"],
+[data-win98="true"] [role="menuitemradio"] {
+  background: transparent !important;
+  color: var(--win98-black) !important;
+  font-family: var(--win98-font) !important;
+  font-size: 11px !important;
+  padding: 3px 16px !important;
+}
+
+[data-win98="true"] [role="menuitem"]:hover,
+[data-win98="true"] [role="menuitem"]:focus,
+[data-win98="true"] [role="menuitemcheckbox"]:hover {
+  background: var(--win98-blue) !important;
+  color: var(--win98-white) !important;
+}
+
+[data-win98="true"] [role="separator"] {
+  border: none !important;
+  border-top: 1px solid var(--win98-dark) !important;
+  border-bottom: 1px solid var(--win98-white) !important;
+  margin: 2px 0 !important;
+}
+
+/* ---------- Shadcn Dialog ---------- */
+[data-win98="true"] [role="dialog"] {
+  background: var(--win98-gray) !important;
+  box-shadow: var(--win98-raised) !important;
+  border: none !important;
+}
+
+/* ---------- Tooltips ---------- */
+[data-win98="true"] [role="tooltip"] {
+  background: #ffffe1 !important;
+  border: 1px solid var(--win98-black) !important;
+  color: var(--win98-black) !important;
+  font-family: var(--win98-font) !important;
+  font-size: 11px !important;
+  padding: 3px 5px !important;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ---------- ThemeToggle specific sizing in Win98 ---------- */
+[data-win98="true"] .win98-theme-toggle {
+  height: 22px !important;
+  padding: 2px 8px !important;
+  font-size: 11px !important;
+  white-space: nowrap;
+}
+
+/* ---------- Typography ---------- */
+[data-win98="true"] h1,
+[data-win98="true"] h2,
+[data-win98="true"] h3,
+[data-win98="true"] h4,
+[data-win98="true"] h5,
+[data-win98="true"] h6 {
+  font-family: var(--win98-font);
+}
+
+/* ---------- hr / separator ---------- */
+[data-win98="true"] hr {
+  border: none !important;
+  border-top: 1px solid var(--win98-dark) !important;
+  border-bottom: 1px solid var(--win98-white) !important;
+}
+
+/* ---------- Tables ---------- */
+[data-win98="true"] th {
+  background: var(--win98-gray);
+  box-shadow: var(--win98-raised);
+  padding: 3px 8px;
+  font-family: var(--win98-font);
+  font-size: 11px;
+}
+
+[data-win98="true"] td {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+/* ---------- Monaco Editor — preserve its own styling ---------- */
+[data-win98="true"] .monaco-editor,
+[data-win98="true"] .monaco-editor * {
+  border-radius: 0 !important;
+}
+
+/* ---------- Badges ---------- */
+[data-win98="true"] [class*="badge"],
+[data-win98="true"] .badge {
+  background: var(--win98-gray) !important;
+  box-shadow: var(--win98-raised) !important;
+  color: var(--win98-black) !important;
+  font-family: var(--win98-font) !important;
+  font-size: 10px !important;
+  border: none !important;
+}
+
+/* ---------- Card components ---------- */
+[data-win98="true"] [class*="card"],
+[data-win98="true"] .card {
+  background: var(--win98-gray) !important;
+  box-shadow: var(--win98-raised) !important;
+  border: none !important;
+}
