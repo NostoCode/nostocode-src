@@ -9,7 +9,7 @@ export default function page() {
     <div className='w-full h-[calc(100vh-3rem)] py-10 px-20'>
       <h3 className="text-2xl text-gray-500 font-semibold">Welcome</h3>
       <h1 className='text-4xl my-4'>NostoCode Explore</h1>
-      <h1 className="text-4xl">Hii...</h1>
+      <h1 className="text-4xl">Hi...</h1>
       <h3 className="my-4 text-2xl">I am <span className='font-semibold'>Avijit</span>. I hope you like this project</h3>
       <p className="my-4 text-lg w-[80%] dark:text-gray-400">I appreciate you taking the time to visit. If you want to connect with me or see more of my professional activities, please check the links below. Feel free to browse my portfolio, follow my updates on social media, or drop me an email directly. I look forward to hearing from you and discussing potential projects or collaborations. I hope you find the connection useful!</p>
       <div className="flex gap-4 mt-8">

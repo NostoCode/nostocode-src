@@ -23,7 +23,7 @@ import { toast } from 'sonner';
 
 import { useTheme } from 'next-themes';
 import { signInValidation } from '@/schemas/signInSchema';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 
 
 export default function page() {
@@ -54,17 +54,22 @@ export default function page() {
 
       if (res?.error) {
         if (res.error === "CredentialsSignin") {
-          console.log("Login failded incorrect username or password: ", res.error);
-          toast.error("Login failded incorrect username or password");
+          console.log("Login failed: incorrect username or password: ", res.error);
+          toast.error("Login failed: incorrect username or password");
         } else {
           console.log(`Error: ${res.error}`)
           toast.error(`Error: ${res.error}`);
         }
       }
 
-      if (res?.ok && res?.url) {
+      if (res?.ok) {
         toast.success("Login Successful");
-        router.replace('/problems');
+        const session = await getSession();
+        if (session?.user?._id) {
+          router.replace(`/dashboard/${session.user._id}`);
+        } else {
+          router.replace('/problems');
+        }
       }
     } catch (error) {
       toast.error("Something went wrong. Please try again.");

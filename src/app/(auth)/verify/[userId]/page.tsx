@@ -85,7 +85,7 @@ export default function page() {
     <div className='w-full h-[calc(100vh-4rem)] flex justify-center items-center'>
       <div className="w-[32rem] border-2 py-8 px-8 rounded-2xl flex flex-col items-center">
         <div className="logo">
-          {(theme === "dark")? <img src="/logo dark.png" alt="" /> : <img src="/logo.svg" alt="" />}
+          <span className="text-2xl font-bold">NostoCode</span>
         </div>
         <div className="w-full">
           <h1 className='text-3xl mt-8 mb-2 font-semibold'>Verify Your Account</h1>
