@@ -92,7 +92,7 @@ export default function page() {
             }
             {!isLoading && <div className="w-full flex gap-4 cursor-pointer">
               <div className="w-8 h-8 rounded-full bg-white overflow-hidden border">
-                <img src="/navLogo light.png" alt="" className="w-full h-full scale-75" />
+                <img src="/navLogo-light.svg" alt="" className="w-full h-full scale-75" />
               </div>
               <div className="w-[90%] border-b-2 pb-4">
                 <p className="text-sm dark:text-gray-400">NostoCode {formatDate(new Date())}</p>

@@ -41,6 +41,9 @@
   --input: #ffffff;
   --ring: #000080;
   --radius: 0rem;
+  /* Sidebar accent for Win98 theme */
+  --sidebar-accent: #c0c0c0;
+  --sidebar-accent-foreground: #0a0a0a;
 }
 
 /* ---------- Base ---------- */
@@ -400,4 +403,23 @@
   background: var(--win98-gray) !important;
   box-shadow: var(--win98-raised) !important;
   border: none !important;
+}
+
+/* ---------- Text colors for Win98 visibility ---------- */
+[data-win98="true"] .text-gray-400 {
+  color: #505050 !important;
+}
+
+[data-win98="true"] .text-gray-500 {
+  color: #404040 !important;
+}
+
+/* ---------- Dark bg overrides in Win98 mode ---------- */
+[data-win98="true"] .dark\:bg-\[#212124\] {
+  background-color: var(--win98-white) !important;
+}
+
+/* ---------- Custom backgrounds in Win98 mode ---------- */
+[data-win98="true"] .customBackground {
+  background: var(--win98-gray) !important;
 }

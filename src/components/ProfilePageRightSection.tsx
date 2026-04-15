@@ -1,7 +1,7 @@
 import React from 'react'
 import ProfilePageLInearChart from './ProfilePageLInearChart'
 import ProblemPageBarChart from './ProfilePageBarChart'
-import { ArrowRight, ChevronRight, ClipboardList, FileText, MessageCircleMore, SquareCheckBig } from 'lucide-react'
+import { ArrowRight, ChevronRight, ClipboardList, FileText, MessageCircleMore, SquareCheckBig, Award, Medal, Trophy } from 'lucide-react'
 import CustomContributorGraph from './CustomContributorGraph'
 import { LevelWiseProblemType } from '@/app/(app)/problems/page'
 import CustomRadialChart from './CustomRadialChart'
@@ -56,9 +56,9 @@ export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQ
             <ArrowRight className='text-gray-400' />
           </div>
           <div className="w-full h-24 flex gap-3 justify-center items-center">
-            <img src="/badge1.png" alt="" className="w-20 h-20" />
-            <img src="/badge2.png" alt="" className="w-22 h-22" />
-            <img src="/badge3.png" alt="" className="w-22 h-20" />
+            <Award className='w-16 h-16 text-yellow-500' />
+            <Medal className='w-16 h-16 text-gray-400' />
+            <Trophy className='w-16 h-16 text-orange-400' />
           </div>
           <div className="">
             <p className="text-gray-400 text-sm">Most recent badges</p>

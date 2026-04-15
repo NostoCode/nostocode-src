@@ -140,7 +140,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
     useEffect(() => {
         const handleGlobalPaste = (e: ClipboardEvent) => {
             e.preventDefault();
-            toast.error("External paste is disabled in Ancient Coding Mode");
+            toast.error("禁止从外部粘贴 - External paste is disabled in Ancient Coding Mode");
         };
 
         window.addEventListener("paste", handleGlobalPaste);
@@ -182,14 +182,20 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                         length: selectedText.length,
                         timestamp: Date.now()
                     });
-                    toast.success("Copied to internal clipboard");
+                    toast.success("已复制到内部剪贴板 - Copied to internal clipboard");
                 }
             }
         }
     };
 
     const handlePasteInternal = () => {
-        if (internalClipboard && editorRef.current) {
+        // If internal clipboard is empty, block external paste
+        if (!internalClipboard) {
+            toast.error("禁止从外部粘贴 - External paste is disabled in Ancient Coding Mode");
+            return;
+        }
+
+        if (editorRef.current) {
             const position = editorRef.current?.getPosition();
             const model = editorRef.current?.getModel();
 
@@ -212,10 +218,8 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                     length: internalClipboard.length,
                     timestamp: Date.now()
                 });
-                toast.success("Pasted from internal clipboard");
+                toast.success("已从内部剪贴板粘贴 - Pasted from internal clipboard");
             }
-        } else if (!internalClipboard) {
-            toast.error("Internal clipboard is empty. Copy something first.");
         }
     };
 
