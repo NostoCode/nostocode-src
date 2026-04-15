@@ -61,7 +61,7 @@ export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQ
             <img src="/badge3.png" alt="" className="w-22 h-20" />
           </div>
           <div className="">
-            <p className="text-gray-400 text-sm">Most rescent badges</p>
+            <p className="text-gray-400 text-sm">Most recent badges</p>
             <h2 className='font-semibold text-lg'>50 Days badges 2025</h2>
           </div>
         </div>
