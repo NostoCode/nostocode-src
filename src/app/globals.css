@@ -148,7 +148,7 @@
 }
 
 .customTextWhite{
-  color: white !important;
+  color: var(--foreground) !important;
 }
 
 .customBackground{
