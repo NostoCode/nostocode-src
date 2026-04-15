@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createProblemValidation = z.object({
-    title: z.string().min(3, { message: "Title must be atleast 3 charecters" }),
+    title: z.string().min(3, { message: "Title must be at least 3 characters" }),
     level: z.string(),
     description: z.string(),
     examples: z.string(),

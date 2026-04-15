@@ -5,6 +5,6 @@ export const mongodbObjectId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid Ob
 
 export const similarQuestionValidation = z.object({
     _id: mongodbObjectId,
-    title: z.string().min(6, {message: "Titel mustbe atleast 6 charecters"}),
-    level: z.string().max(6, {message: "Level consist maximum 6 charecters"})
+    title: z.string().min(6, {message: "Title must be at least 6 characters"}),
+    level: z.string().max(6, {message: "Level consist maximum 6 characters"})
 })
