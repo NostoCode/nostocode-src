@@ -131,7 +131,7 @@ export default function page() {
       <ScrollArea className='relative w-1/2 h-[calc(100vh-3rem)] px-4 py-2'>
         <div className="w-full border-2 py-8 px-8 rounded-2xl flex flex-col items-center relative">
           <div className="logo">
-            {(theme === "dark") ? <img src="/logo dark.png" alt="" /> : <img src="/logo.svg" alt="" />}
+            <img src="/logo.svg" alt="" />
           </div>
           <div className="w-full">
             <h1 className='text-3xl mt-8 mb-2 font-semibold'>Update Problem</h1>

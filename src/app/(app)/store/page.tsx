@@ -7,7 +7,7 @@ export default function page() {
     <div className='w-full h-[150vh] relative'>
       <div className="absolute top-0 right-12 h-8 border-2 border-t-0 flex items-center gap-2 p-6 rounded-b-md">Your Points: <span className='text-yellow-400'>0</span><CircleDollarSign className='resize-custom w-5 text-yellow-400' /></div>
       <div className="w-full h-1/2 flex flex-col justify-center items-center">
-        <div className="w-40 h-40 bg-[url(/navLogo-light.png)] dark:bg-[url(/navLogo-dark.png)] bg-cover"></div>
+        <div className="w-40 h-40 bg-[url(/navLogo-light.svg)] dark:bg-[url(/navLogo-dark.svg)] bg-cover"></div>
         <h1 className="text-3xl my-4 font-light"><span className='font-semibold'>Nosto</span>Code Store</h1>
         <p className="my-4 dark:text-gray-400">Shop in our store or redeem our products for free by using NostoCoins.</p>
         <div className="flex items-center gap-4">
