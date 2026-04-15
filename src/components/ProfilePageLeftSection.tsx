@@ -28,7 +28,7 @@ export default function ProfilePageLeftSecond({ fullUserInfo, filterLanguageWise
                 <div className="">
                     <h1 className="font-semibold text-lg">{fullUserInfo?.username}</h1>
                     <h2 className="text-sm">{fullUserInfo?.username}</h2>
-                    <h2 className='mt-4 font-semibold'>Rank 164,334</h2>
+                    <h2 className='mt-4 font-semibold text-gray-400'>Rank —</h2>
                 </div>
             </div>
             <div className="my-4 w-full max-h-48">
