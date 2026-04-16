@@ -101,7 +101,7 @@ export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQ
           {[...allSubmissions].reverse().slice(0, 8).map((ele, index) =>
             <Link href={`/submission/${ele._id}`} key={index}>
             <div className={`w-full flex items-center justify-between px-4 py-4 rounded cursor-pointer ${index % 2 == 0 ? 'bg-[var(--sidebar-accent)]' : ''}`}>
-              <h2 className="font-semibold">{(ele.problemId as IProblem).title}</h2>
+              <h2 className="font-semibold">{(ele.problemId as IProblem)?.title ?? 'Unknown Problem'}</h2>
               <p className="text-gray-500 text-sm font-semibold">{timeAgoFunction(ele.createdAt as Date)}</p>
             </div>
             </Link>
