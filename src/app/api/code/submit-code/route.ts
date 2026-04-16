@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
         }
 
-        const parsedData2 = codeRunValidation.safeParse({ sourceCode, languageId, testCases });
+        const parsedData2 = codeRunValidation.safeParse({ sourceCode, languageId, testCases, problemId });
 
         if (!parsedData2.success) {
             return NextResponse.json({
@@ -42,8 +42,31 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
         }
 
+        // Build template code for Python if problem has promptCode/testCode
+        let finalCode = sourceCode;
+        let finalTestCases = testCases || [];
+
+        if (languageId === 10) {
+            const problemForTemplate = await problemModel.findById(problemId).select('promptCode testCode');
+            if (problemForTemplate?.promptCode && problemForTemplate?.testCode) {
+                let cleanPrompt = problemForTemplate.promptCode;
+                if (!problemForTemplate.testCode.includes('SortedList') && !sourceCode.includes('SortedList')) {
+                    cleanPrompt = cleanPrompt.replace(/^from sortedcontainers import SortedList\n?/m, '');
+                }
+                finalCode = `${cleanPrompt}\n\n${sourceCode}\n\n${problemForTemplate.testCode}\n\nimport inspect\ntry:\n    _sol = Solution()\n    _methods = [m for m, _ in inspect.getmembers(_sol, predicate=inspect.ismethod) if not m.startswith('_')]\n    check(getattr(_sol, _methods[0]))\n    print("PASS")\nexcept AssertionError:\n    print("FAIL")\nexcept Exception as e:\n    print(f"ERR: {e}")\n`;
+                finalTestCases = [{ input: "", output: "PASS" }];
+            }
+        }
+
+        if (!finalTestCases.length) {
+            return NextResponse.json({
+                success: false,
+                message: "No test cases available for this problem"
+            }, { status: 400 });
+        }
+
         // run code using judge api
-        const apiResponse = await runJudge0Batch(sourceCode, languageId, testCases);
+        const apiResponse = await runJudge0Batch(finalCode, languageId, finalTestCases);
 
         if (!apiResponse.success) {
             console.log("Error in api response: ", apiResponse.result);

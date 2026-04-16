@@ -14,6 +14,9 @@ export interface IProblem extends Document {
     examples: string,
     constraints: string,
     testCases: ITestCase[],
+    starterCode?: string,   // function signature template shown in editor
+    promptCode?: string,    // helper code (ListNode, TreeNode, imports, etc.)
+    testCode?: string,      // check() function with assert statements
     like?: number,
     dislike?: number,
     topics: string,
@@ -57,6 +60,18 @@ const problemSchema = new Schema<IProblem>({
             required: [true, "Output required"]
         }
     }],
+    starterCode: {
+        type: String,
+        default: ""
+    },
+    promptCode: {
+        type: String,
+        default: ""
+    },
+    testCode: {
+        type: String,
+        default: ""
+    },
     like: {
         type: Number,
         default: 0

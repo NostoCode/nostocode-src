@@ -414,11 +414,6 @@
   color: #404040 !important;
 }
 
-/* ---------- Dark bg overrides in Win98 mode ---------- */
-[data-win98="true"] .dark\:bg-\[#212124\] {
-  background-color: var(--win98-white) !important;
-}
-
 /* ---------- Custom backgrounds in Win98 mode ---------- */
 [data-win98="true"] .customBackground {
   background: var(--win98-gray) !important;

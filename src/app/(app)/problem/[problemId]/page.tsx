@@ -96,6 +96,7 @@ export default function page() {
       const data = {
         sourceCode: sourceCode,
         languageId: selectedLanguageCode,
+        problemId: problemId as string,
         testCases: problemInfo.testCases
       }
 
@@ -154,7 +155,6 @@ export default function page() {
         problemId: problemInfo._id,
         sourceCode,
         languageId: selectedLanguageCode,
-        testCases: problemInfo.testCases,
         ancientCodeScore: scoringResult ? scoringResult.score : 100,
         ancientCodeLevel: scoringResult ? scoringResult.level : "🟢 Ancient Master"
       }
@@ -241,7 +241,7 @@ export default function page() {
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel defaultSize={50} minSize={30} className='rounded-md'>
-          <ProblemPageCodeEditor theme={theme} selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} setSelectedLanguageCode={setSelectedLanguageCode} sourceCode={sourceCode} setSourceCode={setSourceCode} />
+          <ProblemPageCodeEditor theme={theme} selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} setSelectedLanguageCode={setSelectedLanguageCode} sourceCode={sourceCode} setSourceCode={setSourceCode} starterCode={problemInfo?.starterCode} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
