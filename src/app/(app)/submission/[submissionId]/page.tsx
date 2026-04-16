@@ -56,7 +56,7 @@ export default function page() {
               </div>
               <div className="flex items-center gap-2">
                 <img src={session?.user.avatar || " "} alt="" className="w-8 h-8 rounded-full bg-blue-200 object-contain" />
-                <h2 className="text-lg font-semibold">{session?.user.username || "Avijit"}</h2>
+                <h2 className="text-lg font-semibold">{session?.user.username || "User"}</h2>
                 <p className="text-sm dark:'text-neutral-400">Submitted at {formatDate(submissionOutput.createdAt as Date)}</p>
               </div>
             </div>

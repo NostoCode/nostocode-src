@@ -45,14 +45,20 @@ export default function page() {
       <div className="w-[80%] h-full flex justify-center pt-8">
         <div className="w-[80%] h-full">
           <div className="w-full h-44 flex gap-4">
-            <div className="w-[33%] h-full rounded overflow-hidden">
-              <img src="/discuss4.png" alt="" className="w-full h-full object-cover" />
+            <div className="w-[33%] h-full rounded overflow-hidden bg-gradient-to-br from-indigo-600 to-purple-700 flex flex-col justify-end p-4">
+              <p className="text-white text-xs font-semibold uppercase tracking-wide mb-1">Study Plan</p>
+              <h3 className="text-white text-lg font-bold leading-tight">Algorithm & Data Structure Fundamentals</h3>
+              <span className="text-indigo-200 text-xs mt-2 cursor-pointer">Start Learning →</span>
             </div>
-            <div className="w-[33%] h-full rounded overflow-hidden">
-              <img src="/discuss3.jpeg" alt="" className="w-full h-full object-cover" />
+            <div className="w-[33%] h-full rounded overflow-hidden bg-gradient-to-br from-emerald-500 to-teal-700 flex flex-col justify-end p-4">
+              <p className="text-white text-xs font-semibold uppercase tracking-wide mb-1">Challenge</p>
+              <h3 className="text-white text-lg font-bold leading-tight">30-Day Python Coding Challenge</h3>
+              <span className="text-emerald-200 text-xs mt-2 cursor-pointer">Join Now →</span>
             </div>
-            <div className="w-[33%] h-full rounded overflow-hidden">
-              <img src="/discuss2.png" alt="" className="w-full h-full object-cover" />
+            <div className="w-[33%] h-full rounded overflow-hidden bg-gradient-to-br from-orange-500 to-rose-600 flex flex-col justify-end p-4">
+              <p className="text-white text-xs font-semibold uppercase tracking-wide mb-1">Ancient Mode</p>
+              <h3 className="text-white text-lg font-bold leading-tight">Prove Your Skills Without AI Assistance</h3>
+              <span className="text-orange-200 text-xs mt-2 cursor-pointer">Learn More →</span>
             </div>
           </div>
           <div className="w-full h-12 mt-4 flex justify-between">
