@@ -1,12 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Editor from '@monaco-editor/react';
-import { Bookmark, Braces, ChevronUp, CodeXml, Copy, Maximize, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Bookmark, ChevronUp, CodeXml, Copy, Maximize, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     Tooltip,
@@ -266,31 +260,25 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         );
     };
 
-    // Language IDs for local Judge0 extra instance (judge0/judge0:1.13.1-extra)
-    // C=1, C++=2, Java=4, Python(ML)=10
+    // Only Python is supported (template-based execution)
     const coddingLanguages = {
-        "C": { "compilorId": "c", "apiId": 1 },
-        "C++": { "compilorId": "cpp", "apiId": 2 },
-        "Java": { "compilorId": "java", "apiId": 4 },
-        "Javascript": { "compilorId": "javascript", "apiId": 93 },
         "Python": { "compilorId": "python", "apiId": 10 }
     }
 
     type coddingLanguagesType = keyof typeof coddingLanguages;
 
     useEffect(() => {
-        const changeLanguageCode = () => {
-            setSelectedLanguageCode(coddingLanguages[selectedLanguage as coddingLanguagesType].apiId);
-            // Load starter code when Python is selected and starterCode is available
-            if (selectedLanguage === "Python" && starterCode) {
-                setSourceCode(starterCode);
-            } else {
-                setSourceCode("");
-            }
-            resetEditorEvents();
+        setSelectedLanguageCode(coddingLanguages[selectedLanguage as coddingLanguagesType].apiId);
+        if (selectedLanguage === "Python" && starterCode) {
+            // Only load starter code if editor is currently empty (don't overwrite user code)
+            setSourceCode((prev) => prev || starterCode);
+        } else if (!starterCode) {
+            // starterCode not yet loaded from server — don't clear editor
+        } else {
+            setSourceCode("");
         }
-        changeLanguageCode();
-    }, [selectedLanguage])
+        if (selectedLanguage) resetEditorEvents();
+    }, [selectedLanguage, starterCode])
 
     const handleResetCode = () => {
         if (selectedLanguage === "Python" && starterCode) {
@@ -347,16 +335,10 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                     </div>
                 </div>
                 <div style={{ background: "var(--card)" }} className={`w-full h-6 px-3 py-4 flex items-center justify-between ${theme === "dark" ? 'text-neutral-400' : ''}`}>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger className='flex items-center gap-2 outline-none transition-all duration-300 hover:bg-[var(--sidebar-accent)] px-1 rounded-sm cursor-pointer'>{selectedLanguage} <ChevronUp className='resize-custom w-4 rotate-180' /></DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem onClickCapture={() => { setSelectedLanguage("C") }}>C</DropdownMenuItem>
-                            <DropdownMenuItem onClickCapture={() => setSelectedLanguage("C++")}>C++</DropdownMenuItem>
-                            <DropdownMenuItem onClickCapture={() => setSelectedLanguage("Java")}>Java</DropdownMenuItem>
-                            <DropdownMenuItem onClickCapture={() => setSelectedLanguage("Javascript")}>Javascript</DropdownMenuItem>
-                            <DropdownMenuItem onClickCapture={() => setSelectedLanguage("Python")}>Python</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className='flex items-center gap-2 px-1'>
+                        <span className="font-medium">Python</span>
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">Only</span>
+                    </div>
                     <div className="flex gap-3">
                         <Bookmark className='resize-custom w-4' />
                         <Tooltip>

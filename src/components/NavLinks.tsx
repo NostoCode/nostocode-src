@@ -5,7 +5,7 @@ import { Session } from 'next-auth';
 
 export default function NavLinks({theme, session, pathname}: {theme: string | undefined, session: Session | null, pathname: string}) {
   return (
-    <div className="flex gap-6 w-[80%]">
+    <div className="flex gap-6 w-[80%] ml-8">
         <Link href="/problems" className={`${theme === "dark"? pathname === "/problems"? 'text-white': 'text-neutral-300' 
           : 
           pathname === "/problems"? '' : 'text-neutral-400'}`}>Problems</Link>
