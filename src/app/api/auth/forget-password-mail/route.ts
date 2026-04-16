@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
             }, { status: 404 });
         }
         
-        const verifyCode = Math.floor(10000 + Math.random() * 900000).toString();
+        const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
 
         user.forgetPasswordExpiry = new Date(Date.now() + (5 * 60 * 1000));
         user.verifyCode = verifyCode;

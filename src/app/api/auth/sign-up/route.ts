@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
         }
 
         const existingUserButNotVerified = await userModel.findOne({email});
-        const verifyCode = Math.floor(10000 + Math.random() * 900000).toString();
+        const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
         const hashPassword = await bcrypt.hash(password, 10);
         // to track our userid
         let userId;

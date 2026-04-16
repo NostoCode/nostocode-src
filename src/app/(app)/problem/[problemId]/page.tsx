@@ -43,8 +43,8 @@ export default function page() {
   const [problemInfo, setProblemInfo] = useState<IProblem | null>(null);
 
   const [sourceCode, setSourceCode] = useState<string>("");
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("C++");
-  const [selectedLanguageCode, setSelectedLanguageCode] = useState<number>(54);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("Python");
+  const [selectedLanguageCode, setSelectedLanguageCode] = useState<number>(10);
   const [isCodeRunning, setIsCodeRunning] = useState<boolean>(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState<string>("description");

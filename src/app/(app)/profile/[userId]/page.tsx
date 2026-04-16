@@ -96,8 +96,20 @@ export default function page() {
     return (
         <div className='w-full h-screen'>
             <div className="w-full h-[40%] flex items-center gap-12 mb-4 px-24">
-                <div className="w-40 h-40 border-white border-4 rounded-lg overflow-hidden">
-                    <img src={fullUserInfo?.avatar} alt="" className="w-full h-full object-cover" />
+                <div className="w-40 h-40 border-white border-4 rounded-lg overflow-hidden bg-gray-400 flex items-center justify-center relative">
+                    <span className="text-4xl font-bold text-white z-0 select-none">
+                      {fullUserInfo?.username?.[0]?.toUpperCase() ?? "?"}
+                    </span>
+                    {fullUserInfo?.avatar && (
+                      <img 
+                        src={fullUserInfo.avatar} 
+                        alt="" 
+                        className="w-full h-full object-cover absolute inset-0 z-10"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    )}
                 </div>
                 <div className="">
                     <h1 className="text-2xl font-semibold flex items-center gap-4">{fullUserInfo?.username} <ExternalLink className='resize-custom w-5 text-blue-500' /></h1>

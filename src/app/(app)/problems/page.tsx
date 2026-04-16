@@ -244,7 +244,7 @@ export default function page() {
               <div className={`w-full h-12 flex items-center gap-2 px-4 rounded-md ${index % 2 === 0 ? 'bg-[var(--sidebar-accent)]' : ''}`}>
                 <h2 className="w-[5%] flex justify-center">{checkIsProblemSolvedOrnot(problem._id as string) && <Check className='resize-custom w-5 text-orange-400' />}</h2>
                 <h2 className="w-[70%] font-semibold">{problem.title}</h2>
-                <h2 className={`w-[15%] text-green-500 text-sm ${problemColors[problem.level as problemColorsType]}`}>{problem.level}</h2>
+                <h2 className={`w-[15%] text-sm whitespace-nowrap ${problemColors[problem.level as problemColorsType]}`}>{problem.level}</h2>
                 <h2 className="flex w-[10%]"><Barcode className='resize-custom w-4 text-gray-500' /><Barcode className='resize-custom w-4 text-gray-500' /></h2>
               </div>
             </Link>

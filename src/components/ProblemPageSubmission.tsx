@@ -49,9 +49,9 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
 
   return (
     <div style={{ background: "var(--card)" }} className='w-full min-h-[calc(100vh-6.5rem)] flex flex-col p-4 pb-12'>
-      <div className="w-full flex items-center justify-between py-1 border-b border-t px-2">
-        <p className={`${theme === "dark" ? 'text-neutral-300' : ''}`}>No</p>
-        <h1 className={`text-lg ${theme === "dark" ? 'text-neutral-300' : ''}`}>Status</h1>
+      <div className="w-full flex items-center justify-between py-1 border-b border-t px-2 gap-4">
+        <p className={`flex-none ${theme === "dark" ? 'text-neutral-300' : ''}`}>No</p>
+        <h1 className={`text-lg flex-none ${theme === "dark" ? 'text-neutral-300' : ''}`}>Status</h1>
         <div className="flex items-center gap-16 w-[32rem]">
           <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Language <ChevronDown className='resize-custom w-4' /></h3>
           <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Runtime <ChevronDown className='resize-custom w-4' /></h3>
