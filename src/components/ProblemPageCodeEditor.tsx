@@ -133,7 +133,7 @@ function resetEditorEvents() {
     editorEvents.length = 0;
 }
 
-export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSelectedLanguage, setSelectedLanguageCode, sourceCode, setSourceCode }: ProblemPageCodeEditorType) {
+export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSelectedLanguage, setSelectedLanguageCode, sourceCode, setSourceCode, starterCode }: ProblemPageCodeEditorType & { starterCode?: string }) {
     const [isFullScreen, setIsFullScreen] = useState(!document.fullscreenElement);
     const editorRef = useRef<any>(null);
 
@@ -281,14 +281,23 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
     useEffect(() => {
         const changeLanguageCode = () => {
             setSelectedLanguageCode(coddingLanguages[selectedLanguage as coddingLanguagesType].apiId);
-            setSourceCode("");
+            // Load starter code when Python is selected and starterCode is available
+            if (selectedLanguage === "Python" && starterCode) {
+                setSourceCode(starterCode);
+            } else {
+                setSourceCode("");
+            }
             resetEditorEvents();
         }
         changeLanguageCode();
     }, [selectedLanguage])
 
     const handleResetCode = () => {
-        setSourceCode("");
+        if (selectedLanguage === "Python" && starterCode) {
+            setSourceCode(starterCode);
+        } else {
+            setSourceCode("");
+        }
         resetEditorEvents();
     }
 

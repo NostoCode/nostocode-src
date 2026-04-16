@@ -28,10 +28,13 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
 
     useEffect(() => {
         const setInputAndOutputValues = () => {
-            const inputArray = problemInfo.testCases[viewTestCase].input.split("\n");
-            setInputValues(inputArray);
-            const outputArray = problemInfo.testCases[viewTestCase].output.split("\n");
-            setOutputValues(outputArray);
+            // In template mode, testCases may still exist for display, but we don't need to show input/output
+            if (!problemInfo.testCode && problemInfo.testCases.length > 0) {
+                const inputArray = problemInfo.testCases[viewTestCase].input.split("\n");
+                setInputValues(inputArray);
+                const outputArray = problemInfo.testCases[viewTestCase].output.split("\n");
+                setOutputValues(outputArray);
+            }
         }
         setInputAndOutputValues();
     }, [viewTestCase]);
@@ -79,28 +82,44 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                         }
                         <h2 className={`${theme === "dark" ? 'text-neutral-400' : ''}`}>Runtime: 0 ms</h2>
                     </div>
-                    <div className="flex gap-4 my-6">
-                        {codeOutput.map((ele, index) =>
-                            <Button key={index} onClick={() => setViewTestCase(index)} variant="secondary" className={`flex items-center gap-2 px-8 py-2  cursor-pointer font-semibold ${viewTestCase === index ? '' : 'opacity-60'} ${ele.status.description === "Accepted" ? 'text-green-500' : 'text-red-400'}`}><CircleCheckBig className='resize-custom w-4' /> Case{index + 1}</Button>
-                        )}
-                    </div>
-                    <div className="">
-                        <h2 className={`mb-2 font-semibold ${theme === "dark" ? 'text-neutral-400' : ''}`}>Input</h2>
-                        {inputValues.map((value, index) =>
-                            <div key={index} className="w-full h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold">{value}</div>
-                        )}
-                        <h2 className={`mb-2 font-semibold ${theme === "dark" ? 'text-neutral-400' : ''}`}>Output</h2>
-                        {codeOutput[viewTestCase].stdout?.trim().split("\n").map((value, index) =>
-                            <div key={index} className="w-full h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold">{value}</div>
-                        )}
-                        {(codeOutput[viewTestCase].compile_output && !codeOutput[viewTestCase].stdout) &&
-                            <div className="w-full min-h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold text-red-500">{codeOutput[viewTestCase].compile_output}</div>
-                        }
-                        <h2 className={`mb-2 font-semibold ${theme === "dark" ? 'text-neutral-400' : ''}`}>Expected</h2>
-                        {outputValues.map((value, index) =>
-                            <div key={index} className="w-full h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold">{value}</div>
-                        )}
-                    </div>
+                    {problemInfo.testCode ? (
+                        // Template mode: show single PASS/FAIL result
+                        <div className="mt-4">
+                            <h2 className={`mb-2 font-semibold ${theme === "dark" ? 'text-neutral-400' : ''}`}>Result</h2>
+                            <div className={`w-full min-h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-mono font-semibold ${codeOutput[0]?.stdout?.trim() === 'PASS' ? 'text-green-500' : 'text-red-400'}`}>
+                                {codeOutput[0]?.stdout?.trim() || codeOutput[0]?.compile_output?.trim() || codeOutput[0]?.stderr?.trim() || 'No output'}
+                            </div>
+                            {(codeOutput[0]?.compile_output && !codeOutput[0]?.stdout) &&
+                                <div className="w-full min-h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold text-red-500">{codeOutput[0].compile_output}</div>
+                            }
+                        </div>
+                    ) : (
+                        // Standard mode: show per-test-case input/output
+                        <>
+                            <div className="flex gap-4 my-6">
+                                {codeOutput.map((ele, index) =>
+                                    <Button key={index} onClick={() => setViewTestCase(index)} variant="secondary" className={`flex items-center gap-2 px-8 py-2  cursor-pointer font-semibold ${viewTestCase === index ? '' : 'opacity-60'} ${ele.status.description === "Accepted" ? 'text-green-500' : 'text-red-400'}`}><CircleCheckBig className='resize-custom w-4' /> Case{index + 1}</Button>
+                                )}
+                            </div>
+                            <div className="">
+                                <h2 className={`mb-2 font-semibold ${theme === "dark" ? 'text-neutral-400' : ''}`}>Input</h2>
+                                {inputValues.map((value, index) =>
+                                    <div key={index} className="w-full h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold">{value}</div>
+                                )}
+                                <h2 className={`mb-2 font-semibold ${theme === "dark" ? 'text-neutral-400' : ''}`}>Output</h2>
+                                {codeOutput[viewTestCase].stdout?.trim().split("\n").map((value, index) =>
+                                    <div key={index} className="w-full h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold">{value}</div>
+                                )}
+                                {(codeOutput[viewTestCase].compile_output && !codeOutput[viewTestCase].stdout) &&
+                                    <div className="w-full min-h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold text-red-500">{codeOutput[viewTestCase].compile_output}</div>
+                                }
+                                <h2 className={`mb-2 font-semibold ${theme === "dark" ? 'text-neutral-400' : ''}`}>Expected</h2>
+                                {outputValues.map((value, index) =>
+                                    <div key={index} className="w-full h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold">{value}</div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             }
 

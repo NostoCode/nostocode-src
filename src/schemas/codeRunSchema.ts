@@ -7,10 +7,11 @@ export const codeRunValidation = z.object({
       (id) => [1, 2, 4, 10, 93].includes(id),
       { message: "Invalid language ID. Allowed: C, C++, Java, Python, JavaScript this languages" }
     ),
+    problemId: z.string().optional(),
     testCases: z.array(
         z.object({
-            input: z.string().min(1, { message: "Input is required" }),
-            output: z.string().min(1, { message: "Output is required" }),
+            input: z.string(),
+            output: z.string(),
         })
-    )
+    ).optional()
 })
