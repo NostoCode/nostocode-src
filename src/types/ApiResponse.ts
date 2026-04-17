@@ -4,7 +4,7 @@ import { ISubmission } from "@/models/Submission";
 import { IUser } from "@/models/User";
 import mongoose, { mongo } from "mongoose";
 
-export interface Judge0SubmissionResult {
+export interface CodeRunResult {
     token: string;
     status: {
         id: number;
@@ -44,7 +44,7 @@ export interface ApiResponse {
     problem?: IProblem,
     solution?: ISolution,
     allProblems?: IProblem[],
-    results?: Judge0SubmissionResult[],
+    results?: CodeRunResult[],
     output?: string,
     submissionDetails?: ISubmission
 }
