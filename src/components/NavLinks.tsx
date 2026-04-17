@@ -18,10 +18,6 @@ export default function NavLinks({theme, session, pathname}: {theme: string | un
           : 
           pathname === "/about"? '' : 'text-neutral-400'}`}>Explore</Link>
 
-        <Link href="/store" className={`${theme === "dark"? pathname === "/store"? 'text-white': 'text-neutral-300' 
-          : 
-          pathname === "/store"? '' : 'text-neutral-400'}`}>Store</Link>
-
         {session && session.user.userType === "admin" && (
           <Link href="/add-problem" className={`${theme === "dark"? pathname === "/add-problem"? 'text-white': 'text-neutral-300' 
           : 
