@@ -6,7 +6,7 @@ import { IProblem } from '@/models/Problem';
 import { ApiResponse, codeSubmissionResultType } from '@/types/ApiResponse';
 import MDEditor from '@uiw/react-md-editor';
 import axios from 'axios';
-import { Clock4, Info, Sparkles, SquarePen } from 'lucide-react';
+import { Clock4, Info, Sparkles, SquarePen, Shield } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -65,15 +65,36 @@ export default function page() {
             </Link>
           </div>
           <div className="w-[60%] border p-4 rounded-lg">
-            <div className="w-1/2 p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
-              <div className="w-full flex items-center justify-between">
-                <h2 className={`flex gap-2 items-center ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}><Clock4 className="resize-custom w-4 h-4" /> Runtime</h2>
-                <Info className={`resize-custom w-4 h-4 ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`} />
+            <div className="flex gap-4">
+              <div className="flex-1 p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
+                <div className="w-full flex items-center justify-between">
+                  <h2 className={`flex gap-2 items-center ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}><Clock4 className="resize-custom w-4 h-4" /> Runtime</h2>
+                  <Info className={`resize-custom w-4 h-4 ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`} />
+                </div>
+                <h2 className={`text-xl ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}>{submissionOutput.status === "Accepted" ? `${(submissionOutput.time * 1000).toFixed(2)} ms` : 'N/A'}</h2>
+                {submissionOutput.status === "Accepted" &&
+                  <h2 className="flex items-center gap-2 text-blue-500"><Sparkles className='resize-custom w-4 h-4' /> Analyze complexity</h2>
+                }
               </div>
-              <h2 className={`text-xl ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}>{submissionOutput.status === "Accepted" ? `${(submissionOutput.time * 1000).toFixed(2)} ms` : 'N/A'}</h2>
-              {submissionOutput.status === "Accepted" &&
-                <h2 className="flex items-center gap-2 text-blue-500"><Sparkles className='resize-custom w-4 h-4' /> Analyze complexity</h2>
-              }
+              <div className="flex-1 p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
+                <div className="w-full flex items-center justify-between">
+                  <h2 className="flex gap-2 items-center"><Shield className="resize-custom w-4 h-4" /> Ancient Code Score</h2>
+                  <Info className="resize-custom w-4 h-4" />
+                </div>
+                {submissionOutput.ancientCodeScore !== undefined ? (
+                  <>
+                    <h2 className={`text-xl font-bold ${
+                      submissionOutput.ancientCodeScore >= 90 ? 'text-green-500' :
+                      submissionOutput.ancientCodeScore >= 70 ? 'text-yellow-500' :
+                      submissionOutput.ancientCodeScore >= 40 ? 'text-orange-500' :
+                      'text-red-500'
+                    }`}>{submissionOutput.ancientCodeScore} / 100</h2>
+                    <h2 className="text-sm">{submissionOutput.ancientCodeLevel}</h2>
+                  </>
+                ) : (
+                  <h2 className="text-xl text-gray-400">N/A</h2>
+                )}
+              </div>
             </div>
             <div className="w-full h-[20rem] overflow-hidden mt-4">
               <CustomBarChart session={session} labelValue={submissionOutput.time} />

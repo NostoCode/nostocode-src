@@ -47,8 +47,9 @@ function logEditorEvent(event: EditorEvent) {
 
 // Calculate Ancient Coding Score
 function calculateAncientCodeScore(): ScoringResult {
+    // No events = code was not typed (starter code submitted or externally injected)
     if (editorEvents.length === 0) {
-        return { score: 100, level: "🟢 Ancient Master", details: { typingRatio: 1, rhythmScore: 1, editActivity: 0, largeInserts: 0, antiPasteScore: 1 } };
+        return { score: 0, level: "🔴 Likely AI Generated", details: { typingRatio: 0, rhythmScore: 0, editActivity: 0, largeInserts: 0, antiPasteScore: 100 } };
     }
 
     const insertEvents = editorEvents.filter(e => e.type === "insert");
@@ -75,17 +76,13 @@ function calculateAncientCodeScore(): ScoringResult {
 
     const editActivity = totalActions > 0 ? deleteEvents.length / totalActions : 0;
 
+    // Detect large unexplained inserts (>50 chars, not from internal paste) — primary signal of code injection
     let largeInserts = 0;
-    for (let i = 0; i < editorEvents.length; i++) {
-        if (editorEvents[i].type === "insert" && editorEvents[i].length > 30) {
-            let isBurst = false;
-            for (let j = i + 1; j < Math.min(i + 5, editorEvents.length); j++) {
-                if (editorEvents[j].timestamp - editorEvents[i].timestamp < 50) {
-                    isBurst = true;
-                    break;
-                }
-            }
-            if (isBurst) largeInserts++;
+    const pasteTimestamps = pasteEvents.map(e => e.timestamp);
+    for (const event of editorEvents) {
+        if (event.type === "insert" && event.length > 50) {
+            const isPastedInternally = pasteTimestamps.some(pt => Math.abs(pt - event.timestamp) < 200);
+            if (!isPastedInternally) largeInserts++;
         }
     }
 
@@ -97,7 +94,9 @@ function calculateAncientCodeScore(): ScoringResult {
         20 * editActivity +
         20 * antiPasteScore;
 
-    const normalizedScore = Math.min(100, Math.max(0, rawScore));
+    // Each unexplained large insert (likely code injection) deducts 40 points
+    const largeInsertPenalty = Math.min(rawScore, largeInserts * 40);
+    const normalizedScore = Math.min(100, Math.max(0, rawScore - largeInsertPenalty));
 
     let level: string;
     if (normalizedScore >= 90) {

@@ -27,6 +27,8 @@ export interface codeSubmissionResultType {
     memory: number,
     sourceCode: string,
     problemId: string | mongoose.Types.ObjectId | IProblem,
+    ancientCodeScore?: number,
+    ancientCodeLevel?: string,
     createdAt?: Date,
     udpatedAt?: Date
 }
