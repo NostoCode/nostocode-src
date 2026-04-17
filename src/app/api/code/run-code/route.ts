@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { codeRunValidation } from "@/schemas/codeRunSchema";
-import { runJudge0Batch } from "@/lib/judge0ApiFunction";
+import { runJudge0Batch } from "@/lib/pistonApiFunction";
 import { getToken } from "next-auth/jwt";
 import { connectToDb } from "@/lib/dbConnect";
 import problemModel from "@/models/Problem";

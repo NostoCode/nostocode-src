@@ -1,5 +1,5 @@
 import { connectToDb } from "@/lib/dbConnect";
-import { runJudge0Batch } from "@/lib/judge0ApiFunction";
+import { runJudge0Batch } from "@/lib/pistonApiFunction";
 import problemModel from "@/models/Problem";
 import submissionModel from "@/models/Submission";
 import userModel from "@/models/User";
