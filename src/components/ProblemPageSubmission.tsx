@@ -3,7 +3,7 @@ import { formatDate } from '@/helpers/formatDate';
 import { IProblem } from '@/models/Problem';
 import { ApiResponse, codeSubmissionResultType } from '@/types/ApiResponse';
 import axios from 'axios';
-import { ChevronDown, Clock4, Cpu } from 'lucide-react'
+import { ChevronDown, Clock4, Cpu, Shield } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 import { Skeleton } from './ui/skeleton';
@@ -52,10 +52,11 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
       <div className="w-full flex items-center justify-between py-1 border-b border-t px-2 gap-4">
         <p className={`flex-none ${theme === "dark" ? 'text-neutral-300' : ''}`}>No</p>
         <h1 className={`text-lg flex-none ${theme === "dark" ? 'text-neutral-300' : ''}`}>Status</h1>
-        <div className="flex items-center gap-16 w-[32rem]">
+        <div className="flex items-center gap-8 w-[40rem]">
           <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Language <ChevronDown className='resize-custom w-4' /></h3>
           <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Runtime <ChevronDown className='resize-custom w-4' /></h3>
           <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Memory <ChevronDown className='resize-custom w-4' /></h3>
+          <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Shield className='resize-custom w-4' /> Ancient Score</h3>
         </div>
       </div>
 
@@ -81,10 +82,21 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
             <h1 className={`text-lg font-semibold ${ele.status === "Accepted"? 'text-green-500' : 'text-red-500'}`}>{ele.status}</h1>
             <h2 className={`text-sm ${theme === "dark" ? 'text-neutral-300' : ''}`}>{formatDate(ele.createdAt as Date)}</h2>
           </div>
-          <div className="flex items-center gap-16 w-[30rem]">
+          <div className="flex items-center gap-8 w-[40rem]">
             <h3 className="px-2 py-0.5 rounded-full bg-[var(--sidebar-accent)]">{ele.language}</h3>
             <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Clock4 className='resize-custom w-4' /> {ele.status === "Accepted"? `${(ele.time * 1000).toFixed(2)} ms` : 'N/A'}</h3>
-            <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''} ${ele.status === "Accepted"? 'ml-6' : 'ml-12.5'}`}><Cpu className='resize-custom w-4' /> {ele.status === "Accepted"? `${(ele.memory).toFixed(2)} MB` : 'N/A'}</h3>
+            <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Cpu className='resize-custom w-4' /> {ele.status === "Accepted"? `${(ele.memory).toFixed(2)} MB` : 'N/A'}</h3>
+            <h3 className={`flex items-center gap-1 font-semibold ${
+              ele.ancientCodeScore !== undefined
+                ? ele.ancientCodeScore >= 90 ? 'text-green-500'
+                  : ele.ancientCodeScore >= 70 ? 'text-yellow-500'
+                  : ele.ancientCodeScore >= 40 ? 'text-orange-500'
+                  : 'text-red-500'
+                : 'text-gray-400'
+            }`}>
+              <Shield className='resize-custom w-4' />
+              {ele.ancientCodeScore !== undefined ? `${ele.ancientCodeScore}` : 'N/A'}
+            </h3>
           </div>
         </div>
       )}
