@@ -2,7 +2,7 @@ import axios from "axios";
 
 const PISTON_API_URL = process.env.PISTON_API_URL || 'http://localhost:2000';
 
-// Map internal status to a Judge0-compatible shape so routes need no changes.
+// Map Piston status to a standardized result shape.
 function mapStatus(stdout: string, pistonStatus: string | null, exitCode: number): { id: number; description: string } {
     if (pistonStatus === "TO") return { id: 5, description: "Time Limit Exceeded" };
     if (pistonStatus === "OL") return { id: 6, description: "Output Limit Exceeded" };
@@ -16,7 +16,7 @@ function mapStatus(stdout: string, pistonStatus: string | null, exitCode: number
     return { id: 4, description: "Wrong Answer" };
 }
 
-export const runJudge0Batch = async (
+export const runCodeBatch = async (
     sourceCode: string,
     _languageId: string, // ignored — always Python
     testCases: [{ input: string; output: string }]
@@ -31,8 +31,8 @@ export const runJudge0Batch = async (
                     version: "3.x",
                     files: [{ content: sourceCode }],
                     stdin: tc.input,
-                    run_timeout: 15000,
-                    compile_timeout: 10000,
+                    run_timeout: 3000,
+                    compile_timeout: 3000,
                 },
                 { headers: { "content-type": "application/json" } }
             )

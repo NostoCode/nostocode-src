@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { codeRunValidation } from "@/schemas/codeRunSchema";
-import { runJudge0Batch } from "@/lib/pistonApiFunction";
+import { runCodeBatch } from "@/lib/pistonApiFunction";
 import { getToken } from "next-auth/jwt";
 import { connectToDb } from "@/lib/dbConnect";
 import problemModel from "@/models/Problem";
@@ -76,8 +76,8 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
         }
 
-        // call judge0 api
-        const response = await runJudge0Batch(finalCode, languageId, finalTestCases as any);
+        // call piston execution api
+        const response = await runCodeBatch(finalCode, languageId, finalTestCases as any);
 
         if (!response.success) {
             return NextResponse.json({
