@@ -27,7 +27,7 @@ import { toast } from 'sonner';
 import { useTheme } from 'next-themes';
 
 
-export default function page() {
+export default function Page() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
   const router = useRouter();

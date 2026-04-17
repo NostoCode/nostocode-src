@@ -19,7 +19,7 @@ function mapStatus(stdout: string, pistonStatus: string | null, exitCode: number
 export const runCodeBatch = async (
     sourceCode: string,
     _languageId: string, // ignored — always Python
-    testCases: [{ input: string; output: string }]
+    testCases: { input: string; output: string }[]
 ) => {
     try {
         // Piston has no batch endpoint; run cases in parallel
@@ -51,12 +51,13 @@ export const runCodeBatch = async (
             };
         });
 
-        return { success: true, result };
-    } catch (error: any) {
-        console.error("Piston API error:", error.response?.data ?? error.message);
+        return { success: true as const, result };
+    } catch (error: unknown) {
+        const err = error as { response?: { data?: { message?: string } }; message?: string };
+        console.error("Piston API error:", err.response?.data ?? err.message);
         return {
-            success: false,
-            result: error.response?.data?.message ?? "Piston execution error",
+            success: false as const,
+            result: err.response?.data?.message ?? "Piston execution error",
         };
     }
 };

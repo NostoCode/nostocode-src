@@ -13,7 +13,7 @@ import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner';
 
-export default function page() {
+export default function Page() {
   const [allSolutions, setAllSolutions] = useState<ISolution[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false);
 

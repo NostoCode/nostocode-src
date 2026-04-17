@@ -15,7 +15,7 @@ import { useParams } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner';
 
-export default function page() {
+export default function Page() {
   const { userId } = useParams()
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [allSubmissions, setAllSubmissions] = useState<codeSubmissionResultType[]>([]);

@@ -169,7 +169,7 @@ function calculateAncientCodeScore(): ScoringResult {
     // --- Weighted formula (sums to 100) ---
     // antiPasteScore removed: external paste is already blocked at OS level;
     // internal paste = code the user wrote themselves = no penalty.
-    let rawScore =
+    const rawScore =
         15 * inputRatio     +  // gameable but still indicative
         40 * rhythmScore    +  // strongest human signal
         10 * editActivity   +  // small signal
@@ -213,6 +213,7 @@ function resetEditorEvents() {
 
 export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSelectedLanguage, setSelectedLanguageCode, sourceCode, setSourceCode, starterCode }: ProblemPageCodeEditorType & { starterCode?: string }) {
     const [isFullScreen, setIsFullScreen] = useState(!document.fullscreenElement);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const editorRef = useRef<any>(null);
 
     useEffect(() => {
@@ -341,6 +342,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         toast.success("已从内部剪贴板粘贴 - Pasted from internal clipboard");
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleEditorChange = (value: string | undefined, ev: any) => {
         if (!value || !editorRef.current) return;
 

@@ -28,7 +28,7 @@ export interface LevelWiseProblemType {
   hard: number
 }
 
-export default function page() {
+export default function Page() {
   const [allProblems, setAllProblems] = useState<IProblem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingUserInfo, setLoadingUserInfo] = useState<boolean>(false);
@@ -157,7 +157,7 @@ export default function page() {
   }
 
   const handleReverseArray = () => {
-    let temp = [];
+    const temp = [];
     for (let i = filteredProblems.length - 1; i >= 0; i--) {
       temp.push(filteredProblems[i]);
     }

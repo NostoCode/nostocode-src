@@ -26,7 +26,7 @@ import { signInValidation } from '@/schemas/signInSchema';
 import { signIn, getSession } from 'next-auth/react';
 
 
-export default function page() {
+export default function Page() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
   const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
@@ -148,7 +148,7 @@ export default function page() {
           </form>
         </Form>
         <div className="w-full flex gap-2 items-center my-4">
-          <p>Don't have an account?</p>
+          <p>Don&apos;t have an account?</p>
           <Link href="/sign-up" className='font-semibold' >Sign up</Link>
         </div>
       </div>

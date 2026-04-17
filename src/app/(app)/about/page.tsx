@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function page() {
+export default function Page() {
   return (
     <div className='w-full h-[calc(100vh-3rem)] py-10 px-20'>
       <h3 className="text-2xl text-gray-500 font-semibold">Welcome</h3>

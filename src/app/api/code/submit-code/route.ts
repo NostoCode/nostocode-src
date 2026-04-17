@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
         for (let i = 0; i < apiResponse.result.length; i++) {
             sumOfTime += parseFloat(apiResponse.result[i].time) || 0;
-            sumOfMemory += parseInt(apiResponse.result[i].memory) || 0;
+            sumOfMemory += apiResponse.result[i].memory || 0;
             if (apiResponse.result[i].status.description !== "Accepted") {
                 currentStatus = apiResponse.result[i].status.description;
                 break;

@@ -34,7 +34,7 @@ import confetti from "canvas-confetti";
 
 // Ancient Coding Mode - AI features removed
 
-export default function page() {
+export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
   const pathname = useParams();
   const { problemId } = pathname;
@@ -135,8 +135,8 @@ export default function page() {
 
   // Ancient Coding Mode: Get score from editor
   const getScoringResult = () => {
-    if (typeof window !== 'undefined' && (window as any).getAncientCodeScore) {
-      return (window as any).getAncientCodeScore();
+    if (typeof window !== 'undefined' && typeof (window as Window & { getAncientCodeScore?: () => unknown }).getAncientCodeScore === 'function') {
+      return (window as Window & { getAncientCodeScore?: () => unknown }).getAncientCodeScore!();
     }
     return null;
   };

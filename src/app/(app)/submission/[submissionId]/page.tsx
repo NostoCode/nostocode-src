@@ -14,7 +14,7 @@ import { useParams } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner';
 
-export default function page() {
+export default function Page() {
   const { data: session, status } = useSession();
   const [submissionOutput, setSubmissionOutput] = useState<codeSubmissionResultType | null>(null);
   const { submissionId } = useParams();
