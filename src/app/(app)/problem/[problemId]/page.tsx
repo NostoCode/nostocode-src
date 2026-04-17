@@ -14,7 +14,7 @@ import { useParams } from 'next/navigation.js';
 import { mongodbObjectId } from '@/schemas/similarQuestionSchema';
 import { toast } from 'sonner';
 import axios from 'axios';
-import { ApiResponse, codeSubmissionResultType, Judge0SubmissionResult } from '@/types/ApiResponse';
+import { ApiResponse, codeSubmissionResultType, CodeRunResult } from '@/types/ApiResponse';
 import { IProblem } from '@/models/Problem.js';
 import { Skeleton } from "@/components/ui/skeleton"
 import ProblemPageDescription from '@/components/ProblemPageDescription';
@@ -48,7 +48,7 @@ export default function page() {
   const [isCodeRunning, setIsCodeRunning] = useState<boolean>(false);
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
   const [currentTab, setCurrentTab] = useState<string>("description");
-  const [codeOutput, setCodeOutput] = useState<Judge0SubmissionResult[] | null>(null);
+  const [codeOutput, setCodeOutput] = useState<CodeRunResult[] | null>(null);
   const [submissionOutput, setSubmissionOutput] = useState<codeSubmissionResultType | null>(null);
 
   useEffect(() => {

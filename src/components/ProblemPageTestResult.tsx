@@ -1,5 +1,5 @@
 "use client"
-import { codeSubmissionResultType, Judge0SubmissionResult } from '@/types/ApiResponse'
+import { codeSubmissionResultType, CodeRunResult } from '@/types/ApiResponse'
 import { CircleCheckBig, Clock4, Info, Sparkles, SquarePen, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
@@ -12,7 +12,7 @@ import MDEditor from '@uiw/react-md-editor';
 import Link from 'next/link'
 
 interface ProblemPageTestResultType {
-    codeOutput: Judge0SubmissionResult[] | null,
+    codeOutput: CodeRunResult[] | null,
     isCodeRunning: boolean, theme: string | undefined,
     problemInfo: IProblem,
     session: Session | null,

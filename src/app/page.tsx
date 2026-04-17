@@ -20,7 +20,7 @@ export default function Home() {
             { icon: Shield, title: "No External Paste", desc: "System clipboard is fully blocked" },
             { icon: Code2, title: "Internal Clipboard", desc: "Ctrl+C/V works within the editor" },
             { icon: Brain, title: "Ancient Score", desc: "Behavioral scoring on every submit" },
-            { icon: Zap, title: "Real Judge", desc: "C, C++, Java, Python via Judge0" },
+            { icon: Zap, title: "Real Judge", desc: "Python code execution via Piston" },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="rounded-xl border bg-card p-4 text-left space-y-1">
               <Icon className="w-5 h-5 text-amber-500 mb-2" />

@@ -1,5 +1,5 @@
 import { connectToDb } from "@/lib/dbConnect";
-import { runJudge0Batch } from "@/lib/judge0ApiFunction";
+import { runCodeBatch } from "@/lib/pistonApiFunction";
 import problemModel from "@/models/Problem";
 import submissionModel from "@/models/Submission";
 import userModel from "@/models/User";
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         }
 
         // run code using judge api
-        const apiResponse = await runJudge0Batch(finalCode, languageId, finalTestCases);
+        const apiResponse = await runCodeBatch(finalCode, languageId, finalTestCases);
 
         if (!apiResponse.success) {
             console.log("Error in api response: ", apiResponse.result);
