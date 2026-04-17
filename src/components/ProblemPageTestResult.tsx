@@ -10,6 +10,7 @@ import CustomBarChart from './CustomBarChart'
 import { formatDate } from '@/helpers/formatDate'
 import MDEditor from '@uiw/react-md-editor';
 import Link from 'next/link'
+import { ancientScoreLevel } from '@/helpers/ancientScoreLevel'
 
 interface ProblemPageTestResultType {
     codeOutput: CodeRunResult[] | null,
@@ -169,7 +170,7 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                                 submissionOutput.ancientCodeScore >= 40 ? 'text-orange-500' :
                                 'text-red-500'
                             }`}>{submissionOutput.ancientCodeScore} / 100</h2>
-                            <h2 className="text-sm">{submissionOutput.ancientCodeLevel}</h2>
+                            <h2 className="text-sm">{ancientScoreLevel(submissionOutput.ancientCodeScore!)}</h2>
                         </>
                     ) : (
                         <h2 className="text-xl text-gray-400">N/A</h2>

@@ -148,6 +148,7 @@ export default function page() {
     const scoringResult = getScoringResult();
 
     setIsSubmitLoading(true);
+    setCurrentTab("testResult");  // switch to result tab so user sees the outcome
     try {
       const data = {
         userId: session?.user._id,
@@ -177,11 +178,14 @@ export default function page() {
         scoreMsg += `- Rhythm Score: ${scoringResult.details.rhythmScore}\n`;
         scoreMsg += `- Edit Activity: ${scoringResult.details.editActivity}%\n`;
         scoreMsg += `- Large Inserts: ${scoringResult.details.largeInserts}\n`;
-        scoreMsg += `- Anti-Paste Score: ${scoringResult.details.antiPasteScore}`;
+        scoreMsg += `- Anti-Paste Score: ${scoringResult.details.antiPasteScore}\n`;
+        scoreMsg += `- Speed Score: ${scoringResult.details.speedScore}\n`;
+        scoreMsg += `- Burst Score: ${scoringResult.details.burstScore}\n`;
+        scoreMsg += `- Session: ${scoringResult.details.sessionSecs}s`;
         toast.info(
           `${scoringResult.level} (${scoringResult.score}/100)`,
           {
-            description: `Typing: ${scoringResult.details.typingRatio}% · Rhythm: ${scoringResult.details.rhythmScore} · Edit: ${scoringResult.details.editActivity}% · Inserts: ${scoringResult.details.largeInserts}`,
+            description: `Rhythm: ${scoringResult.details.rhythmScore} · Speed: ${scoringResult.details.speedScore} · Burst: ${scoringResult.details.burstScore} · Session: ${scoringResult.details.sessionSecs}s`,
             duration: 8000,
           }
         );
