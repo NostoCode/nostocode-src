@@ -18,10 +18,7 @@ export default function page() {
           <h2 className="text-xl font-semibold mb-2">🧠 Ancient Coding Mode</h2>
           <p className="text-gray-500 dark:text-gray-400">Our unique anti-cheat system. Disable AI assistance, browser tools and prove your skills the old-fashioned way.</p>
         </div>
-        <div className="border rounded-lg p-6">
-          <h2 className="text-xl font-semibold mb-2">🪙 NostoCoins</h2>
-          <p className="text-gray-500 dark:text-gray-400">Earn coins by solving problems and redeem them in the NostoCode Store for exclusive rewards.</p>
-        </div>
+
       </div>
     </div>
   )
