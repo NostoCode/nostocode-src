@@ -178,7 +178,6 @@ export default function page() {
         scoreMsg += `- Rhythm Score: ${scoringResult.details.rhythmScore}\n`;
         scoreMsg += `- Edit Activity: ${scoringResult.details.editActivity}%\n`;
         scoreMsg += `- Large Inserts: ${scoringResult.details.largeInserts}\n`;
-        scoreMsg += `- Anti-Paste Score: ${scoringResult.details.antiPasteScore}\n`;
         scoreMsg += `- Speed Score: ${scoringResult.details.speedScore}\n`;
         scoreMsg += `- Burst Score: ${scoringResult.details.burstScore}\n`;
         scoreMsg += `- Session: ${scoringResult.details.sessionSecs}s`;

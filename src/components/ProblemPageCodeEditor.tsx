@@ -41,6 +41,15 @@ interface EditorEvent {
     timestamp: number
 }
 
+// Monaco selection shape (subset we need, avoids importing monaco-editor directly)
+interface MonacoSelection {
+    isEmpty: () => boolean;
+    startLineNumber: number;
+    startColumn: number;
+    endLineNumber: number;
+    endColumn: number;
+}
+
 // Code-length snapshots used for burst/progression analysis
 interface CodeSnapshot { length: number; timestamp: number }
 
@@ -57,7 +66,6 @@ interface ScoringResult {
         rhythmScore: number;
         editActivity: number;
         largeInserts: number;
-        antiPasteScore: number;
         speedScore: number;
         burstScore: number;
         sessionSecs: number;
@@ -77,7 +85,7 @@ function calculateAncientCodeScore(): ScoringResult {
     if (editorEvents.length === 0) {
         return {
             score: 0, level: "🔴 Likely AI Generated",
-            details: { typingRatio: 0, rhythmScore: 0, editActivity: 0, largeInserts: 0, antiPasteScore: 100, speedScore: 0, burstScore: 0, sessionSecs: 0 }
+            details: { typingRatio: 0, rhythmScore: 0, editActivity: 0, largeInserts: 0, speedScore: 0, burstScore: 0, sessionSecs: 0 }
         };
     }
 
@@ -121,34 +129,36 @@ function calculateAncientCodeScore(): ScoringResult {
         }
     }
 
-    // --- antiPasteScore ---
-    // First 2 internal pastes are free (normal refactoring); penalize beyond that.
-    const excessPastes = Math.max(0, pasteEvents.length - 2);
-    const antiPasteScore = Math.max(0, 1 - excessPastes * 0.15);
+    // Internal paste inserts are excluded from speed and burst scoring —
+    // the user typed that code in the editor themselves, it shouldn't be penalised.
+    const genuineInsertEvents = insertEvents.filter(
+        e => !pasteTimestamps.some(pt => Math.abs(pt - e.timestamp) < 200)
+    );
+    const totalGenuineInsertedChars = genuineInsertEvents.reduce((sum, e) => sum + e.length, 0);
 
-    // --- speedScore: avg chars/sec over the session.
+    // --- speedScore: avg chars/sec over genuine typing (excludes internal pastes).
     //     Normal: 2–15 chars/sec. Fast typist: ~15/sec. Script: 100+/sec. ---
     const sessionSecs = editorEvents.length >= 2
         ? (editorEvents[editorEvents.length - 1].timestamp - editorEvents[0].timestamp) / 1000
         : 0;
     let speedScore = 0.8; // default if we have no timing data
-    if (sessionSecs > 0 && totalInsertedChars > 0) {
-        const avgSpeed = totalInsertedChars / sessionSecs; // chars/sec
+    if (sessionSecs > 0 && totalGenuineInsertedChars > 0) {
+        const avgSpeed = totalGenuineInsertedChars / sessionSecs; // chars/sec
         // Full score for ≤15/s, 0 for ≥30/s, linear decay between
         speedScore = Math.min(1, Math.max(0, 1 - Math.max(0, avgSpeed - 15) / 15));
     }
 
-    // --- burstScore: max chars inserted in any 1-second sliding window.
+    // --- burstScore: max chars inserted in any 1-second sliding window (genuine typing only).
     //     Humans: ~10 chars/sec in a burst. Scripts: 200+/sec. ---
     let maxBurst = 0;
     const BURST_WINDOW_MS = 1000;
     let windowStart = 0;
     let windowChars = 0;
-    for (let i = 0; i < insertEvents.length; i++) {
-        windowChars += insertEvents[i].length;
+    for (let i = 0; i < genuineInsertEvents.length; i++) {
+        windowChars += genuineInsertEvents[i].length;
         // drop events older than BURST_WINDOW_MS
-        while (windowStart < i && insertEvents[i].timestamp - insertEvents[windowStart].timestamp > BURST_WINDOW_MS) {
-            windowChars -= insertEvents[windowStart].length;
+        while (windowStart < i && genuineInsertEvents[i].timestamp - genuineInsertEvents[windowStart].timestamp > BURST_WINDOW_MS) {
+            windowChars -= genuineInsertEvents[windowStart].length;
             windowStart++;
         }
         if (windowChars > maxBurst) maxBurst = windowChars;
@@ -157,13 +167,14 @@ function calculateAncientCodeScore(): ScoringResult {
     const burstScore = Math.min(1, Math.max(0, 1 - Math.max(0, maxBurst - 20) / 100));
 
     // --- Weighted formula (sums to 100) ---
+    // antiPasteScore removed: external paste is already blocked at OS level;
+    // internal paste = code the user wrote themselves = no penalty.
     let rawScore =
         15 * inputRatio     +  // gameable but still indicative
-        30 * rhythmScore    +  // strongest human signal
+        40 * rhythmScore    +  // strongest human signal
         10 * editActivity   +  // small signal
-        15 * antiPasteScore +
-        15 * speedScore     +  // overall session speed
-        15 * burstScore;       // burst injection detection
+        20 * speedScore     +  // overall session speed (genuine typing only)
+        15 * burstScore;       // burst injection detection (genuine typing only)
 
     // Each unexplained large inject deducts 40 points (hard cap)
     const largeInsertPenalty = Math.min(rawScore, largeInserts * 40);
@@ -188,7 +199,6 @@ function calculateAncientCodeScore(): ScoringResult {
             rhythmScore:   Math.round(rhythmScore * 100),
             editActivity:  Math.round(editActivity * 100),
             largeInserts,
-            antiPasteScore: Math.round(antiPasteScore * 100),
             speedScore:    Math.round(speedScore * 100),
             burstScore:    Math.round(burstScore * 100),
             sessionSecs:   Math.round(sessionSecs),
@@ -237,58 +247,98 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
     }, []);
 
     const handleCopyInternal = () => {
-        if (editorRef.current) {
-            const model = editorRef.current?.getModel();
-            const selection = editorRef.current?.getSelection();
+        if (!editorRef.current) return;
+        const model = editorRef.current.getModel();
+        const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
+        if (!model || !selections || selections.length === 0) return;
 
-            if (selection && model) {
-                const selectedText = model.getValueInRange(selection);
-                if (selectedText) {
-                    internalClipboard = selectedText;
-                    logEditorEvent({
-                        type: "copy_internal",
-                        length: selectedText.length,
-                        timestamp: Date.now()
-                    });
-                    toast.success("已复制到内部剪贴板 - Copied to internal clipboard");
-                }
-            }
+        let textToCopy: string;
+        if (selections.every(s => s.isEmpty())) {
+            // All cursors with no selection → copy each cursor's line (VS Code behaviour)
+            textToCopy = selections.map(s => model.getLineContent(s.startLineNumber)).join('\n') + '\n';
+        } else {
+            // One or more real selections → join each selection with newline
+            textToCopy = selections.map(s => model.getValueInRange(s)).join('\n');
+        }
+
+        if (textToCopy) {
+            internalClipboard = textToCopy;
+            logEditorEvent({ type: "copy_internal", length: textToCopy.length, timestamp: Date.now() });
+            toast.success("已复制到内部剪贴板 - Copied to internal clipboard");
         }
     };
 
+    const handleCutInternal = () => {
+        if (!editorRef.current) return;
+        const model = editorRef.current.getModel();
+        const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
+        if (!model || !selections || selections.length === 0) return;
+
+        const lineCount = model.getLineCount();
+        let textToCut: string;
+        let editOperations: { identifier: { major: number; minor: number }; range: { startLineNumber: number; startColumn: number; endLineNumber: number; endColumn: number }; text: string; forceMoveMarkers: boolean }[];
+
+        if (selections.every(s => s.isEmpty())) {
+            // No selection → cut each cursor's whole line (VS Code behaviour)
+            const parts: string[] = [];
+            editOperations = selections.map((s, i) => {
+                const ln = s.startLineNumber;
+                const content = model.getLineContent(ln);
+                let range: { startLineNumber: number; startColumn: number; endLineNumber: number; endColumn: number };
+                if (lineCount === 1) {
+                    parts.push(content);
+                    range = { startLineNumber: ln, startColumn: 1, endLineNumber: ln, endColumn: content.length + 1 };
+                } else if (ln < lineCount) {
+                    parts.push(content + '\n');
+                    range = { startLineNumber: ln, startColumn: 1, endLineNumber: ln + 1, endColumn: 1 };
+                } else {
+                    parts.push('\n' + content);
+                    range = { startLineNumber: ln - 1, startColumn: model.getLineLength(ln - 1) + 1, endLineNumber: ln, endColumn: content.length + 1 };
+                }
+                return { identifier: { major: 1, minor: i }, range, text: '', forceMoveMarkers: true };
+            });
+            textToCut = parts.join('');
+        } else {
+            // Cut each selection
+            textToCut = selections.map(s => model.getValueInRange(s)).join('\n');
+            editOperations = selections.map((s, i) => ({
+                identifier: { major: 1, minor: i },
+                range: { startLineNumber: s.startLineNumber, startColumn: s.startColumn, endLineNumber: s.endLineNumber, endColumn: s.endColumn },
+                text: '',
+                forceMoveMarkers: true
+            }));
+        }
+
+        internalClipboard = textToCut;
+        editorRef.current.executeEdits("internal-cut", editOperations);
+        logEditorEvent({ type: "copy_internal", length: textToCut.length, timestamp: Date.now() });
+        toast.success("已剪切 - Cut to internal clipboard");
+    };
+
     const handlePasteInternal = () => {
-        // If internal clipboard is empty, block external paste
         if (!internalClipboard) {
             toast.error("禁止从外部粘贴 - External paste is disabled in Ancient Coding Mode");
             return;
         }
+        if (!editorRef.current) return;
+        const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
+        if (!selections || selections.length === 0) return;
 
-        if (editorRef.current) {
-            const position = editorRef.current?.getPosition();
-            const model = editorRef.current?.getModel();
+        // If clipboard has same segment count as cursors (multi-cursor copy/cut → paste),
+        // distribute one segment per cursor (VS Code behaviour). Otherwise paste same text everywhere.
+        const clipLines = internalClipboard.split('\n');
+        const usePerCursor = selections.length > 1 && clipLines.length === selections.length;
 
-            if (position && model) {
-                const editOperations = [{
-                    identifier: { major: 1, minor: 0 },
-                    range: {
-                        startLineNumber: position.lineNumber,
-                        startColumn: position.column,
-                        endLineNumber: position.lineNumber,
-                        endColumn: position.column
-                    },
-                    text: internalClipboard,
-                    forceMoveMarkers: false
-                }];
+        const editOperations = selections.map((sel, i) => ({
+            identifier: { major: 1, minor: i },
+            range: sel,
+            text: usePerCursor ? clipLines[i] : internalClipboard,
+            forceMoveMarkers: true
+        }));
 
-                editorRef.current?.executeEdits("internal-paste", editOperations);
-                logEditorEvent({
-                    type: "paste_internal",
-                    length: internalClipboard.length,
-                    timestamp: Date.now()
-                });
-                toast.success("已从内部剪贴板粘贴 - Pasted from internal clipboard");
-            }
-        }
+        editorRef.current.executeEdits("internal-paste", editOperations);
+        logEditorEvent({ type: "paste_internal", length: internalClipboard.length, timestamp: Date.now() });
+        toast.success("已从内部剪贴板粘贴 - Pasted from internal clipboard");
     };
 
     const handleEditorChange = (value: string | undefined, ev: any) => {
@@ -326,15 +376,9 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
     const handleEditorDidMount: OnMount = (editor, monaco) => {
         editorRef.current = editor;
 
-        editor.addCommand(
-            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC,
-            handleCopyInternal
-        );
-
-        editor.addCommand(
-            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV,
-            handlePasteInternal
-        );
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, handleCopyInternal);
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX, handleCutInternal);
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, handlePasteInternal);
     };
 
     // Only Python is supported (template-based execution)
