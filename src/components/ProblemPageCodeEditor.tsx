@@ -122,18 +122,20 @@ function calculateAncientCodeScore(): ScoringResult {
     }
 
     // --- antiPasteScore ---
-    const antiPasteScore = Math.max(0, 1 - pasteEvents.length * 0.1);
+    // First 2 internal pastes are free (normal refactoring); penalize beyond that.
+    const excessPastes = Math.max(0, pasteEvents.length - 2);
+    const antiPasteScore = Math.max(0, 1 - excessPastes * 0.15);
 
     // --- speedScore: avg chars/sec over the session.
-    //     Normal: 2–10 chars/sec. Playwright: ~12/sec. Script: 100+/sec. ---
+    //     Normal: 2–15 chars/sec. Fast typist: ~15/sec. Script: 100+/sec. ---
     const sessionSecs = editorEvents.length >= 2
         ? (editorEvents[editorEvents.length - 1].timestamp - editorEvents[0].timestamp) / 1000
         : 0;
     let speedScore = 0.8; // default if we have no timing data
     if (sessionSecs > 0 && totalInsertedChars > 0) {
         const avgSpeed = totalInsertedChars / sessionSecs; // chars/sec
-        // Full score for ≤10/s, 0 for ≥20/s, linear decay between
-        speedScore = Math.min(1, Math.max(0, 1 - Math.max(0, avgSpeed - 10) / 10));
+        // Full score for ≤15/s, 0 for ≥30/s, linear decay between
+        speedScore = Math.min(1, Math.max(0, 1 - Math.max(0, avgSpeed - 15) / 15));
     }
 
     // --- burstScore: max chars inserted in any 1-second sliding window.
