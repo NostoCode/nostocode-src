@@ -1,6 +1,7 @@
 import { connectToDb } from "@/lib/dbConnect";
 import problemModel from "@/models/Problem";
 import { createProblemValidation } from "@/schemas/createProblemSchema";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
@@ -59,6 +60,8 @@ export async function POST(req: NextRequest) {
             similarQuestions: [],
             solutions: []
         });
+
+        revalidateTag("problems"); // bust the all-problems list cache
 
         return NextResponse.json({
             success: true,
