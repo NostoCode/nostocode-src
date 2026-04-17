@@ -62,7 +62,9 @@ function calculateAncientCodeScore(): ScoringResult {
 
     const inputRatio = totalActions > 0 ? insertEvents.length / totalActions : 1;
 
-    let rhythmScore = 0.8;
+    // rhythmScore: human typing is IRREGULAR (high CV), robot/playwright typing is UNIFORM (low CV)
+    // We reward irregularity (human) and penalize uniformity (robot)
+    let rhythmScore = 0.3;
     if (insertEvents.length >= 2) {
         const intervals = [];
         for (let i = 1; i < insertEvents.length; i++) {
@@ -70,8 +72,15 @@ function calculateAncientCodeScore(): ScoringResult {
             intervals.push(interval);
         }
         const meanInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-        const variance = intervals.reduce((a, b) => a + Math.pow(b - meanInterval, 2), 0) / intervals.length;
-        rhythmScore = Math.min(1, Math.max(0.3, 1 - (variance / (meanInterval * meanInterval + 0.01))));
+        if (meanInterval > 0) {
+            const variance = intervals.reduce((a, b) => a + Math.pow(b - meanInterval, 2), 0) / intervals.length;
+            const cv = Math.sqrt(variance) / meanInterval; // coefficient of variation
+            // humans: cv typically 0.4–1.5 (irregular pauses, thinking, typos)
+            // robots (playwright, scripts): cv typically < 0.1 (perfectly uniform)
+            rhythmScore = Math.min(1, Math.max(0, cv * 2));
+        } else {
+            rhythmScore = 0; // zero-length intervals = simultaneous inject
+        }
     }
 
     const editActivity = totalActions > 0 ? deleteEvents.length / totalActions : 0;
@@ -223,13 +232,14 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
 
         if (changes && changes.length > 0) {
             for (const change of changes) {
-                const deletedText = change.deletedText;
-                const textLength = deletedText ? deletedText.length : (change.text?.length || 0);
+                // Monaco provides rangeLength (chars removed), not deletedText
+                const deletedLength = change.rangeLength || 0;
 
-                if (deletedText && deletedText.length > 0) {
+                if (deletedLength > 0 && (!change.text || change.text.length === 0)) {
+                    // Pure deletion (backspace, delete key)
                     logEditorEvent({
                         type: "delete",
-                        length: deletedText.length,
+                        length: deletedLength,
                         timestamp: Date.now()
                     });
                 } else if (change.text && change.text.length > 0) {
