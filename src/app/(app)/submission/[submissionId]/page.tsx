@@ -2,6 +2,7 @@
 import CustomBarChart from '@/components/CustomBarChart';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/helpers/formatDate';
+import { ancientScoreLevel } from '@/helpers/ancientScoreLevel';
 import { IProblem } from '@/models/Problem';
 import { ApiResponse, codeSubmissionResultType } from '@/types/ApiResponse';
 import MDEditor from '@uiw/react-md-editor';
@@ -89,7 +90,7 @@ export default function page() {
                       submissionOutput.ancientCodeScore >= 40 ? 'text-orange-500' :
                       'text-red-500'
                     }`}>{submissionOutput.ancientCodeScore} / 100</h2>
-                    <h2 className="text-sm">{submissionOutput.ancientCodeLevel}</h2>
+                    <h2 className="text-sm">{ancientScoreLevel(submissionOutput.ancientCodeScore!)}</h2>
                   </>
                 ) : (
                   <h2 className="text-xl text-gray-400">N/A</h2>
