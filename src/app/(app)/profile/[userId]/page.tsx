@@ -21,7 +21,7 @@ import { z } from "zod";
 import { updateUserValidation } from '@/schemas/updateUserSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-export default function page() {
+export default function Page() {
 
     const { userId } = useParams()
     const [fullUserInfo, setFullUserInfo] = useState<IUser | null>(null)

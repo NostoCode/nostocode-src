@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         }
 
         // call piston execution api
-        const response = await runCodeBatch(finalCode, languageId, finalTestCases as any);
+        const response = await runCodeBatch(finalCode, languageId, finalTestCases);
 
         if (!response.success) {
             return NextResponse.json({

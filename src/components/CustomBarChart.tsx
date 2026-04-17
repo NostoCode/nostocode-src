@@ -49,10 +49,13 @@ export default function CustomBarChart({ session, labelValue }: { session: Sessi
     }
 
     // Custom label renderer to display image
-    const renderCustomLabel = (props: any) => {
+    const renderCustomLabel = (props: { x?: number | string; y?: number | string; width?: number | string; index?: number }) => {
         if (!session) return null;
         // fetchs bar position and values
-        const { x, y, width, index } = props;
+        const x = Number(props.x ?? 0);
+        const y = Number(props.y ?? 0);
+        const width = Number(props.width ?? 0);
+        const index = props.index ?? 0;
 
         // showing image
         const barData = chartData[index];

@@ -13,7 +13,8 @@ export const authOptions: NextAuthOptions = {
                 email: { label: "Email", type: "email" },
                 password: { label: "Password", type: "password" }
             },
-            async authorize(credentials: any): Promise<any> {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            async authorize(credentials: any) {
                 if (!credentials?.email || !credentials?.password) {
                     throw new Error("Missing error and password");
                 }
@@ -38,8 +39,8 @@ export const authOptions: NextAuthOptions = {
                     } else {
                         throw new Error("Incorrect Password");
                     }
-                } catch (error: any) {
-                    throw new Error(error);
+                } catch (error: unknown) {
+                    throw new Error(error instanceof Error ? error.message : String(error));
                 }
             }
         })

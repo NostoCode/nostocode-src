@@ -4,14 +4,13 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area';
 import MDEditor from '@uiw/react-md-editor';
 import { Loader2, Send } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form"
 import { useForm } from 'react-hook-form';
@@ -26,7 +25,7 @@ import { toast } from 'sonner';
 import { Types } from 'mongoose';
 import Link from 'next/link';
 
-export default function page() {
+function AddSolutionContent() {
 
   const [mounted, setMounted] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -55,7 +54,7 @@ export default function page() {
     }
 
     try {
-      const res = await axios.post<ApiResponse>("/api/solution/add-solution", data);
+      await axios.post<ApiResponse>("/api/solution/add-solution", data);
 
       toast.success("Solution added successfully");
       router.replace(`/problem/${submission?.problemId}`);
@@ -72,7 +71,6 @@ export default function page() {
     }
   }
 
-  // const allValues = form.watch()
   const allTags = form.watch("tags");
   const explanationValue = form.watch("explanation");
 
@@ -111,13 +109,9 @@ export default function page() {
     fetchSubmissionDetails();
   }, [mounted]);
 
-  useEffect(() => {
-    if (!mounted) return;
-  }, [mounted]);
-
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return null;
+  if (!mounted || isLoading) return null;
 
   return (
     <div className='w-full flex justify-center'>
@@ -199,4 +193,12 @@ export default function page() {
       </div>
     </div>
   )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={null}>
+      <AddSolutionContent />
+    </Suspense>
+  );
 }
