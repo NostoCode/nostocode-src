@@ -2,6 +2,7 @@ import { connectToDb } from "@/lib/dbConnect";
 import problemModel from "@/models/Problem";
 import { createProblemValidation } from "@/schemas/createProblemSchema";
 import { getToken } from "next-auth/jwt";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(req:NextRequest) {
@@ -39,6 +40,8 @@ export async function PATCH(req:NextRequest) {
             body,
             {new: true}
         );
+
+        revalidateTag("problems"); // bust the all-problems list cache
 
         return NextResponse.json({
             success: true,
