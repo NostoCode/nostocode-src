@@ -97,8 +97,8 @@ export async function POST(req: NextRequest) {
             time: sumOfTime / apiResponse.result.length,
             memory: (sumOfMemory / apiResponse.result.length) / 1024,
             sourceCode,
-            ancientCodeScore: ancientCodeScore || 100,
-            ancientCodeLevel: ancientCodeLevel || "🟢 Ancient Master",
+            ancientCodeScore: ancientCodeScore ?? 100,
+            ancientCodeLevel: ancientCodeLevel ?? "🟢 Ancient Master",
             problemId
         });
 
