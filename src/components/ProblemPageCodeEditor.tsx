@@ -502,7 +502,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                     automaticLayout: true,
                     minimap: { enabled: false },
                     lineNumbers: "on",
-                    pasteAs: false,
+                    pasteAs: { enabled: false },
                 }}
                 className='w-full h-[calc(100vh-8.7rem)]'
             />
