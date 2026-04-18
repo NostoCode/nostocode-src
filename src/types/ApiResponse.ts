@@ -33,6 +33,13 @@ export interface codeSubmissionResultType {
     udpatedAt?: Date
 }
 
+export interface FailedCase {
+    index: number;
+    input: string;
+    expected: string;
+    actual: string;
+}
+
 export interface ApiResponse {
     success: boolean,
     message: string,
@@ -54,4 +61,5 @@ export interface ApiResponse {
     limit?: number,
     totalPages?: number,
     totalTestCases?: number,
+    failedCase?: FailedCase | null,
 }

@@ -5,6 +5,7 @@ import submissionModel from "@/models/Submission";
 import userModel from "@/models/User";
 import { codeRunValidation } from "@/schemas/codeRunSchema";
 import { codeSubmissionValidation } from "@/schemas/codeSubmissionSchema";
+import { extractAssertLines, buildDetailedHarness } from "@/lib/buildDetailedHarness";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -45,16 +46,19 @@ export async function POST(req: NextRequest) {
         // Build template code for Python if problem has promptCode/testCode
         let finalCode = sourceCode;
         let finalTestCases = testCases || [];
+        let isTemplateMode = false;
 
         if (languageId === 10) {
             const problemForTemplate = await problemModel.findById(problemId).select('promptCode testCode');
             if (problemForTemplate?.promptCode && problemForTemplate?.testCode) {
+                const allAsserts = extractAssertLines(problemForTemplate.testCode);
                 let cleanPrompt = problemForTemplate.promptCode;
                 if (!problemForTemplate.testCode.includes('SortedList') && !sourceCode.includes('SortedList')) {
                     cleanPrompt = cleanPrompt.replace(/^from sortedcontainers import SortedList\n?/m, '');
                 }
-                finalCode = `${cleanPrompt}\n\n${sourceCode}\n\n${problemForTemplate.testCode}\n\nimport inspect\ntry:\n    _sol = Solution()\n    _methods = [m for m, _ in inspect.getmembers(_sol, predicate=inspect.ismethod) if not m.startswith('_')]\n    check(getattr(_sol, _methods[0]))\n    print("PASS")\nexcept AssertionError:\n    print("FAIL")\nexcept Exception as e:\n    print(f"ERR: {e}")\n`;
-                finalTestCases = [{ input: "", output: "PASS" }];
+                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, allAsserts);
+                finalTestCases = [{ input: "", output: "" }];
+                isTemplateMode = true;
             }
         }
 
@@ -65,7 +69,7 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
         }
 
-        // run code using judge api
+        // run code using piston api
         const apiResponse = await runCodeBatch(finalCode, languageId, finalTestCases);
 
         if (!apiResponse.success) {
@@ -79,13 +83,32 @@ export async function POST(req: NextRequest) {
         let currentStatus = "Accepted";
         let sumOfTime = 0;
         let sumOfMemory = 0;
+        let failedCase: { index: number; input: string; expected: string; actual: string } | null = null;
 
-        for (let i = 0; i < apiResponse.result.length; i++) {
-            sumOfTime += parseFloat(apiResponse.result[i].time) || 0;
-            sumOfMemory += apiResponse.result[i].memory || 0;
-            if (apiResponse.result[i].status.description !== "Accepted") {
-                currentStatus = apiResponse.result[i].status.description;
-                break;
+        if (isTemplateMode) {
+            // In template mode, determine pass/fail from the JSON output of the detailed harness
+            sumOfTime = parseFloat(apiResponse.result[0]?.time || '0') || 0;
+            sumOfMemory = apiResponse.result[0]?.memory || 0;
+            const stdout = apiResponse.result[0]?.stdout?.trim();
+            try {
+                const parsed = JSON.parse(stdout || '');
+                if (!parsed.ok) {
+                    currentStatus = "Wrong Answer";
+                    failedCase = { index: parsed.index, input: parsed.input, expected: parsed.expected, actual: parsed.actual };
+                }
+            } catch {
+                // Not JSON: compile error or unhandled runtime error before any output
+                const stderr = apiResponse.result[0]?.stderr?.trim();
+                currentStatus = stderr ? "Runtime Error" : "Wrong Answer";
+            }
+        } else {
+            for (let i = 0; i < apiResponse.result.length; i++) {
+                sumOfTime += parseFloat(apiResponse.result[i].time) || 0;
+                sumOfMemory += apiResponse.result[i].memory || 0;
+                if (apiResponse.result[i].status.description !== "Accepted") {
+                    currentStatus = apiResponse.result[i].status.description;
+                    break;
+                }
             }
         }
 
@@ -131,15 +154,18 @@ export async function POST(req: NextRequest) {
         }
 
         user.submissions.push(newSubmission._id);
-        user.solvedQuestions.push(problemId);
-        user.solvedProblems = user.solvedProblems + 1;
+        if (currentStatus === "Accepted") {
+            user.solvedQuestions.push(problemId);
+            user.solvedProblems = user.solvedProblems + 1;
+        }
         await user.save();
 
         return NextResponse.json({
             success: true,
             message: "Your code submitted successfully",
             submissionOutput: newSubmission,
-            totalTestCases: problem.testCases?.length || 0
+            totalTestCases: problem.testCases?.length || 0,
+            failedCase,
         }, { status: 201 });
 
     } catch (error) {
