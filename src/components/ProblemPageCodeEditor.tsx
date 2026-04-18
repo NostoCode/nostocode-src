@@ -8,6 +8,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useWin98Theme } from '@/context/ThemeContext';
 
 // Prop types for this component
 interface ProblemPageCodeEditorType {
@@ -213,6 +214,8 @@ function resetEditorEvents() {
 
 export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSelectedLanguage, setSelectedLanguageCode, sourceCode, setSourceCode, starterCode }: ProblemPageCodeEditorType & { starterCode?: string }) {
     const [isFullScreen, setIsFullScreen] = useState(!document.fullscreenElement);
+    const { theme: win98Theme } = useWin98Theme();
+    const monacoTheme = win98Theme === 'win98' ? 'vs' : 'vs-dark';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const editorRef = useRef<any>(null);
 
@@ -498,7 +501,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                 language={coddingLanguages[selectedLanguage as coddingLanguagesType].compilorId}
                 value={sourceCode}
                 onChange={handleEditorChange}
-                theme='vs-dark'
+                theme={monacoTheme}
                 onMount={handleEditorDidMount}
                 options={{
                     automaticLayout: true,

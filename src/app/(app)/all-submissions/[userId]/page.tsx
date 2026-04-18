@@ -9,7 +9,7 @@ import { timeAgoFunction } from '@/helpers/timeAgoFunction';
 import { IProblem } from '@/models/Problem';
 import { ApiResponse, codeSubmissionResultType } from '@/types/ApiResponse';
 import axios from 'axios';
-import { ArrowDownUp, Box, Check, CircleCheckBig, CircleQuestionMark, Funnel, Search, Shuffle, SquarePen } from 'lucide-react'
+import { ArrowDownUp, CircleCheckBig, Funnel, Search, SquarePen } from 'lucide-react'
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react'
@@ -100,7 +100,6 @@ export default function Page() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Shuffle className='resize-custom w-5 text-gray-400' />
         </div>
         <ScrollArea className="w-full h-[calc(100vh-12rem)] pr-3">
           {isLoading && <div>
@@ -122,23 +121,7 @@ export default function Page() {
       </div>
       <div className="w-[25%] h-full flex flex-col items-center justify-center py-4">
         <div className="p-2 border w-[80%] rounded-md customBackground h-[75%]">
-          <Calendar className='w-full h-[70%] customBackground' />
-          <div className="border h-[20%] bg-[#453827] rounded-lg p-2">
-            <div className="flex justify-between items-center">
-              <h3 className="text-[#fca215] flex gap-2">Weekly Premium <CircleQuestionMark className='resize-custom w-4' /></h3>
-              <p className="text-sm dark:text-gray-500">3 days left</p>
-            </div>
-            <div className="flex justify-around mt-6">
-              <h3 className="bg-[#fca215] p-1 font-semibold text-xs rounded-full cursor-pointer">W1</h3>
-              <h3 className="hover:bg-[#fca215] hover:text-white transition-all duration-300 p-1 font-semibold text-xs rounded-full cursor-pointer text-gray-400">W2</h3>
-              <h3 className="hover:bg-[#fca215] hover:text-white transition-all duration-300 p-1 font-semibold text-xs rounded-full cursor-pointer text-gray-400">W3</h3>
-              <h3 className="hover:bg-[#fca215] hover:text-white transition-all duration-300 p-1 font-semibold text-xs rounded-full cursor-pointer text-gray-400">W4</h3>
-            </div>
-            <div className="flex justify-between items-center mt-6">
-              <p className="flex gap-2 items-center"><Box fill='green' className='resize-custom w-5' /> 0 <span className="text-sm text-green-400">Redeem</span></p>
-              <p className="dark:text-gray-400 text-sm">Rules</p>
-            </div>
-          </div>
+          <Calendar className='w-full h-full customBackground' />
         </div>
       </div>
     </div>

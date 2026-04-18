@@ -48,5 +48,9 @@ export interface ApiResponse {
     allProblems?: IProblem[],
     results?: CodeRunResult[],
     output?: string,
-    submissionDetails?: ISubmission
+    submissionDetails?: ISubmission,
+    total?: number,
+    page?: number,
+    limit?: number,
+    totalPages?: number,
 }
