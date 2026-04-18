@@ -50,6 +50,7 @@ export default function Page() {
   const [currentTab, setCurrentTab] = useState<string>("description");
   const [codeOutput, setCodeOutput] = useState<CodeRunResult[] | null>(null);
   const [submissionOutput, setSubmissionOutput] = useState<codeSubmissionResultType | null>(null);
+  const [totalTestCases, setTotalTestCases] = useState<number>(0);
 
   useEffect(() => {
     setMounted(true);
@@ -194,6 +195,7 @@ export default function Page() {
       showConfetti()
       console.log("Code submitted successfully: ", res.data.submissionOutput);
       setSubmissionOutput(res.data.submissionOutput ?? null);
+      setTotalTestCases(res.data.totalTestCases ?? 0);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         toast.error(error.response.data.message || "Please check your code and try again.");
@@ -238,7 +240,7 @@ export default function Page() {
             {(problemInfo && currentTab === "description") && <ProblemPageDescription problemInfo={problemInfo} session={session} />}
             {(problemInfo && currentTab === "solutions") && <ProblemPageSoluction problemId={problemId?.toString() || ""} />}
             {(problemInfo && currentTab === "submissions") && <ProblemPageSubmission theme={theme} problemInfo={problemInfo} setCurrentTab={setCurrentTab} setSubmissionOutput={setSubmissionOutput} />}
-            {(problemInfo && currentTab === "testResult") && <ProblemPageTestResult codeOutput={codeOutput} isCodeRunning={isCodeRunning} theme={theme} problemInfo={problemInfo} session={session} submissionOutput={submissionOutput} setSubmissionOutput={setSubmissionOutput} />}
+            {(problemInfo && currentTab === "testResult") && <ProblemPageTestResult codeOutput={codeOutput} isCodeRunning={isCodeRunning} theme={theme} problemInfo={problemInfo} session={session} submissionOutput={submissionOutput} setSubmissionOutput={setSubmissionOutput} totalTestCases={totalTestCases} />}
             <ProblemSideFooter />
           </ScrollArea>
 
