@@ -53,4 +53,5 @@ export interface ApiResponse {
     page?: number,
     limit?: number,
     totalPages?: number,
+    totalTestCases?: number,
 }

@@ -138,7 +138,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             success: true,
             message: "Your code submitted successfully",
-            submissionOutput: newSubmission
+            submissionOutput: newSubmission,
+            totalTestCases: problem.testCases?.length || 0
         }, { status: 201 });
 
     } catch (error) {

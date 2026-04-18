@@ -32,6 +32,20 @@ except Exception as e:
 `;
 }
 
+/** Extract only the first N assert lines from testCode for Run (example-only mode) */
+function extractExampleTestCode(testCode: string, n: number): string {
+    const lines = testCode.split('\n');
+    const defLine = lines.find(l => l.trim().startsWith('def check')) || 'def check(candidate):';
+    const assertLines: string[] = [];
+    for (const line of lines) {
+        if (line.trim().startsWith('assert ')) {
+            assertLines.push(line);
+            if (assertLines.length >= n) break;
+        }
+    }
+    return defLine + '\n' + assertLines.join('\n') + '\n';
+}
+
 export async function POST(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
 
@@ -62,9 +76,12 @@ export async function POST(req: NextRequest) {
         // Use template approach when problemId is provided and language is Python (10)
         if (problemId && languageId === 10) {
             await connectToDb();
-            const problem = await problemModel.findById(problemId).select('promptCode testCode');
+            const problem = await problemModel.findById(problemId).select('promptCode testCode examples');
             if (problem?.promptCode && problem?.testCode) {
-                finalCode = buildTemplateCode(problem.promptCode, sourceCode, problem.testCode);
+                // Run only the example test cases (not the full test suite used by Submit)
+                const numExamples = (problem.examples?.match(/Example\s+\d+/gi) || []).length || 3;
+                const exampleTestCode = extractExampleTestCode(problem.testCode, numExamples);
+                finalCode = buildTemplateCode(problem.promptCode, sourceCode, exampleTestCode);
                 finalTestCases = [{ input: "", output: "PASS" }];
             }
         }

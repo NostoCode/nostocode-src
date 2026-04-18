@@ -18,10 +18,11 @@ interface ProblemPageTestResultType {
     problemInfo: IProblem,
     session: Session | null,
     submissionOutput: codeSubmissionResultType | null,
-    setSubmissionOutput: React.Dispatch<React.SetStateAction<codeSubmissionResultType | null>>
+    setSubmissionOutput: React.Dispatch<React.SetStateAction<codeSubmissionResultType | null>>,
+    totalTestCases?: number,
 }
 
-export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme, problemInfo, session, submissionOutput, setSubmissionOutput }: ProblemPageTestResultType) {
+export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme, problemInfo, session, submissionOutput, setSubmissionOutput, totalTestCases }: ProblemPageTestResultType) {
     const [viewTestCase, setViewTestCase] = useState<number>(0);
     const [inputValues, setInputValues] = useState<string[]>([]);
     const [outputValues, setOutputValues] = useState<string[]>([]);
@@ -133,7 +134,7 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                                 <h2 className="text-xl font-semibold text-red-500">{submissionOutput.status}</h2>
                             }
                             {submissionOutput.status === "Accepted" ?
-                                <p className={`text-sm ${theme === "dark" ? 'text-neutral-400' : ''}`}>3 / 3 testcases passed</p> : <p className={`text-sm ${theme === "dark" ? 'text-neutral-400' : ''}`}>Some  testcases failed</p>
+                                <p className={`text-sm ${theme === "dark" ? 'text-neutral-400' : ''}`}>{totalTestCases ? `${totalTestCases} / ${totalTestCases} testcases passed` : 'All testcases passed'}</p> : <p className={`text-sm ${theme === "dark" ? 'text-neutral-400' : ''}`}>Some  testcases failed</p>
                             }
                         </div>
                         <div className="flex items-center gap-2">
