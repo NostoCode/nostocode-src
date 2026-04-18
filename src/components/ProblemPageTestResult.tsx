@@ -1,5 +1,5 @@
 "use client"
-import { codeSubmissionResultType, CodeRunResult } from '@/types/ApiResponse'
+import { codeSubmissionResultType, CodeRunResult, FailedCase } from '@/types/ApiResponse'
 import { CircleCheckBig, Clock4, Info, Shield, Sparkles, SquarePen, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
@@ -20,9 +20,11 @@ interface ProblemPageTestResultType {
     submissionOutput: codeSubmissionResultType | null,
     setSubmissionOutput: React.Dispatch<React.SetStateAction<codeSubmissionResultType | null>>,
     totalTestCases?: number,
+    runFailedCase?: FailedCase | null,
+    submitFailedCase?: FailedCase | null,
 }
 
-export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme, problemInfo, session, submissionOutput, setSubmissionOutput, totalTestCases }: ProblemPageTestResultType) {
+export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme, problemInfo, session, submissionOutput, setSubmissionOutput, totalTestCases, runFailedCase, submitFailedCase }: ProblemPageTestResultType) {
     const [viewTestCase, setViewTestCase] = useState<number>(0);
     const [inputValues, setInputValues] = useState<string[]>([]);
     const [outputValues, setOutputValues] = useState<string[]>([]);
@@ -94,6 +96,23 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                             {(codeOutput[0]?.compile_output && !codeOutput[0]?.stdout) &&
                                 <div className="w-full min-h-16 bg-[var(--sidebar-accent)] mb-2 p-4 rounded-md font-semibold text-red-500">{codeOutput[0].compile_output}</div>
                             }
+                            {runFailedCase && (
+                                <div className="mt-5 space-y-3">
+                                    <h2 className="font-semibold text-red-400">Failing Testcase #{runFailedCase.index + 1}</h2>
+                                    <div>
+                                        <h3 className={`mb-1 text-sm font-medium ${theme === "dark" ? 'text-neutral-400' : 'text-neutral-500'}`}>Input</h3>
+                                        <div className="w-full bg-[var(--sidebar-accent)] p-4 rounded-md font-mono text-sm whitespace-pre-wrap">{runFailedCase.input}</div>
+                                    </div>
+                                    <div>
+                                        <h3 className={`mb-1 text-sm font-medium ${theme === "dark" ? 'text-neutral-400' : 'text-neutral-500'}`}>Expected Output</h3>
+                                        <div className="w-full bg-[var(--sidebar-accent)] p-4 rounded-md font-mono text-sm text-green-500">{runFailedCase.expected}</div>
+                                    </div>
+                                    <div>
+                                        <h3 className={`mb-1 text-sm font-medium ${theme === "dark" ? 'text-neutral-400' : 'text-neutral-500'}`}>Your Output</h3>
+                                        <div className="w-full bg-[var(--sidebar-accent)] p-4 rounded-md font-mono text-sm text-red-400">{runFailedCase.actual}</div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         // Standard mode: show per-test-case input/output
@@ -182,6 +201,23 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                 {(submissionOutput && submissionOutput.status === "Accepted") && <div className="w-full h-[20rem] overflow-hidden">
                     <CustomBarChart session={session} labelValue={submissionOutput.time} />
                 </div>}
+                {(submissionOutput && submissionOutput.status !== "Accepted" && submitFailedCase) && (
+                    <div className="mt-2 mb-6 space-y-3">
+                        <h2 className="font-semibold text-red-400">Failing Testcase #{submitFailedCase.index + 1}</h2>
+                        <div>
+                            <h3 className={`mb-1 text-sm font-medium ${theme === "dark" ? 'text-neutral-400' : 'text-neutral-500'}`}>Input</h3>
+                            <div className="w-full bg-[var(--sidebar-accent)] p-4 rounded-md font-mono text-sm whitespace-pre-wrap">{submitFailedCase.input}</div>
+                        </div>
+                        <div>
+                            <h3 className={`mb-1 text-sm font-medium ${theme === "dark" ? 'text-neutral-400' : 'text-neutral-500'}`}>Expected Output</h3>
+                            <div className="w-full bg-[var(--sidebar-accent)] p-4 rounded-md font-mono text-sm text-green-500">{submitFailedCase.expected}</div>
+                        </div>
+                        <div>
+                            <h3 className={`mb-1 text-sm font-medium ${theme === "dark" ? 'text-neutral-400' : 'text-neutral-500'}`}>Your Output</h3>
+                            <div className="w-full bg-[var(--sidebar-accent)] p-4 rounded-md font-mono text-sm text-red-400">{submitFailedCase.actual}</div>
+                        </div>
+                    </div>
+                )}
                 <div className={`flex items-center mt-6 mb-4 ${theme === "dark" ? 'text-neutral-400' : ''}`}>
                     <h2 className="font-semibold px-2 border-r-2">Code</h2>
                     <h2 className="font-semibold px-2">{submissionOutput.language}</h2>

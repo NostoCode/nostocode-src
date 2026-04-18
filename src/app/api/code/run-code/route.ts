@@ -4,47 +4,7 @@ import { runCodeBatch } from "@/lib/pistonApiFunction";
 import { getToken } from "next-auth/jwt";
 import { connectToDb } from "@/lib/dbConnect";
 import problemModel from "@/models/Problem";
-
-/** Build the full Python program from user code + problem template */
-function buildTemplateCode(promptCode: string, userCode: string, testCode: string): string {
-    // Remove sortedcontainers import if not used in test code
-    let cleanPrompt = promptCode;
-    if (!testCode.includes('SortedList') && !userCode.includes('SortedList')) {
-        cleanPrompt = cleanPrompt.replace(/^from sortedcontainers import SortedList\n?/m, '');
-    }
-
-    return `${cleanPrompt}
-
-${userCode}
-
-${testCode}
-
-import inspect
-try:
-    _sol = Solution()
-    _methods = [m for m, _ in inspect.getmembers(_sol, predicate=inspect.ismethod) if not m.startswith('_')]
-    check(getattr(_sol, _methods[0]))
-    print("PASS")
-except AssertionError:
-    print("FAIL")
-except Exception as e:
-    print(f"ERR: {e}")
-`;
-}
-
-/** Extract only the first N assert lines from testCode for Run (example-only mode) */
-function extractExampleTestCode(testCode: string, n: number): string {
-    const lines = testCode.split('\n');
-    const defLine = lines.find(l => l.trim().startsWith('def check')) || 'def check(candidate):';
-    const assertLines: string[] = [];
-    for (const line of lines) {
-        if (line.trim().startsWith('assert ')) {
-            assertLines.push(line);
-            if (assertLines.length >= n) break;
-        }
-    }
-    return defLine + '\n' + assertLines.join('\n') + '\n';
-}
+import { extractAssertLines, buildDetailedHarness } from "@/lib/buildDetailedHarness";
 
 export async function POST(req: NextRequest) {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
@@ -72,17 +32,26 @@ export async function POST(req: NextRequest) {
 
         let finalCode = sourceCode;
         let finalTestCases: { input: string; output: string }[] = testCases || [];
+        let isTemplateMode = false;
 
         // Use template approach when problemId is provided and language is Python (10)
         if (problemId && languageId === 10) {
             await connectToDb();
             const problem = await problemModel.findById(problemId).select('promptCode testCode examples');
             if (problem?.promptCode && problem?.testCode) {
-                // Run only the example test cases (not the full test suite used by Submit)
+                // Run only the first N example assertions (not the full suite used by Submit)
                 const numExamples = (problem.examples?.match(/Example\s+\d+/gi) || []).length || 3;
-                const exampleTestCode = extractExampleTestCode(problem.testCode, numExamples);
-                finalCode = buildTemplateCode(problem.promptCode, sourceCode, exampleTestCode);
-                finalTestCases = [{ input: "", output: "PASS" }];
+                const allAsserts = extractAssertLines(problem.testCode);
+                const exampleAsserts = allAsserts.slice(0, numExamples);
+
+                let cleanPrompt = problem.promptCode;
+                if (!problem.testCode.includes('SortedList') && !sourceCode.includes('SortedList')) {
+                    cleanPrompt = cleanPrompt.replace(/^from sortedcontainers import SortedList\n?/m, '');
+                }
+
+                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, exampleAsserts);
+                finalTestCases = [{ input: "", output: "" }];
+                isTemplateMode = true;
             }
         }
 
@@ -93,7 +62,6 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
         }
 
-        // call piston execution api
         const response = await runCodeBatch(finalCode, languageId, finalTestCases);
 
         if (!response.success) {
@@ -103,10 +71,30 @@ export async function POST(req: NextRequest) {
             }, { status: 400 });
         }
 
+        // In template mode, parse the JSON output from the detailed harness
+        let failedCase: { index: number; input: string; expected: string; actual: string } | null = null;
+        let normalizedResults = response.result;
+
+        if (isTemplateMode) {
+            const stdout = response.result[0]?.stdout?.trim();
+            try {
+                const parsed = JSON.parse(stdout || '');
+                if (parsed.ok) {
+                    normalizedResults = [{ ...response.result[0], stdout: "PASS", status: { description: "Accepted", id: 3 } }];
+                } else {
+                    failedCase = { index: parsed.index, input: parsed.input, expected: parsed.expected, actual: parsed.actual };
+                    normalizedResults = [{ ...response.result[0], stdout: "FAIL", status: { description: "Wrong Answer", id: 4 } }];
+                }
+            } catch {
+                // Not JSON — compile error or unhandled runtime error; keep raw result
+            }
+        }
+
         return NextResponse.json({
             success: true,
             message: "Code executed successfully",
-            results: response.result,
+            results: normalizedResults,
+            failedCase,
         }, { status: 200 });
     } catch (error) {
         console.error("Something went wrong while submitting code into api:", error);
