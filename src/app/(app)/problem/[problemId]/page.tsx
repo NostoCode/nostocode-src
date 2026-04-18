@@ -156,6 +156,7 @@ export default function Page() {
         problemId: problemInfo._id,
         sourceCode,
         languageId: selectedLanguageCode,
+        testCases: problemInfo.testCases,
         ancientCodeScore: scoringResult ? scoringResult.score : 100,
         ancientCodeLevel: scoringResult ? scoringResult.level : "🟢 Ancient Master"
       }
@@ -212,7 +213,7 @@ export default function Page() {
 
   return (
     <div className="w-full h-[calc(100vh-3rem)] px-3 py-2">
-      <div className="w-full flex justify-center items-center absolute top-1.5 left-0">
+      <div className="w-full flex justify-center items-center absolute top-1.5 left-0 problem-run-submit-bar">
         <div className="flex gap-1">
           <Button onClick={handleCodeRun} disabled={(session?.user ? false : true) || isCodeRunning} variant="secondary" className='cursor-pointer relative z-40'>{isCodeRunning ? <Loader2 className='resize-custom w-5 animate-spin' /> : <Play />}</Button>
           <Button disabled={session?.user ? false : true} onClick={handleCodeSubmission} variant="secondary" className='w-30 cursor-pointer relative z-40 text-base flex items-center gap-2 font-semibold'>

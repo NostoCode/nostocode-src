@@ -11,7 +11,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import Link from 'next/link';
-import { Settings, FlaskConical, CreditCard, Package, LogOut, Bell, Timer } from "lucide-react"
+import { Settings, FlaskConical, CreditCard, Package, LogOut } from "lucide-react"
 import { signOut } from 'next-auth/react';
 import { Session } from 'next-auth';
 
@@ -21,16 +21,38 @@ interface NavDropdownPropsType {
     theme: string | undefined
 }
 
+function AvatarImg({ src, username, className }: { src?: string; username?: string; className: string }) {
+    const initials = (username || "U").slice(0, 1).toUpperCase();
+    if (!src) {
+        return (
+            <div className={`${className} flex items-center justify-center bg-indigo-500 text-white font-bold`}>
+                {initials}
+            </div>
+        );
+    }
+    return (
+        <img
+            src={src}
+            alt={username || ""}
+            className={`${className} object-cover`}
+            onError={(e) => {
+                const target = e.currentTarget.parentElement;
+                if (target) {
+                    target.innerHTML = `<div class="${className} flex items-center justify-center bg-indigo-500 text-white font-bold" style="width:100%;height:100%">${initials}</div>`;
+                }
+            }}
+        />
+    );
+}
+
 export default function NavDropdown({ session, signOut, theme }: NavDropdownPropsType) {
 
     return (
         <div className="flex items-center gap-4">
-            <Timer className={`resize-custom w-6 ${theme === "dark" ? 'text-neutral-300' : ''}`} />
-            <Bell className={`resize-custom w-6 ${theme === "dark" ? 'text-neutral-300' : ''}`} />
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <div className="w-9 h-9 overflow-hidden rounded-full bg-amber-200 border-2 cursor-pointer">
-                        <img src={session?.user.avatar} alt="" className="w-full h-full object-cover" />
+                        <AvatarImg src={session?.user.avatar} username={session?.user.username} className="w-full h-full" />
                     </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[18rem]" align="center">
@@ -38,7 +60,7 @@ export default function NavDropdown({ session, signOut, theme }: NavDropdownProp
                         <Link href={`/dashboard/${session?.user._id}`}>
                             <div className="flex items-center gap-4 my-2">
                                 <div className="w-16 h-16 rounded-full overflow-hidden border">
-                                    <img src={session?.user.avatar} alt="" className="w-full h-full object-cover" />
+                                    <AvatarImg src={session?.user.avatar} username={session?.user.username} className="w-full h-full" />
                                 </div>
                                 <div className="w-[70%] relative">
                                     <h2 className="text-2xl font-semibold truncate w-full">{session?.user.username}</h2>

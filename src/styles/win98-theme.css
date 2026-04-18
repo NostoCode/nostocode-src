@@ -418,3 +418,73 @@
 [data-win98="true"] .customBackground {
   background: var(--win98-gray) !important;
 }
+
+/* ---------- Win98 color fixes ---------- */
+/* Orange text becomes navy blue for readability on gray */
+[data-win98="true"] .text-orange-400,
+[data-win98="true"] .text-orange-500,
+[data-win98="true"] [class*="text-orange"] {
+  color: var(--win98-blue) !important;
+}
+
+/* Yellow text → dark readable color */
+[data-win98="true"] .text-yellow-300,
+[data-win98="true"] .text-yellow-400 {
+  color: #804000 !important;
+}
+
+/* Blue accent text remains readable */
+[data-win98="true"] .text-blue-400,
+[data-win98="true"] .text-blue-500 {
+  color: var(--win98-blue) !important;
+}
+
+/* Green text stays readable */
+[data-win98="true"] .text-green-400,
+[data-win98="true"] .text-green-500 {
+  color: #006400 !important;
+}
+
+/* Orange background badges (ANCIENT CODING MODE, Python Only) */
+[data-win98="true"] [class*="bg-orange"] {
+  background: var(--win98-gray) !important;
+  color: var(--win98-black) !important;
+}
+[data-win98="true"] [class*="bg-blue"] {
+  background: var(--win98-gray) !important;
+  color: var(--win98-black) !important;
+}
+[data-win98="true"] [class*="border-orange"] {
+  border-color: var(--win98-dark) !important;
+}
+[data-win98="true"] [class*="border-blue"] {
+  border-color: var(--win98-dark) !important;
+}
+
+/* ---------- Win98 Run/Submit button placement fix ---------- */
+/* In Win98 mode the chrome titlebar (~22px) + app-window margin (4px) + header (~28px)
+   precede the problem page, so the absolute-positioned run/submit bar must be pushed down */
+[data-win98="true"] .problem-run-submit-bar {
+  top: 58px !important;
+}
+
+/* ---------- Win98 Shuffle button in NavRunButtons ---------- */
+[data-win98="true"] .nav-shuffle-btn {
+  box-shadow: var(--win98-raised) !important;
+  padding: 2px 6px !important;
+}
+
+/* ---------- Win98 Companies tag: use win98 blue instead of orange ---------- */
+[data-win98="true"] .companies-tag {
+  color: var(--win98-blue) !important;
+}
+
+/* ---------- Win98 ScrollArea fix ---------- */
+[data-win98="true"] [data-radix-scroll-area-viewport] {
+  background: var(--win98-gray);
+}
+
+/* ---------- Win98 Problems page: account for fixed taskbar at bottom ---------- */
+[data-win98="true"] .problems-outer-container {
+  height: calc(100vh - 3rem - 60px) !important;
+}

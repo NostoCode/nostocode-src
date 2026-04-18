@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowDownUp, Barcode, Check, ExternalLink, Funnel, GitFork, GraduationCap, LibraryBig, Play, Plus, RotateCcw, Search, Shuffle, Star } from 'lucide-react'
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,8 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingUserInfo, setLoadingUserInfo] = useState<boolean>(false);
   const [fullUserInfo, setFullUserInfo] = useState<IUser | null>(null);
+  const [isShuffling, setIsShuffling] = useState<boolean>(false);
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [totalLevelWiseProblem, setTotalLevelWiseProblem] = useState<LevelWiseProblemType>({
     easy: 0,
@@ -47,6 +50,8 @@ export default function Page() {
   const [filteredProblems, setFilteredProblems] = useState<IProblem[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filter, setFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const PAGE_SIZE = 20;
 
   const problemColors = {
     "Easy": "text-green-500",
@@ -130,6 +135,7 @@ export default function Page() {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
+    setCurrentPage(1);
 
     if (!value) {
       setFilteredProblems(allProblems);
@@ -145,6 +151,7 @@ export default function Page() {
   const handleFilterBtn = (level: string) => {
     const temp = filter === level ? "" : level;
     setFilter(temp);
+    setCurrentPage(1);
 
     if (!temp) {
       setFilteredProblems(allProblems);
@@ -162,10 +169,24 @@ export default function Page() {
       temp.push(filteredProblems[i]);
     }
     setFilteredProblems(temp);
+    setCurrentPage(1);
   }
 
+  const totalPages = Math.ceil(filteredProblems.length / PAGE_SIZE);
+  const pagedProblems = filteredProblems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const handleShuffle = async () => {
+    if (isShuffling) return;
+    const pool = allProblems.length > 0 ? allProblems : filteredProblems;
+    if (pool.length === 0) return;
+    setIsShuffling(true);
+    const randomProblem = pool[Math.floor(Math.random() * pool.length)];
+    router.push(`/problem/${randomProblem._id}`);
+    setIsShuffling(false);
+  };
+
   return (
-    <div className='w-full h-[calc(100vh-3rem)] flex'>
+    <div className='w-full h-[calc(100vh-3rem)] flex problems-outer-container'>
       <div className="w-[15%] h-full py-6 px-4 border-r-4">
         <div className="w-full p-2 rounded mb-3 flex items-center gap-4 hover:bg-[var(--sidebar-accent)] transition-all duration-300 cursor-pointer"><LibraryBig className='resize-custom w-6' /> Library</div>
         <div className="w-full p-2 rounded mb-3 flex items-center gap-4 hover:bg-[var(--sidebar-accent)] transition-all duration-300 cursor-pointer"><GraduationCap className='resize-custom w-6' /> Study Plan</div>
@@ -210,8 +231,8 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="w-1/2 h-full">
-        <div className="w-full h-18 py-2 flex justify-between items-center pl-4 pr-8">
+      <div className="w-1/2 h-full flex flex-col">
+        <div className="w-full h-18 py-2 flex justify-between items-center pl-4 pr-8 shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-[20rem] rounded-full overflow-hidden flex gap-1 items-center px-4 bg-input">
               <Search className='resize-custom w-5 text-gray-400' />
@@ -229,27 +250,54 @@ export default function Page() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <Shuffle className='resize-custom w-5 text-gray-400' />
+          <button onClick={handleShuffle} disabled={isShuffling} title="Random Problem" className="cursor-pointer disabled:opacity-50" style={{ background: 'none', border: 'none', padding: 0, boxShadow: 'none' }}>
+            <Shuffle className='resize-custom w-5 text-gray-400' />
+          </button>
         </div>
-        <ScrollArea className="w-full h-[calc(100%-4.5rem)] flex flex-col px-4 pb-4">
-          {isLoading &&
-            <div className="w-full">
-              <Skeleton className="w-full h-12 flex items-center gap-2 px-4 rounded-md mb-2"></Skeleton>
-              <Skeleton className="w-full h-12 flex items-center gap-2 px-4 rounded-md mb-2"></Skeleton>
-              <Skeleton className="w-full h-12 flex items-center gap-2 px-4 rounded-md mb-2"></Skeleton>
-            </div>
-          }
-          {(filteredProblems.length > 0 && !isLoading) && filteredProblems.map((problem, index) =>
-            <Link key={index} href={`/problem/${problem._id}`}>
-              <div className={`w-full h-12 flex items-center gap-2 px-4 rounded-md ${index % 2 === 0 ? 'bg-[var(--sidebar-accent)]' : ''}`}>
-                <h2 className="w-[5%] flex justify-center">{checkIsProblemSolvedOrnot(problem._id as string) && <Check className='resize-custom w-5 text-orange-400' />}</h2>
-                <h2 className="w-[70%] font-semibold">{problem.title}</h2>
-                <h2 className={`w-[15%] text-sm whitespace-nowrap ${problemColors[problem.level as problemColorsType]}`}>{problem.level}</h2>
-                <h2 className="flex w-[10%]"><Barcode className='resize-custom w-4 text-gray-500' /><Barcode className='resize-custom w-4 text-gray-500' /></h2>
+        <div className="flex-1 min-h-0">
+          <ScrollArea className="w-full h-full px-4 pb-4">
+            {isLoading &&
+              <div className="w-full">
+                <Skeleton className="w-full h-12 flex items-center gap-2 px-4 rounded-md mb-2"></Skeleton>
+                <Skeleton className="w-full h-12 flex items-center gap-2 px-4 rounded-md mb-2"></Skeleton>
+                <Skeleton className="w-full h-12 flex items-center gap-2 px-4 rounded-md mb-2"></Skeleton>
               </div>
-            </Link>
-          )}
-        </ScrollArea>
+            }
+            {(pagedProblems.length > 0 && !isLoading) && pagedProblems.map((problem, index) =>
+              <Link key={index} href={`/problem/${problem._id}`}>
+                <div className={`w-full h-12 flex items-center gap-2 px-4 rounded-md ${index % 2 === 0 ? 'bg-[var(--sidebar-accent)]' : ''}`}>
+                  <h2 className="w-[5%] flex justify-center">{checkIsProblemSolvedOrnot(problem._id as string) && <Check className='resize-custom w-5 text-orange-400' />}</h2>
+                  <h2 className="w-[70%] font-semibold">{problem.title}</h2>
+                  <h2 className={`w-[15%] text-sm whitespace-nowrap ${problemColors[problem.level as problemColorsType]}`}>{problem.level}</h2>
+                  <h2 className="flex w-[10%]"><Barcode className='resize-custom w-4 text-gray-500' /><Barcode className='resize-custom w-4 text-gray-500' /></h2>
+                </div>
+              </Link>
+            )}
+          </ScrollArea>
+        </div>
+        {/* Pagination controls - outside ScrollArea so always visible */}
+        {!isLoading && totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 py-2 border-t shrink-0">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm disabled:opacity-40 cursor-pointer"
+            >
+              ← Prev
+            </button>
+            <span className="text-sm">
+              Page {currentPage} / {totalPages}
+              <span className="text-gray-500 ml-2">({filteredProblems.length} problems)</span>
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm disabled:opacity-40 cursor-pointer"
+            >
+              Next →
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

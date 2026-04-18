@@ -19,8 +19,15 @@ const getCachedProblems = unstable_cache(
     }
 );
 
+const PAGE_SIZE = 20;
+
 export async function GET(req: NextRequest) {
     try {
+        const { searchParams } = new URL(req.url);
+        const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+        const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || String(PAGE_SIZE), 10)));
+        const paginate = searchParams.has("page");
+
         const allProblems = await getCachedProblems();
 
         if (allProblems.length === 0) {
@@ -30,15 +37,38 @@ export async function GET(req: NextRequest) {
             }, { status: 400 })
         }
 
+        // When no page param, return all (for shuffle / backwards compat)
+        if (!paginate) {
+            return NextResponse.json(
+                {
+                    success: true,
+                    message: "All the problems found successfully",
+                    allProblems,
+                    total: allProblems.length,
+                },
+                {
+                    status: 200,
+                    headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" }
+                }
+            );
+        }
+
+        const start = (page - 1) * limit;
+        const paginatedProblems = allProblems.slice(start, start + limit);
+        const totalPages = Math.ceil(allProblems.length / limit);
+
         return NextResponse.json(
             {
                 success: true,
-                message: "All the problems found successfully",
-                allProblems
+                message: "Problems found successfully",
+                allProblems: paginatedProblems,
+                total: allProblems.length,
+                page,
+                limit,
+                totalPages,
             },
             {
                 status: 200,
-                // Browser/CDN: serve stale up to 30 s, then revalidate in background
                 headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" }
             }
         );
