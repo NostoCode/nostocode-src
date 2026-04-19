@@ -51,7 +51,7 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filter, setFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const PAGE_SIZE = 20;
+  const [pageSize, setPageSize] = useState<number>(20);
 
   const problemColors = {
     "Easy": "text-green-500",
@@ -172,8 +172,8 @@ export default function Page() {
     setCurrentPage(1);
   }
 
-  const totalPages = Math.ceil(filteredProblems.length / PAGE_SIZE);
-  const pagedProblems = filteredProblems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const totalPages = Math.ceil(filteredProblems.length / pageSize);
+  const pagedProblems = filteredProblems.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleShuffle = async () => {
     if (isShuffling) return;
@@ -188,11 +188,11 @@ export default function Page() {
   return (
     <div className='w-full h-[calc(100vh-3rem)] flex problems-outer-container'>
       <div className="w-[15%] h-full py-6 px-4 border-r-4">
-        <div className="w-full p-2 rounded mb-3 flex items-center gap-4 hover:bg-[var(--sidebar-accent)] transition-all duration-300 cursor-pointer"><LibraryBig className='resize-custom w-6' /> Library</div>
-        <div className="w-full p-2 rounded mb-3 flex items-center gap-4 hover:bg-[var(--sidebar-accent)] transition-all duration-300 cursor-pointer"><GraduationCap className='resize-custom w-6' /> Study Plan</div>
+        <div className="w-full p-2 rounded mb-3 flex items-center gap-4 opacity-50 cursor-not-allowed" title="Coming soon"><LibraryBig className='resize-custom w-6' /> Library</div>
+        <div className="w-full p-2 rounded mb-3 flex items-center gap-4 opacity-50 cursor-not-allowed" title="Coming soon"><GraduationCap className='resize-custom w-6' /> Study Plan</div>
         <div className='w-full border-2 mb-4 mt-8'></div>
-        <div className="w-full p-2 rounded mb-3 flex items-center justify-between hover:bg-[var(--sidebar-accent)] transition-all duration-300 cursor-pointer text-gray-500">My List <Plus className='resize-custom w-6 text-gray-500' /></div>
-        <div className="w-full p-2 rounded mb-3 flex items-center gap-4 hover:bg-[var(--sidebar-accent)] transition-all duration-300 cursor-pointer"><Star className='resize-custom w-5' /> Favorite</div>
+        <div className="w-full p-2 rounded mb-3 flex items-center justify-between opacity-50 cursor-not-allowed text-gray-500" title="Coming soon">My List <Plus className='resize-custom w-6 text-gray-500' /></div>
+        <div className="w-full p-2 rounded mb-3 flex items-center gap-4 opacity-50 cursor-not-allowed" title="Coming soon"><Star className='resize-custom w-5' /> Favorite</div>
       </div>
       <div className="w-[35%] h-full py-4 px-12">
         <div className="w-full h-full bg-[var(--sidebar-accent)] rounded-md p-6 flex flex-col gap-2">
@@ -276,7 +276,7 @@ export default function Page() {
           </ScrollArea>
         </div>
         {/* Pagination controls - outside ScrollArea so always visible */}
-        {!isLoading && totalPages > 1 && (
+        {!isLoading && (totalPages > 1 || true) && (
           <div className="flex items-center justify-center gap-3 py-2 border-t shrink-0">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -286,16 +286,26 @@ export default function Page() {
               ← Prev
             </button>
             <span className="text-sm">
-              Page {currentPage} / {totalPages}
+              Page {currentPage} / {totalPages || 1}
               <span className="text-gray-500 ml-2">({filteredProblems.length} problems)</span>
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || totalPages === 0}
               className="px-3 py-1 text-sm disabled:opacity-40 cursor-pointer"
             >
               Next →
             </button>
+            <select
+              value={pageSize}
+              onChange={e => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+              className="ml-4 text-sm border rounded px-2 py-1 bg-[var(--sidebar-accent)] cursor-pointer"
+              title="Problems per page"
+            >
+              <option value={10}>10 / page</option>
+              <option value={20}>20 / page</option>
+              <option value={50}>50 / page</option>
+            </select>
           </div>
         )}
       </div>

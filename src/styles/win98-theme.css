@@ -462,10 +462,13 @@
 }
 
 /* ---------- Win98 Run/Submit button placement fix ---------- */
-/* In Win98 mode the chrome titlebar (~22px) + app-window margin (4px) + header (~28px)
-   precede the problem page, so the absolute-positioned run/submit bar must be pushed down */
+/* In Win98 mode the chrome titlebar (~20px) + app-window margin (4px) + header (~28px)
+   precede the problem page. Align the run/submit bar with the header row. */
 [data-win98="true"] .problem-run-submit-bar {
-  top: 58px !important;
+  top: 24px !important;  /* start of Win98 header (4px margin + ~20px chrome bar) */
+  height: 28px !important;
+  align-items: center !important;
+  padding: 0 !important;
 }
 
 /* ---------- Win98 Shuffle button in NavRunButtons ---------- */
