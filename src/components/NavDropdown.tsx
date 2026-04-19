@@ -74,17 +74,21 @@ export default function NavDropdown({ session, signOut, theme }: NavDropdownProp
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        <DropdownMenuItem className=' cursor-pointer'>
+                        <DropdownMenuItem className='cursor-not-allowed opacity-50 text-sm'>
                             <FlaskConical className='resize-custom w-5 mr-2' /> Try New Features
+                            <span className="ml-auto text-xs text-gray-400">Coming soon</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className=' cursor-pointer'>
+                        <DropdownMenuItem className='cursor-not-allowed opacity-50 text-sm'>
                             <CreditCard className='resize-custom w-5 mr-2' /> Billing
+                            <span className="ml-auto text-xs text-gray-400">Coming soon</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className=' cursor-pointer'>
+                        <DropdownMenuItem className='cursor-not-allowed opacity-50 text-sm'>
                             <Settings className='resize-custom w-5 mr-2' /> Settings
+                            <span className="ml-auto text-xs text-gray-400">Coming soon</span>
                         </DropdownMenuItem>
-                        <DropdownMenuItem className=' cursor-pointer'>
+                        <DropdownMenuItem className='cursor-not-allowed opacity-50 text-sm'>
                             <Package className='resize-custom w-5 mr-2' /> Orders
+                            <span className="ml-auto text-xs text-gray-400">Coming soon</span>
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />

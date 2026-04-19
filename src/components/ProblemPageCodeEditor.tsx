@@ -32,8 +32,10 @@ declare global {
 // Ancient Coding Mode - Anti-Cheat & Scoring
 // ============================================
 
-// Internal clipboard - never uses system clipboard
+// Internal clipboard - never loses content on external clipboard changes
 let internalClipboard = "";
+// Debounce flag to prevent double-firing when Monaco command + window paste both fire
+let lastInternalPasteTime = 0;
 
 // Event logging for scoring
 interface EditorEvent {
@@ -222,7 +224,48 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
     useEffect(() => {
         const handleGlobalPaste = (e: ClipboardEvent) => {
             e.preventDefault();
-            toast.error("禁止从外部粘贴 - External paste is disabled in Ancient Coding Mode");
+            // Skip if Monaco Ctrl+V handler already fired (avoid double-paste)
+            if (Date.now() - lastInternalPasteTime < 150) return;
+
+            const externalText = e.clipboardData?.getData('text') || "";
+            const hasInternal = internalClipboard.length > 0;
+            const hasExternal = externalText.length > 0;
+
+            // Case 1: both empty → no-op
+            if (!hasInternal && !hasExternal) return;
+            // Case 2: no internal, has external → block
+            if (!hasInternal && hasExternal) {
+                toast.error("禁止外部粘贴板粘贴 - External paste is disabled in Ancient Coding Mode");
+                return;
+            }
+
+            // Cases 3–5: has internal → paste internal into editor
+            if (editorRef.current) {
+                const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
+                if (selections && selections.length > 0) {
+                    const clipLines = internalClipboard.split('\n');
+                    const usePerCursor = selections.length > 1 && clipLines.length === selections.length;
+                    const editOperations = selections.map((sel: MonacoSelection, i: number) => ({
+                        identifier: { major: 1, minor: i },
+                        range: sel,
+                        text: usePerCursor ? clipLines[i] : internalClipboard,
+                        forceMoveMarkers: true
+                    }));
+                    editorRef.current.executeEdits("internal-paste", editOperations);
+                    logEditorEvent({ type: "paste_internal", length: internalClipboard.length, timestamp: Date.now() });
+                    lastInternalPasteTime = Date.now();
+                }
+            }
+
+            if (!hasExternal) {
+                // Case 3: paste internal, sync to external done via copy; toast
+                toast.success("已从内部粘贴板粘贴 - Pasted from internal clipboard");
+            } else if (internalClipboard === externalText) {
+                // Case 4: same content → silent paste
+            } else {
+                // Case 5: different → paste internal, warn
+                toast.warning("禁止外部粘贴板粘贴，已从内部粘贴板粘贴 - External paste blocked, pasted from internal clipboard");
+            }
         };
 
         window.addEventListener("paste", handleGlobalPaste);
@@ -250,7 +293,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         };
     }, []);
 
-    const handleCopyInternal = () => {
+    const handleCopyInternal = async () => {
         if (!editorRef.current) return;
         const model = editorRef.current.getModel();
         const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
@@ -268,11 +311,13 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         if (textToCopy) {
             internalClipboard = textToCopy;
             logEditorEvent({ type: "copy_internal", length: textToCopy.length, timestamp: Date.now() });
+            // Sync to system clipboard so paste matrix works correctly
+            try { await navigator.clipboard.writeText(textToCopy); } catch { /* permission denied ok */ }
             toast.success("已复制到内部剪贴板 - Copied to internal clipboard");
         }
     };
 
-    const handleCutInternal = () => {
+    const handleCutInternal = async () => {
         if (!editorRef.current) return;
         const model = editorRef.current.getModel();
         const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
@@ -316,20 +361,40 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         internalClipboard = textToCut;
         editorRef.current.executeEdits("internal-cut", editOperations);
         logEditorEvent({ type: "copy_internal", length: textToCut.length, timestamp: Date.now() });
+        // Sync to system clipboard so paste matrix works correctly
+        try { await navigator.clipboard.writeText(textToCut); } catch { /* permission denied ok */ }
         toast.success("已剪切 - Cut to internal clipboard");
     };
 
-    const handlePasteInternal = () => {
-        if (!internalClipboard) {
-            toast.error("禁止从外部粘贴 - External paste is disabled in Ancient Coding Mode");
+    const handlePasteInternal = async () => {
+        // Read system clipboard only if permission is already granted.
+        // Avoid calling readText() when permission is "prompt" — it would show a browser
+        // permission dialog and block the paste until dismissed.
+        let externalText = "";
+        try {
+            const perm = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
+            if (perm.state === 'granted') {
+                externalText = await navigator.clipboard.readText();
+            }
+        } catch { /* permissions API not supported or clipboard denied */ }
+
+        const hasInternal = internalClipboard.length > 0;
+        const hasExternal = externalText.length > 0;
+
+        // Case 1: both empty → no-op
+        if (!hasInternal && !hasExternal) return;
+
+        // Case 2: no internal, has external → block
+        if (!hasInternal && hasExternal) {
+            toast.error("禁止外部粘贴板粘贴 - External paste is disabled in Ancient Coding Mode");
             return;
         }
+
+        // Cases 3–5: has internal → paste internal into editor
         if (!editorRef.current) return;
         const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
         if (!selections || selections.length === 0) return;
 
-        // If clipboard has same segment count as cursors (multi-cursor copy/cut → paste),
-        // distribute one segment per cursor (VS Code behaviour). Otherwise paste same text everywhere.
         const clipLines = internalClipboard.split('\n');
         const usePerCursor = selections.length > 1 && clipLines.length === selections.length;
 
@@ -342,7 +407,19 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
 
         editorRef.current.executeEdits("internal-paste", editOperations);
         logEditorEvent({ type: "paste_internal", length: internalClipboard.length, timestamp: Date.now() });
-        toast.success("已从内部剪贴板粘贴 - Pasted from internal clipboard");
+        lastInternalPasteTime = Date.now();
+
+        if (!hasExternal) {
+            // Case 3: internal only → sync to external + toast
+            try { await navigator.clipboard.writeText(internalClipboard); } catch { /* ok */ }
+            toast.success("已从内部粘贴板粘贴 - Pasted from internal clipboard");
+        } else if (internalClipboard === externalText) {
+            // Case 4: same content → silent paste (user copied internally, system clipboard synced)
+        } else {
+            // Case 5: different → sync internal to external + warn
+            try { await navigator.clipboard.writeText(internalClipboard); } catch { /* ok */ }
+            toast.warning("禁止外部粘贴板粘贴，已从内部粘贴板粘贴 - External paste blocked, pasted from internal clipboard");
+        }
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -381,9 +458,30 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
     const handleEditorDidMount: OnMount = (editor, monaco) => {
         editorRef.current = editor;
 
-        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, handleCopyInternal);
-        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX, handleCutInternal);
-        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, handlePasteInternal);
+        // Use onKeyDown instead of addCommand — Monaco doesn't route clipboard shortcuts
+        // (Ctrl+C, Ctrl+X, Ctrl+V) through its command dispatch; they fire as DOM clipboard events.
+        // We intercept at the keydown level, prevent the default browser clipboard behavior,
+        // and call our custom handlers instead.
+        // Note: Ctrl+V is also handled by the global window "paste" event listener as a fallback,
+        // but intercepting here ensures consistent behavior and prevents double-paste.
+        editor.onKeyDown((e) => {
+            const ctrl = e.ctrlKey || e.metaKey;
+            if (!ctrl || e.shiftKey || e.altKey) return;
+
+            if (e.keyCode === monaco.KeyCode.KeyC) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleCopyInternal();
+            } else if (e.keyCode === monaco.KeyCode.KeyX) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleCutInternal();
+            } else if (e.keyCode === monaco.KeyCode.KeyV) {
+                e.preventDefault();
+                e.stopPropagation();
+                handlePasteInternal();
+            }
+        });
     };
 
     // Only Python is supported (template-based execution)

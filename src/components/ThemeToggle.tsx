@@ -12,9 +12,9 @@ export function ThemeToggle() {
       variant="outline"
       size="sm"
       className="cursor-pointer text-xs font-mono win98-theme-toggle"
-      title={theme === "win98" ? "Switch to Modern theme" : "Switch to Win98 theme"}
+      title={theme === "win98" ? "Switch to Modern theme" : "Switch to Ancient theme"}
     >
-      {theme === "win98" ? "🖥 Modern" : "💾 Win98"}
+      {theme === "win98" ? "🖥 Modern" : "🏺 Ancient"}
     </Button>
   );
 }

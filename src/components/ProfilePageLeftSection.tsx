@@ -1,7 +1,7 @@
 "use client";
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Eye, FolderCheck, GraduationCap, MapPin, MessageCircle, Star, Tag } from 'lucide-react'
+import { Construction, GraduationCap, MapPin, Tag } from 'lucide-react'
 import { IUser } from '@/models/User'
 import { FilteredLanguageType } from '@/app/(app)/dashboard/[userId]/page'
 import Link from 'next/link'
@@ -18,13 +18,25 @@ const languageName = {
 type languageNameType = keyof typeof languageName
 
 export default function ProfilePageLeftSecond({ fullUserInfo, filterLanguageWiseSubmission, userId }: { fullUserInfo: IUser | null, filterLanguageWiseSubmission: FilteredLanguageType, userId: string }) {
-    const { data: session, status } = useSession();
-    console.log(session)
+    const { data: session } = useSession();
+    const [avatarError, setAvatarError] = useState(false);
+    const initials = (fullUserInfo?.username || "?")[0].toUpperCase();
 
     return (
         <div className="customBackground w-[20%] h-full  rounded-lg px-3 py-4">
             <div className="flex items-center gap-4 w-full">
-                <img src={fullUserInfo?.avatar} alt="" className='w-22 h-22 rounded-full bg-blue-500 object-cover border-2 border-white' />
+                {!avatarError && fullUserInfo?.avatar ? (
+                    <img
+                        src={fullUserInfo.avatar}
+                        alt=""
+                        className='w-22 h-22 rounded-full bg-blue-500 object-cover border-2 border-white'
+                        onError={() => setAvatarError(true)}
+                    />
+                ) : (
+                    <div className='w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center border-2 border-white text-white text-xl font-bold select-none flex-shrink-0'>
+                        {initials}
+                    </div>
+                )}
                 <div className="">
                     <h1 className="font-semibold text-lg">{fullUserInfo?.username}</h1>
                     <h2 className="text-sm">{fullUserInfo?.username}</h2>
@@ -67,93 +79,28 @@ export default function ProfilePageLeftSecond({ fullUserInfo, filterLanguageWise
                 </div>
             </div>
             <div className="flex flex-col gap-3 border-t pt-2 pb-4">
-                <h1 className="font-semibold mb-3">Community Status</h1>
-                <div className="flex gap-4">
-                    <Eye className='resize-custom w-5 text-blue-500' />
-                    <div className="text-gray-500">
-                        <h4 className='text-sm'>Views <span className='font-semibold'>10</span></h4>
-                        <p className='text-xs'>Last week 0</p>
-                    </div>
-                </div>
-                <div className="flex gap-4">
-                    <FolderCheck className='resize-custom w-5 text-green-500' />
-                    <div className="text-gray-500">
-                        <h4 className='text-sm'>Solutions <span className='font-semibold'>10</span></h4>
-                        <p className='text-xs'>Last week 0</p>
-                    </div>
-                </div>
-                <div className="flex gap-4">
-                    <MessageCircle className='resize-custom w-5' />
-                    <div className="text-gray-500">
-                        <h4 className='text-sm'>Discuss <span className='font-semibold'>10</span></h4>
-                        <p className='text-xs'>Last week 0</p>
-                    </div>
-                </div>
-                <div className="flex gap-4">
-                    <Star className='resize-custom w-5 text-orange-500' />
-                    <div className="text-gray-500">
-                        <h4 className='text-sm'>Discuss <span className='font-semibold'>10</span></h4>
-                        <p className='text-xs'>Last week 0</p>
-                    </div>
-                </div>
-            </div>
-            <div className="flex flex-col gap-3 border-t pt-2">
                 <h1 className="font-semibold mb-3">Languages</h1>
                 <div className="flex flex-col gap-3">
-                    {Object.entries(filterLanguageWiseSubmission).filter(([first, second]) => second > 0).map(([first, second], index) =>
+                    {Object.entries(filterLanguageWiseSubmission).filter(([, count]) => count > 0).map(([lang, count], index) =>
                         <div key={index} className="flex w-full justify-between items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">{languageName[first as languageNameType]}</h3>
-                            <h3 className="text-sm text-gray-400 mr-2"><span className="font-semibold text-white">{second}</span> problems solved</h3>
+                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">{languageName[lang as languageNameType]}</h3>
+                            <h3 className="text-sm text-gray-400 mr-2"><span className="font-semibold text-white">{count}</span> problems solved</h3>
                         </div>
                     )}
                 </div>
-                <div className="flex flex-col gap-3 border-t pt-2">
-                    <h1 className="font-semibold mb-3">Skills</h1>
-                    <h1 className="font-semibold mt-2 text-sm ml-2">Advance</h1>
-                    <div className="flex flex-col gap-3 ml-2">
-                        <div className="flex w-full gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">Dynamic Programming</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x30</h3>
-                        </div>
-                        <div className="flex w-full gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">Backtracking</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x20</h3>
-                        </div>
-                        <div className="flex w-full gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">Divide and Conquer</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x10</h3>
-                        </div>
-                    </div>
-                    <h1 className="font-semibold mt-2 text-sm ml-2">Intermediate</h1>
-                    <div className="flex w-full flex-wrap gap-3 ml-2">
-                        <div className="flex gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">Hash Table</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x30</h3>
-                        </div>
-                        <div className="flex gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">Math</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x20</h3>
-                        </div>
-                        <div className="flex gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">Tree</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x10</h3>
-                        </div>
-                    </div>
-                    <h1 className="font-semibold mt-2 text-sm ml-2">Fundamental</h1>
-                    <div className="flex flex-wrap w-full gap-3 ml-2">
-                        <div className="flex gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">Array</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x30</h3>
-                        </div>
-                        <div className="flex gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">String</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x20</h3>
-                        </div>
-                        <div className="flex gap-1 items-center">
-                            <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">Sorting</h3>
-                            <h3 className="text-sm text-gray-400 mr-2">x10</h3>
-                        </div>
-                    </div>
+            </div>
+            <div className="flex flex-col gap-3 border-t pt-2 pb-4">
+                <h1 className="font-semibold mb-1">Community Status</h1>
+                <div className="flex flex-col items-center gap-2 py-4 text-gray-400">
+                    <Construction className="w-6 h-6" />
+                    <span className="text-sm">Coming soon</span>
+                </div>
+            </div>
+            <div className="flex flex-col gap-3 border-t pt-2 pb-4">
+                <h1 className="font-semibold mb-1">Skills</h1>
+                <div className="flex flex-col items-center gap-2 py-4 text-gray-400">
+                    <Construction className="w-6 h-6" />
+                    <span className="text-sm">Coming soon</span>
                 </div>
             </div>
         </div>
