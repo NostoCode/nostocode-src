@@ -1,21 +1,30 @@
 import { codeSubmissionResultType } from "@/types/ApiResponse";
 
 export const languageWiseSubmissionSeperate = (submission: codeSubmissionResultType[]) => {
-    let c = 0, cpp = 0, py = 0, js = 0, java = 0;
+    // Count unique solved problems per language (Accepted only, deduped by problemId)
+    const solvedByLanguage: Record<string, Set<string>> = {
+        "C++": new Set(),
+        "C": new Set(),
+        "Javascript": new Set(),
+        "Python": new Set(),
+        "Java": new Set(),
+    };
 
-    for(let i = 0; i < submission.length; i++){
-        if(submission[i].language === "C++"){
-            cpp++;
-        }else if(submission[i].language === "C"){
-            c++;
-        } else if(submission[i].language === "Javascript"){
-            js++;
-        } else if(submission[i].language === "Python"){
-            py++;
-        } else{
-            java++;
+    for (const sub of submission) {
+        if (sub.status !== "Accepted") continue;
+        const problemId = typeof sub.problemId === "object" && sub.problemId !== null
+            ? String((sub.problemId as { _id?: unknown })._id ?? sub.problemId)
+            : String(sub.problemId);
+        if (solvedByLanguage[sub.language]) {
+            solvedByLanguage[sub.language].add(problemId);
         }
     }
 
-    return {c, cpp, py, js, java};
+    return {
+        c: solvedByLanguage["C"].size,
+        cpp: solvedByLanguage["C++"].size,
+        py: solvedByLanguage["Python"].size,
+        js: solvedByLanguage["Javascript"].size,
+        java: solvedByLanguage["Java"].size,
+    };
 }

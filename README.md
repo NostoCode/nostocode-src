@@ -1,41 +1,139 @@
-# NostoCode - Ancient Coding Mode
+# NostoCode — Ancient Coding Mode OJ
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black)](https://nostocode.vercel.app)
 
-> **NostoCode** is a modified version of LeetCode Clone with "Ancient Coding Mode" - an anti-cheat system that enforces manual typing and tracks coding behavior.
+> **NostoCode** is a LeetCode-style competitive programming platform with **Ancient Coding Mode** — an anti-cheat system that enforces manual typing, disables AI tools, and scores every submission on coding behaviour.
 
-## What's Changed
+🌐 **Live:** [nostocode.vercel.app](https://nostocode.vercel.app)  
+🏠 **Landing page:** [NostoCode.github.io](https://NostoCode.github.io)
 
-This version includes the following major modifications:
+---
 
-### ❌ Removed AI Features
-- Removed `ProblemPageAiTab` component (AI chat bot)
-- Removed `/api/code/chat-output` endpoint
-- Removed Sparkles button from problem page
+## Ancient Coding Mode Features
 
 ### 🚫 External Paste Disabled
-- Global paste events are blocked
-- Right-click context menu disabled in editor
-- Drag & drop text disabled
+- System clipboard paste blocked in the editor via capture-phase `paste` event listener
+- Right-click context menu and drag-and-drop disabled in Monaco
+- External content is detected using `ClipboardEvent.clipboardData` (no permission dialog needed)
 
 ### ✅ Internal Clipboard System
-- Copy/paste works ONLY inside the editor
-- Uses internal buffer, never system clipboard
-- Keyboard shortcuts: `Ctrl+C` / `Ctrl+V`
+- Ctrl+C / Ctrl+X copy to an in-memory internal buffer (not the system clipboard)
+- Ctrl+V pastes from the internal buffer only
+- Pasting internal content does **not** incur a scoring penalty
+- Standard VS Code-style shortcuts work: multi-cursor (Ctrl+D), line duplication, line swap (Alt+↑/↓), etc.
 
-### 🧠 Ancient Coding Score System
-Each submission includes a score based on:
-- **Typing Ratio**: manual typing vs paste usage
-- **Rhythm Score**: time interval variance between inputs
-- **Edit Activity**: delete frequency
-- **Large Inserts**: burst detection (>30 chars in <50ms)
-- **Anti-Paste Score**: penalizes paste usage
+### 🧠 Ancient Code Score
+Each submission is scored based on behavioural metrics:
 
-**Level Mapping:**
-- 🟢 Ancient Master: 90-100
-- 🟡 Skilled Human: 70-90
-- 🟠 Suspicious: 40-70
-- 🔴 Likely AI Generated: 0-40
+| Metric | Description |
+|--------|-------------|
+| **Typing Ratio** | Fraction of characters typed manually vs inserted in bulk |
+| **Rhythm Score** | Variance in time between keystrokes |
+| **Edit Activity** | Frequency of backspace / delete use |
+| **Large Inserts** | Burst detection: >30 chars in <50 ms |
+| **Anti-Paste Score** | Penalises external paste attempts |
+
+**Score Levels:**
+- 🟢 Ancient Master: 90–100
+- 🟡 Skilled Human: 70–89
+- 🟠 Suspicious: 40–69
+- 🔴 Likely AI/Paste: 0–39
+
+### 🎨 Themes
+- **Modern (Dark)** — clean Tailwind-based dark UI
+- **Ancient (Win98)** — Windows 98 pixel-art theme with classic raised-border UI and Courier New font in Monaco
+
+### ❌ Removed
+- AI chat bot (`ProblemPageAiTab`, `/api/code/chat-output`)
+- External AI hint buttons
+
+---
+
+## Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 15 (App Router, Turbopack) |
+| Language | TypeScript |
+| Styling | Tailwind CSS v4 + shadcn/ui |
+| Editor | Monaco Editor (`@monaco-editor/react`) |
+| Database | MongoDB + Mongoose |
+| Auth | NextAuth.js (email/password + Resend email verification) |
+| Code Judge | Piston API (self-hostable, no rate limits) |
+| Deployment | Vercel |
+
+---
+
+## Local Development
+
+### Prerequisites
+- Node.js 18+
+- MongoDB (local or Atlas)
+- Piston instance (or use the public API)
+
+### Setup
+
+```bash
+git clone https://github.com/NostoCode/nostocode-src.git
+cd nostocode-src
+npm install
+```
+
+Copy `.env.txt` to `.env.local` and fill in the values:
+
+```
+MONGODB_URI=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=http://localhost:3000
+RESEND_API_KEY=
+PISTON_API_URL=https://emkc.org/api/v2/piston
+```
+
+```bash
+npm run dev        # starts on http://localhost:3000 with Turbopack
+```
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (app)/            # Authenticated app routes
+│   │   ├── problem/      # Problem page (editor, run/submit, test results)
+│   │   ├── problems/     # Problem list
+│   │   ├── dashboard/    # User dashboard (stats, submissions)
+│   │   └── ...
+│   ├── api/              # Next.js API routes
+│   │   ├── auth/         # Sign-up, sign-in, email verification
+│   │   ├── code/         # run-code, submit-code, submissions
+│   │   ├── problem/      # CRUD for problems
+│   │   └── user/         # User profile API
+│   └── page.tsx          # Landing page
+├── components/
+│   ├── ProblemPageCodeEditor.tsx   # Monaco + Ancient Mode logic
+│   ├── NavRunButtonsContainer.tsx  # Run/Submit buttons in header nav
+│   └── ...
+├── context/
+│   ├── ThemeContext.tsx            # Win98/Modern theme toggle
+│   └── ProblemPageContext.tsx      # Passes run/submit state to header
+├── models/               # Mongoose models (User, Problem, Submission)
+└── styles/
+    └── win98-theme.css   # All Win98/Ancient theme overrides
+```
+
+---
+
+## Key Design Decisions
+
+- **Run/Submit buttons live in the header nav row** (alongside "Problem List"), so they appear consistently at the same position regardless of OS/browser/theme.
+- **Internal clipboard** uses a module-level variable (`internalClipboard`) so it persists across React re-renders.
+- **Paste detection** uses `document.addEventListener("paste", ..., { capture: true })` + `e.clipboardData.getData('text')` — no permission dialogs, reliable cross-browser.
+- **AC count deduplication**: `solvedQuestions` is checked before adding a problem ID, so solving the same problem multiple times doesn't inflate the counter.
+- **Dashboard charts** (Contest Rating, Top) show "Coming Soon" while backend data is not yet collected.
 
 ---
 
@@ -43,98 +141,8 @@ Each submission includes a score based on:
 
 This project is based on [Leetcode-Clone](https://github.com/Avijit200318/Leetcode-Clone) by Avijit200318.
 
-# LeetCode Clone – Competitive Programming Platform (Original)
-
-**Live Link:** 
-
-### Code Editor
-![ride1](https://github.com/user-attachments/assets/04705a8d-f19f-4df3-8c03-b5e61473881f)
-
-### Profile
-![ride1](https://github.com/user-attachments/assets/4f9bcd91-3151-4989-93e6-b9771ab29d2f)
-
-### Submissions
-![ride1](https://github.com/user-attachments/assets/0e5ed5ac-83e8-40ab-984d-40172c0578ee)
-
-## Overview
-This LeetCode Clone is a high-performance platform designed for developers to practice coding problems, execute code in real-time, and share detailed solutions. By integrating the Monaco Editor (the engine behind VS Code) and JudgeAPI, it provides a production-grade environment for mastering Data Structures and Algorithms.
-
-## Table of Contents
-
-- [Features](#features)
-- [Technologies Used](#technologies-used)
-- [Project Setup](#project-setup)
-- [API Documentation](#api-documentation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Features
-
-- **Multi-Language Execution:** Support for **C, C++, Python, JavaScript, and Java** using a secure remote execution engine.
-- **Advanced Code Editor:** Integrated **Monaco-React Editor** providing a VS Code-like experience with syntax highlighting and indentation.
-- **Real-Time Code Running:** Leverage **JudgeAPI** to run code against test cases and receive instant feedback on performance and errors.
-- **Solution Sharing:** A dedicated space for users to write and share their logic using **React-MD Editor** for beautiful Markdown formatting.
-- **AI Leet Bot:** A built-in chat assistant to help users brainstorm algorithms, explain time complexity, or debug code logic.
-- **Progress Tracking:** Personalized dashboard displaying the total count of solved problems and a comprehensive history of all user submissions.
-- **Secure Authentication:** Robust sign-up flow with **email verification** via **Resend Mail** and schema validation using **Zod**.
-
-## Technologies Used
-
-- **Next.js:** Full-stack React framework for optimized routing and server-side rendering.
-- **Tailwind CSS:** For a sleek, responsive, and developer-centric UI/UX.
-- **MongoDB:** Database for managing users, coding problems, and shared solutions.
-- **TypeScript:** Ensuring end-to-end type safety and better developer experience.
-- **JudgeAPI:** External API for compiling and executing code in a sandboxed environment.
-- **Monaco-React:** The industry-standard web code editor.
-- **React-MD Editor:** A powerful Markdown editor for community solution posts.
-- **Resend:** Professional email API for handling account verification.
-- **React Hook Form & Zod:** For efficient form management and strict data validation.
-
-## Project Setup
-
-### Getting Started
-
-Follow these steps to set up the project on your local machine:
-
-1. **Clone the Repository**
-```bash
-git clone https://github.com/Avijit200318/Uber-Clone.git
-```
-2. **Add all the .env variables**
-- Make sure to update the values (like API keys, Mongo URI, etc.) inside both .env files according to .env.txt file local setup or environment.
-3. **Install Dependencies**
-```bash
-npm install
-```
-4. **Run the Development Server**
-```bash
-npm run dev
-```
-The application will be accessible at http://localhost:3000.
-
-## API Documentation
- For API documentation [**click here**](https://github.com/Avijit200318/Leetcode-Clone/blob/main/src/app/api/readme.md)
-
-## Usage
-
-### For Users:
-
-1. **Account Verification:** Sign up and verify your email through the link sent by **Resend**.
-2. **Solve Problems:** Choose a challenge, select your preferred language (C, C++, Python, JS, Java), and write code in the **Monaco Editor**.
-3. **Run & Submit:** Use the **Run** button to test your logic against sample cases via **JudgeAPI** and **Submit** to permanently save your progress and update your solved count.
-4. **Chat with Bot:** Use the **Leet Bot** to get hints, clarify problem statements, or brainstorm logic when stuck.
-
-### For Community & Sharing:
-
-1. **Post Solutions:** Navigate to the solution tab and use the **Markdown Editor** (React-MD) to explain your approach with formatted code blocks and text.
-2. **Track Growth:** View your profile to see the total count of problems solved and review your entire submission history.
-
-## Contributing
-
-Contributions are welcome! Whether you're fixing a bug, enhancing features, or suggesting improvements, feel free to submit a pull request or open an issue.
-
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for full details.
+MIT — see [LICENSE](LICENSE) for details.
+
 

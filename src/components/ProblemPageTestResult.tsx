@@ -46,7 +46,7 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
     useEffect(() => {
         const checkIsAllTestCasePass = () => {
             if (!codeOutput) return;
-
+            setIsAccepted(true); // Reset before re-checking all cases
             for (let i = 0; i < codeOutput.length; i++) {
                 if (codeOutput[i].status.description !== "Accepted") {
                     setIsAccepted(false);

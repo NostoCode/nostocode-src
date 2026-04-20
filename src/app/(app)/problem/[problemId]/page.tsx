@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   ResizableHandle,
   ResizablePanel,
@@ -21,16 +21,14 @@ import ProblemPageDescription from '@/components/ProblemPageDescription';
 
 import ProblemPageCodeEditor from '@/components/ProblemPageCodeEditor';
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
-import { CloudUpload, Loader2, Play } from 'lucide-react';
 
 import { useSession } from 'next-auth/react';
-import { codeRunValidation } from '@/schemas/codeRunSchema';
-import ProblemPageSoluction from '@/components/ProblemPageSoluction';
+import { codeRunValidation } from '@/schemas/codeRunSchema';import ProblemPageSoluction from '@/components/ProblemPageSoluction';
 import ProblemPageSubmission from '@/components/ProblemPageSubmission';
 import ProblemPageTestResult from '@/components/ProblemPageTestResult';
 import { codeSubmissionValidation } from '@/schemas/codeSubmissionSchema';
 import confetti from "canvas-confetti";
+import { updateProblemPageState, clearProblemPageState } from '@/context/ProblemPageContext';
 
 // Ancient Coding Mode - AI features removed
 
@@ -88,7 +86,7 @@ export default function Page() {
     fetchProblemDetails();
   }, [mounted]);
 
-  const handleCodeRun = async () => {
+  const handleCodeRun = useCallback(async () => {
     if (!problemInfo || !session) return;
 
     setIsCodeRunning(true);
@@ -128,7 +126,7 @@ export default function Page() {
     } finally {
       setIsCodeRunning(false);
     }
-  }
+  }, [problemInfo, session, sourceCode, selectedLanguageCode, problemId]);
 
   const showConfetti = () => {
     confetti({
@@ -146,7 +144,7 @@ export default function Page() {
     return null;
   };
 
-  const handleCodeSubmission = async () => {
+  const handleCodeSubmission = useCallback(async () => {
     if (!problemInfo || !session) return;
 
     // Get Ancient Code Score from editor
@@ -212,7 +210,23 @@ export default function Page() {
     } finally {
       setIsSubmitLoading(false);
     }
-  }
+  }, [problemInfo, session, sourceCode, selectedLanguage, selectedLanguageCode]);
+
+  // Sync handlers and state into the module-level store for the header to read
+  useEffect(() => {
+    updateProblemPageState({
+      handleCodeRun,
+      handleCodeSubmission,
+      isCodeRunning,
+      isSubmitLoading,
+      isLoggedIn: !!session?.user,
+    });
+  }, [handleCodeRun, handleCodeSubmission, isCodeRunning, isSubmitLoading, session]);
+
+  // Clear store on unmount
+  useEffect(() => {
+    return () => { clearProblemPageState(); };
+  }, []);
 
   if (!mounted) {
     return null;
@@ -220,15 +234,6 @@ export default function Page() {
 
   return (
     <div className="w-full h-[calc(100vh-3rem)] px-3 py-2">
-      <div className="w-full flex justify-center items-center absolute top-1.5 left-0 problem-run-submit-bar">
-        <div className="flex gap-1">
-          <Button onClick={handleCodeRun} disabled={(session?.user ? false : true) || isCodeRunning} variant="secondary" className='cursor-pointer relative z-40'>{isCodeRunning ? <Loader2 className='resize-custom w-5 animate-spin' /> : <Play />}</Button>
-          <Button disabled={session?.user ? false : true} onClick={handleCodeSubmission} variant="secondary" className='w-30 cursor-pointer relative z-40 text-base flex items-center gap-2 font-semibold'>
-            {isSubmitLoading ? <><Loader2 className='resize-custom w-5 animate-spin' />Running</> : <><CloudUpload className='resize-custom w-5' /> Submit</>}
-          </Button>
-        </div>
-      </div>
-
       <ResizablePanelGroup direction="horizontal" className="w-full gap-1">
         <ResizablePanel defaultSize={50} minSize={31} className='rounded-md bg-[var(--sidebar-accent)] border'>
           <ProblemPageNavigation currentTab={currentTab} setCurrentTab={setCurrentTab} />
