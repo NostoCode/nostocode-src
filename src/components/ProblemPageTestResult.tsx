@@ -6,7 +6,6 @@ import { Button } from './ui/button'
 import { IProblem } from '@/models/Problem'
 import { Skeleton } from './ui/skeleton'
 import { Session } from 'next-auth'
-import CustomBarChart from './CustomBarChart'
 import { formatDate } from '@/helpers/formatDate'
 import MDEditor from '@uiw/react-md-editor';
 import Link from 'next/link'
@@ -202,6 +201,17 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                                 'text-red-500'
                             }`}>{submissionOutput.ancientCodeScore} / 100</h2>
                             <h2 className="text-sm">{ancientScoreLevel(submissionOutput.ancientCodeScore!)}</h2>
+                            {submissionOutput.scoreDetails && (
+                                <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                                    <span>Typing Ratio</span><span className="font-mono text-right">{submissionOutput.scoreDetails.typingRatio}%</span>
+                                    <span>Rhythm Score</span><span className="font-mono text-right">{submissionOutput.scoreDetails.rhythmScore}</span>
+                                    <span>Edit Activity</span><span className="font-mono text-right">{submissionOutput.scoreDetails.editActivity}%</span>
+                                    <span>Large Inserts</span><span className="font-mono text-right">{submissionOutput.scoreDetails.largeInserts}</span>
+                                    <span>Speed Score</span><span className="font-mono text-right">{submissionOutput.scoreDetails.speedScore}</span>
+                                    <span>Burst Score</span><span className="font-mono text-right">{submissionOutput.scoreDetails.burstScore}</span>
+                                    <span>Session</span><span className="font-mono text-right">{submissionOutput.scoreDetails.sessionSecs}s</span>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <h2 className="text-xl text-gray-400">N/A</h2>
@@ -209,9 +219,6 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                   </div>
                 </div>
 
-                {(submissionOutput && submissionOutput.status === "Accepted") && <div className="w-full h-[20rem] overflow-hidden">
-                    <CustomBarChart session={session} labelValue={submissionOutput.time} />
-                </div>}
                 {(submissionOutput && submissionOutput.status !== "Accepted" && submitFailedCase) && (
                     <div className="mt-2 mb-6 space-y-3">
                         <h2 className="font-semibold text-red-400">Failing Testcase #{submitFailedCase.index + 1}</h2>
@@ -234,9 +241,11 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                     <h2 className="font-semibold px-2">{submissionOutput.language}</h2>
                 </div>
                 <div className="w-full border rounded-md overflow-hidden mb-8">
-                    <MDEditor.Markdown
-                        source={`\`\`\`\n${submissionOutput.sourceCode}\n\`\`\``}
-                        className="markdown-body customTextWhite w-full" style={{ background: "var(--card)" }} />
+                    <div data-color-mode="dark">
+                        <MDEditor.Markdown
+                            source={`\`\`\`\n${submissionOutput.sourceCode}\n\`\`\``}
+                            className="markdown-body w-full" style={{ background: "var(--card)" }} />
+                    </div>
                 </div>
             </div>
             }

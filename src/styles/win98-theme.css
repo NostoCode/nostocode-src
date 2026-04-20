@@ -483,3 +483,10 @@
 [data-win98="true"] .problems-outer-container {
   height: calc(100vh - 3rem - 60px) !important;
 }
+
+/* ---------- Win98 MDEditor code blocks: Courier New font ---------- */
+[data-win98="true"] [data-color-mode="dark"] pre,
+[data-win98="true"] [data-color-mode="dark"] pre code,
+[data-win98="true"] [data-color-mode="dark"] code {
+  font-family: "Courier New", Courier, monospace !important;
+}

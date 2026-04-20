@@ -29,6 +29,15 @@ export interface codeSubmissionResultType {
     problemId: string | mongoose.Types.ObjectId | IProblem,
     ancientCodeScore?: number,
     ancientCodeLevel?: string,
+    scoreDetails?: {
+        typingRatio: number;
+        rhythmScore: number;
+        editActivity: number;
+        largeInserts: number;
+        speedScore: number;
+        burstScore: number;
+        sessionSecs: number;
+    },
     createdAt?: Date,
     udpatedAt?: Date
 }
