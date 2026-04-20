@@ -12,7 +12,7 @@ import {
 export default function ProfilePageLInearChart() {
   return (
     <Card className='w-full h-full border-none py-4 gap-3'>
-      <CardHeader className='absolute top-0 left-0'>
+      <CardHeader className='pb-2 gap-1'>
         <CardDescription className='font-semibold text-lg'>Contest Rating</CardDescription>
         <CardTitle className='text-2xl font-normal text-gray-400'>—</CardTitle>
       </CardHeader>

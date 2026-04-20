@@ -1,12 +1,14 @@
 "use client";
 import Link from 'next/link'
 import React, { useState } from 'react'
-import { ListVideo, Shuffle } from 'lucide-react'
+import { ListVideo, Loader2, CloudUpload, Play, Shuffle } from 'lucide-react'
 import { Session } from 'next-auth';
 import axios from 'axios';
 import { ApiResponse } from '@/types/ApiResponse';
 import { IProblem } from '@/models/Problem';
 import { useRouter } from 'next/navigation';
+import { Button } from './ui/button';
+import { useProblemPageState } from '@/context/ProblemPageContext';
 
 interface NavRunButtonType {
   theme: string | undefined,
@@ -16,6 +18,7 @@ interface NavRunButtonType {
 export default function NavRunButtonsContainer({ theme, session }: NavRunButtonType) {
   const [isShuffling, setIsShuffling] = useState(false);
   const router = useRouter();
+  const { handleCodeRun, handleCodeSubmission, isCodeRunning, isSubmitLoading, isLoggedIn } = useProblemPageState();
 
   const handleShuffle = async () => {
     if (isShuffling) return;
@@ -43,11 +46,35 @@ export default function NavRunButtonsContainer({ theme, session }: NavRunButtonT
           onClick={handleShuffle}
           disabled={isShuffling}
           title="Random Problem"
-          className="ml-4 cursor-pointer disabled:opacity-50"
+          className="ml-4 cursor-pointer disabled:opacity-50 nav-shuffle-btn"
           style={{ background: 'none', border: 'none', padding: 0, boxShadow: 'none' }}
         >
           <Shuffle className={`${theme === "dark" ? 'text-neutral-300' : ''} resize-custom w-4`} />
         </button>
+        {handleCodeRun && handleCodeSubmission && (
+          <div className="flex gap-1 ml-4">
+            <Button
+              onClick={handleCodeRun}
+              disabled={!isLoggedIn || isCodeRunning}
+              variant="secondary"
+              className="cursor-pointer"
+              size="sm"
+            >
+              {isCodeRunning ? <Loader2 className='resize-custom w-4 animate-spin' /> : <Play className='resize-custom w-4' />}
+            </Button>
+            <Button
+              disabled={!isLoggedIn || isSubmitLoading}
+              onClick={handleCodeSubmission}
+              variant="secondary"
+              className="cursor-pointer font-semibold"
+              size="sm"
+            >
+              {isSubmitLoading
+                ? <><Loader2 className='resize-custom w-4 animate-spin' />Running</>
+                : <><CloudUpload className='resize-custom w-4' />Submit</>}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

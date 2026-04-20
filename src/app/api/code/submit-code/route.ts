@@ -155,8 +155,13 @@ export async function POST(req: NextRequest) {
 
         user.submissions.push(newSubmission._id);
         if (currentStatus === "Accepted") {
-            user.solvedQuestions.push(problemId);
-            user.solvedProblems = user.solvedProblems + 1;
+            const alreadySolved = user.solvedQuestions.some(
+                (q: unknown) => q?.toString() === problemId.toString()
+            );
+            if (!alreadySolved) {
+                user.solvedQuestions.push(problemId);
+                user.solvedProblems = user.solvedProblems + 1;
+            }
         }
         await user.save();
 

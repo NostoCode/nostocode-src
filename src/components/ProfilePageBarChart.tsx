@@ -13,7 +13,7 @@ import {
 export default function ProblemPageBarChart() {
     return (
         <Card className="w-full h-full py-4 border-none">
-            <CardHeader className='absolute top-0 left-0 gap-1'>
+            <CardHeader className='gap-1 pb-2'>
                 <CardDescription className='font-semibold text-lg'>Top</CardDescription>
                 <CardTitle className='text-2xl font-normal text-gray-400'>—</CardTitle>
             </CardHeader>
