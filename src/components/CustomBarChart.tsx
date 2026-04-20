@@ -57,11 +57,14 @@ export default function CustomBarChart({ session, labelValue }: { session: Sessi
         const width = Number(props.width ?? 0);
         const index = props.index ?? 0;
 
-        // showing image
+        // showing image — only if user has a valid avatar
         const barData = chartData[index];
         if (barData.time !== findBarForLabel(labelValue)) return null;
 
         const imgSize = 26; // image width/height
+        const avatarUrl = session.user.avatar;
+        if (!avatarUrl) return null;
+
         return (
             <foreignObject
                 x={x + width / 2 - imgSize / 2}
@@ -72,9 +75,10 @@ export default function CustomBarChart({ session, labelValue }: { session: Sessi
                 ry={imgSize / 2}
             >
                 <img
-                    src={session.user.avatar}
+                    src={avatarUrl}
                     className="w-full h-full rounded-full object-contain border-2 border-blue-400"
                     alt="avatar"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
             </foreignObject>
         );

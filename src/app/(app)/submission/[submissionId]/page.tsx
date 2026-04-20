@@ -1,13 +1,14 @@
 "use client";
 import CustomBarChart from '@/components/CustomBarChart';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDate } from '@/helpers/formatDate';
 import { ancientScoreLevel } from '@/helpers/ancientScoreLevel';
 import { IProblem } from '@/models/Problem';
 import { ApiResponse, codeSubmissionResultType } from '@/types/ApiResponse';
 import MDEditor from '@uiw/react-md-editor';
 import axios from 'axios';
-import { Clock4, Info, Sparkles, SquarePen, Shield } from 'lucide-react';
+import { Clock4, Info, SquarePen, Shield } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -15,32 +16,31 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner';
 
 export default function Page() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [submissionOutput, setSubmissionOutput] = useState<codeSubmissionResultType | null>(null);
+  const [avatarError, setAvatarError] = useState(false);
   const { submissionId } = useParams();
-  console.log(submissionId)
-  console.log(submissionOutput)
 
   const fetchSubmission = useCallback(async () => {
     if (!submissionId) return;
     try {
       const res = await axios.get<ApiResponse>(`/api/code/fetch-submission?submissionId=${submissionId}`);
-
       setSubmissionOutput(res.data.submissionOutput || null);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         toast.error(error.response.data.message || "Problem while fetching submission")
-        console.log("Problem while fetching submission: ", error.response);
       } else {
         toast.error("Error while fetching the submission");
-        console.log("Error while fetching the submission: ", error);
       }
     }
-  }, [submissionId, setSubmissionOutput]);
+  }, [submissionId]);
 
   useEffect(() => {
     fetchSubmission();
   }, [fetchSubmission]);
+
+  const initials = (session?.user.username || "?")[0].toUpperCase();
+  const isAccepted = submissionOutput?.status === "Accepted";
 
   return (
     <div className='w-full flex flex-col items-center pb-8'>
@@ -52,35 +52,72 @@ export default function Page() {
           <div className="w-[60%] flex justify-between mb-4">
             <div className="">
               <div className="flex items-center gap-2 mb-3">
-                <h2 className="text-xl font-semibold text-green-500">Accepted</h2>
-                <p className="text-sm dark:text-neutral-400">3 / 3 testcases passed</p>
+                {isAccepted
+                  ? <h2 className="text-xl font-semibold text-green-500">Accepted</h2>
+                  : <h2 className="text-xl font-semibold text-red-500">{submissionOutput.status}</h2>
+                }
+                <p className="text-sm text-muted-foreground">
+                  {isAccepted ? "All testcases passed" : "Some testcases failed"}
+                </p>
               </div>
               <div className="flex items-center gap-2">
-                <img src={session?.user.avatar || " "} alt="" className="w-8 h-8 rounded-full bg-blue-200 object-contain" />
+                {!avatarError && session?.user.avatar ? (
+                  <img
+                    src={session.user.avatar}
+                    alt=""
+                    className="w-8 h-8 rounded-full bg-blue-200 object-contain"
+                    onError={() => setAvatarError(true)}
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 select-none">
+                    {initials}
+                  </div>
+                )}
                 <h2 className="text-lg font-semibold">{session?.user.username || "User"}</h2>
-                <p className="text-sm dark:'text-neutral-400">Submitted at {formatDate(submissionOutput.createdAt as Date)}</p>
+                <p className="text-sm text-muted-foreground">Submitted at {formatDate(submissionOutput.createdAt as Date)}</p>
               </div>
             </div>
-            <Link href={`/add-solution?id=${submissionId}`}>
-            <Button className='bg-green-500 text-white font-semibold cursor-pointer hover:bg-green-600 duration-300'><SquarePen className='resize-custom w-4 h-4' /> Solution</Button>
-            </Link>
+            {isAccepted && (
+              <Link href={`/add-solution?id=${submissionId}`}>
+                <Button className='bg-green-500 text-white font-semibold cursor-pointer hover:bg-green-600 duration-300'>
+                  <SquarePen className='resize-custom w-4 h-4' /> Solution
+                </Button>
+              </Link>
+            )}
           </div>
           <div className="w-[60%] border p-4 rounded-lg">
             <div className="flex gap-4">
               <div className="flex-1 p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
                 <div className="w-full flex items-center justify-between">
-                  <h2 className={`flex gap-2 items-center ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}><Clock4 className="resize-custom w-4 h-4" /> Runtime</h2>
-                  <Info className={`resize-custom w-4 h-4 ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`} />
+                  <h2 className={`flex gap-2 items-center ${isAccepted ? '' : 'text-red-500'}`}>
+                    <Clock4 className="resize-custom w-4 h-4" /> Runtime
+                  </h2>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="cursor-default">
+                        <Info className={`resize-custom w-4 h-4 ${isAccepted ? '' : 'text-red-500'}`} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Total execution time for your code submission</TooltipContent>
+                  </Tooltip>
                 </div>
-                <h2 className={`text-xl ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}>{submissionOutput.status === "Accepted" ? `${(submissionOutput.time * 1000).toFixed(2)} ms` : 'N/A'}</h2>
-                {submissionOutput.status === "Accepted" &&
-                  <h2 className="flex items-center gap-2 text-blue-500"><Sparkles className='resize-custom w-4 h-4' /> Analyze complexity</h2>
-                }
+                <h2 className={`text-xl ${isAccepted ? '' : 'text-red-500'}`}>
+                  {isAccepted ? `${(submissionOutput.time * 1000).toFixed(2)} ms` : 'N/A'}
+                </h2>
               </div>
               <div className="flex-1 p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
                 <div className="w-full flex items-center justify-between">
-                  <h2 className="flex gap-2 items-center"><Shield className="resize-custom w-4 h-4" /> Ancient Code Score</h2>
-                  <Info className="resize-custom w-4 h-4" />
+                  <h2 className="flex gap-2 items-center">
+                    <Shield className="resize-custom w-4 h-4" /> Ancient Code Score
+                  </h2>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="cursor-default">
+                        <Info className="resize-custom w-4 h-4" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Reflects how authentically you wrote code — penalises external paste, large inserts, and unusual typing patterns</TooltipContent>
+                  </Tooltip>
                 </div>
                 {submissionOutput.ancientCodeScore !== undefined ? (
                   <>
@@ -97,22 +134,24 @@ export default function Page() {
                 )}
               </div>
             </div>
-            <div className="w-full h-[20rem] overflow-hidden mt-4">
-              <CustomBarChart session={session} labelValue={submissionOutput.time} />
-            </div>
+            {isAccepted && (
+              <div className="w-full h-[20rem] overflow-hidden mt-4">
+                <CustomBarChart session={session} labelValue={submissionOutput.time} />
+              </div>
+            )}
           </div>
           <div className="w-[60%]">
-            <h1 className='dark:text-gray-400 my-4 font-semibold'>Code | {submissionOutput.language}</h1>
-            <div className="w-full border rounded-md overflow-hidden mb-8">
+            <h1 className='text-muted-foreground my-4 font-semibold'>Code | {submissionOutput.language}</h1>
+            <div className="w-full border rounded-md overflow-hidden mb-8" data-color-mode="dark">
               <MDEditor.Markdown
                 source={`\`\`\`\n${submissionOutput.sourceCode}\n\`\`\``}
-                className="markdown-body customTextWhite w-full" style={{ background: "var(--card)" }} />
+                className="w-full" style={{ background: "var(--card)" }} />
             </div>
             <div className="w-full h-64 customBackground rounded-md py-3">
               <textarea className='w-full h-[90%] resize-none px-3 outline-none' placeholder='Write your notes here'></textarea>
               <div className="w-full h-[10%] border-t flex justify-between px-3 py-1">
-                <h3 className='dark:text-gray-400 text-sm'>Select related tags</h3>
-                <h3 className='dark:text-gray-400 text-sm'>0/5</h3>
+                <h3 className='text-muted-foreground text-sm'>Select related tags</h3>
+                <h3 className='text-muted-foreground text-sm'>0/5</h3>
               </div>
             </div>
           </div>

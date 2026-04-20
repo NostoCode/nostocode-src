@@ -38,10 +38,11 @@ export default function NavRunButtonsContainer({ theme, session }: NavRunButtonT
   };
 
   return (
-    <div className="w-[80%] px-4 border-l flex justify-between items-center h-full">
+    <div className="w-[80%] px-4 border-l grid grid-cols-3 items-center h-full">
+      {/* Left: navigation */}
       <div className="flex items-center gap-2">
         <Link href="/problems"><ListVideo className={`${theme === "dark" ? 'text-neutral-300' : ''} resize-custom w-5`} /></Link>
-        <Link href="/problems" className=''>Problem List</Link>
+        <Link href="/problems">Problem List</Link>
         <button
           onClick={handleShuffle}
           disabled={isShuffling}
@@ -51,8 +52,12 @@ export default function NavRunButtonsContainer({ theme, session }: NavRunButtonT
         >
           <Shuffle className={`${theme === "dark" ? 'text-neutral-300' : ''} resize-custom w-4`} />
         </button>
+      </div>
+
+      {/* Center: Run / Submit (only on problem pages) */}
+      <div className="flex justify-center gap-1">
         {handleCodeRun && handleCodeSubmission && (
-          <div className="flex gap-1 ml-4">
+          <>
             <Button
               onClick={handleCodeRun}
               disabled={!isLoggedIn || isCodeRunning}
@@ -73,9 +78,12 @@ export default function NavRunButtonsContainer({ theme, session }: NavRunButtonT
                 ? <><Loader2 className='resize-custom w-4 animate-spin' />Running</>
                 : <><CloudUpload className='resize-custom w-4' />Submit</>}
             </Button>
-          </div>
+          </>
         )}
       </div>
+
+      {/* Right: empty spacer for balance */}
+      <div />
     </div>
   )
 }
