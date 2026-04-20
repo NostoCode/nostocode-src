@@ -53,6 +53,8 @@
   font-size: 11px;
   color: var(--win98-black);
   padding-bottom: 40px;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
 }
 
 [data-win98="true"] * {

@@ -21,6 +21,13 @@ function applyTheme(t: Win98Theme) {
     document.documentElement.classList.add("light");
   } else {
     document.documentElement.removeAttribute("data-win98");
+    // Remove the light class forced by win98 mode; restore user's dark preference
+    document.documentElement.classList.remove("light");
+    const prefersDark = localStorage.getItem("theme") === "dark"
+      || (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    if (prefersDark) {
+      document.documentElement.classList.add("dark");
+    }
   }
 }
 

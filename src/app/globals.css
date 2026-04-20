@@ -151,9 +151,17 @@
   color: var(--foreground) !important;
 }
 
-.customBackground{
-  background: var(--card);
+/* In light (non-dark) Modern mode, override gray text utilities for readability */
+:root:not([data-win98="true"]) .light .text-gray-300,
+:root:not([data-win98="true"]):not(.dark) .text-gray-300 {
+  color: oklch(0.45 0.01 286) !important;
 }
+:root:not([data-win98="true"]) .light .text-gray-400,
+:root:not([data-win98="true"]):not(.dark) .text-gray-400 {
+  color: oklch(0.40 0.01 286) !important;
+}
+
+
 
 @layer base {
   :root {
