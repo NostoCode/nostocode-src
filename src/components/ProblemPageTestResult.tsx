@@ -1,6 +1,6 @@
 "use client"
 import { codeSubmissionResultType, CodeRunResult, FailedCase } from '@/types/ApiResponse'
-import { CircleCheckBig, Clock4, Info, Shield, Sparkles, SquarePen, X } from 'lucide-react'
+import { CircleCheckBig, Clock4, Info, Shield, SquarePen, X } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import { IProblem } from '@/models/Problem'
@@ -11,6 +11,7 @@ import { formatDate } from '@/helpers/formatDate'
 import MDEditor from '@uiw/react-md-editor';
 import Link from 'next/link'
 import { ancientScoreLevel } from '@/helpers/ancientScoreLevel'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 interface ProblemPageTestResultType {
     codeOutput: CodeRunResult[] | null,
@@ -28,6 +29,7 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
     const [viewTestCase, setViewTestCase] = useState<number>(0);
     const [inputValues, setInputValues] = useState<string[]>([]);
     const [outputValues, setOutputValues] = useState<string[]>([]);
+    const [avatarError, setAvatarError] = useState(false);
     const [isAccepted, setIsAccepted] = useState<boolean>(true);
 
     useEffect(() => {
@@ -157,7 +159,13 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                             }
                         </div>
                         <div className="flex items-center gap-2">
-                            <img src={session?.user.avatar || " "} alt="" className="w-8 h-8 rounded-full bg-blue-200 object-contain" />
+                            {!avatarError && session?.user.avatar ? (
+                              <img src={session.user.avatar} alt="" className="w-8 h-8 rounded-full bg-blue-200 object-contain" onError={() => setAvatarError(true)} />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 select-none">
+                                {(session?.user.username || "?")[0].toUpperCase()}
+                              </div>
+                            )}
                             <h2 className="text-lg font-semibold">{session?.user.username}</h2>
                             <p className={`text-sm ${theme === "dark" ? 'text-neutral-400' : ''}`}>Submitted at {formatDate(submissionOutput.createdAt as Date)}</p>
                         </div>
@@ -170,17 +178,20 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                   <div className="flex-1 p-4 rounded-md bg-[var(--sidebar-accent)] flex flex-col gap-2">
                     <div className="w-full flex items-center justify-between">
                         <h2 className={`flex gap-2 items-center ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}><Clock4 className="resize-custom w-4 h-4" /> Runtime</h2>
-                        <Info className={`resize-custom w-4 h-4 ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`} />
+                        <Tooltip>
+                          <TooltipTrigger asChild><button className="cursor-default"><Info className={`resize-custom w-4 h-4 ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`} /></button></TooltipTrigger>
+                          <TooltipContent>Total execution time for your code submission</TooltipContent>
+                        </Tooltip>
                     </div>
                     <h2 className={`text-xl ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}>{submissionOutput.status === "Accepted" ? `${(submissionOutput.time * 1000).toFixed(2)} ms` : 'N/A'}</h2>
-                    {submissionOutput.status === "Accepted" &&
-                        <h2 className="flex items-center gap-2 text-blue-500"><Sparkles className='resize-custom w-4 h-4' /> Analyze complexity</h2>
-                    }
                   </div>
                   <div className="flex-1 p-4 rounded-md bg-[var(--sidebar-accent)] flex flex-col gap-2">
                     <div className="w-full flex items-center justify-between">
                         <h2 className="flex gap-2 items-center"><Shield className="resize-custom w-4 h-4" /> Ancient Code Score</h2>
-                        <Info className="resize-custom w-4 h-4" />
+                        <Tooltip>
+                          <TooltipTrigger asChild><button className="cursor-default"><Info className="resize-custom w-4 h-4" /></button></TooltipTrigger>
+                          <TooltipContent>Reflects how authentically you wrote code — penalises external paste, large inserts, and unusual typing patterns</TooltipContent>
+                        </Tooltip>
                     </div>
                     {submissionOutput.ancientCodeScore !== undefined ? (
                         <>

@@ -564,7 +564,9 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                     minimap: { enabled: false },
                     lineNumbers: "on",
                     pasteAs: { enabled: false },
-                    ...(win98Theme === 'win98' ? { fontFamily: '"Courier New", monospace' } : {}),
+                    fontFamily: win98Theme === 'win98'
+                        ? '"Courier New", monospace'
+                        : 'Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace',
                 }}
                 className='w-full h-[calc(100vh-8.7rem)]'
             />

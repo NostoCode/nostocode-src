@@ -2,14 +2,14 @@ import { IProblem } from "@/models/Problem";
 
 export const levelWiseProblemSeperate = (allProblems: IProblem[]) => {
     let e = 0, m = 0, h = 0;
-    const uniqueTitles = new Set<string>();
+    const uniqueIds = new Set<string>();
 
     for (let i = 0; i < allProblems.length; i++) {
-        if(uniqueTitles.has(allProblems[i].title)){
+        const id = String(allProblems[i]._id);
+        if (uniqueIds.has(id)) {
             continue;
         }
-
-        uniqueTitles.add(allProblems[i].title);
+        uniqueIds.add(id);
 
         if (allProblems[i].level === "Easy") {
             e += 1;
