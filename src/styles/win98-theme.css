@@ -400,8 +400,10 @@
 }
 
 /* ---------- Card components ---------- */
-[data-win98="true"] [class*="card"],
-[data-win98="true"] .card {
+/* Use specific selectors to avoid false matches on Tailwind arbitrary values like hover:bg-[var(--card)] */
+[data-win98="true"] .card,
+[data-win98="true"] .bg-card,
+[data-win98="true"] [class*="card-"] {
   background: var(--win98-gray) !important;
   box-shadow: var(--win98-raised) !important;
   border: none !important;
