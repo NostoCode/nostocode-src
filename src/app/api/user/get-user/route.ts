@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         const userId = searchParams.get("userId");
 
         const user = await userModel.findById(userId).select("-password")
-            .populate({ path: "solvedQuestions", select: "" });
+            .populate({ path: "solvedQuestions", select: "difficulty" });
 
         if (!user) {
             return NextResponse.json({

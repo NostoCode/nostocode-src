@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
         const allSubmissions = await submissionModel.find({
             userId
-        }).populate({ path: "problemId", select: "" });
+        }).populate({ path: "problemId", select: "title" });
 
         return NextResponse.json({
             success: true,

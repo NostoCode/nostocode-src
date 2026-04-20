@@ -34,8 +34,6 @@ declare global {
 
 // Internal clipboard - never loses content on external clipboard changes
 let internalClipboard = "";
-// Debounce flag to prevent double-firing when Monaco command + window paste both fire
-let lastInternalPasteTime = 0;
 
 // Event logging for scoring
 interface EditorEvent {
@@ -223,9 +221,8 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
 
     useEffect(() => {
         const handleGlobalPaste = (e: ClipboardEvent) => {
-            e.preventDefault();
-            // Skip if Monaco Ctrl+V handler already fired (avoid double-paste)
-            if (Date.now() - lastInternalPasteTime < 150) return;
+            // Only intercept when Monaco editor has focus
+            if (!editorRef.current?.hasTextFocus()) return;
 
             const externalText = e.clipboardData?.getData('text') || "";
             const hasInternal = internalClipboard.length > 0;
@@ -233,9 +230,14 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
 
             // Case 1: both empty → no-op
             if (!hasInternal && !hasExternal) return;
+
+            // Prevent browser/Monaco from also pasting
+            e.preventDefault();
+            e.stopPropagation();
+
             // Case 2: no internal, has external → block
             if (!hasInternal && hasExternal) {
-                toast.error("禁止外部粘贴板粘贴 - External paste is disabled in Ancient Coding Mode");
+                toast.error("External paste is disabled in Ancient Coding Mode");
                 return;
             }
 
@@ -253,22 +255,21 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                     }));
                     editorRef.current.executeEdits("internal-paste", editOperations);
                     logEditorEvent({ type: "paste_internal", length: internalClipboard.length, timestamp: Date.now() });
-                    lastInternalPasteTime = Date.now();
                 }
             }
 
             if (!hasExternal) {
                 // Case 3: paste internal, sync to external done via copy; toast
-                toast.success("已从内部粘贴板粘贴 - Pasted from internal clipboard");
+                toast.success("Pasted from internal clipboard");
             } else if (internalClipboard === externalText) {
                 // Case 4: same content → silent paste
             } else {
                 // Case 5: different → paste internal, warn
-                toast.warning("禁止外部粘贴板粘贴，已从内部粘贴板粘贴 - External paste blocked, pasted from internal clipboard");
+                toast.warning("External paste blocked, pasted from internal clipboard");
             }
         };
 
-        window.addEventListener("paste", handleGlobalPaste);
+        document.addEventListener("paste", handleGlobalPaste, { capture: true });
 
         const handleContextMenu = (e: Event) => {
             e.preventDefault();
@@ -285,7 +286,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         window.addEventListener("drop", handleDrop);
 
         return () => {
-            window.removeEventListener("paste", handleGlobalPaste);
+            document.removeEventListener("paste", handleGlobalPaste, { capture: true });
             if (container) {
                 container.removeEventListener('contextmenu', handleContextMenu);
             }
@@ -313,7 +314,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
             logEditorEvent({ type: "copy_internal", length: textToCopy.length, timestamp: Date.now() });
             // Sync to system clipboard so paste matrix works correctly
             try { await navigator.clipboard.writeText(textToCopy); } catch { /* permission denied ok */ }
-            toast.success("已复制到内部剪贴板 - Copied to internal clipboard");
+            toast.success("Copied to internal clipboard");
         }
     };
 
@@ -363,63 +364,24 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         logEditorEvent({ type: "copy_internal", length: textToCut.length, timestamp: Date.now() });
         // Sync to system clipboard so paste matrix works correctly
         try { await navigator.clipboard.writeText(textToCut); } catch { /* permission denied ok */ }
-        toast.success("已剪切 - Cut to internal clipboard");
+        toast.success("Cut to internal clipboard");
     };
 
-    const handlePasteInternal = async () => {
-        // Read system clipboard only if permission is already granted.
-        // Avoid calling readText() when permission is "prompt" — it would show a browser
-        // permission dialog and block the paste until dismissed.
-        let externalText = "";
-        try {
-            const perm = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName });
-            if (perm.state === 'granted') {
-                externalText = await navigator.clipboard.readText();
-            }
-        } catch { /* permissions API not supported or clipboard denied */ }
-
-        const hasInternal = internalClipboard.length > 0;
-        const hasExternal = externalText.length > 0;
-
-        // Case 1: both empty → no-op
-        if (!hasInternal && !hasExternal) return;
-
-        // Case 2: no internal, has external → block
-        if (!hasInternal && hasExternal) {
-            toast.error("禁止外部粘贴板粘贴 - External paste is disabled in Ancient Coding Mode");
-            return;
-        }
-
-        // Cases 3–5: has internal → paste internal into editor
-        if (!editorRef.current) return;
+    const handlePasteButton = () => {
+        if (!editorRef.current || !internalClipboard) return;
         const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
         if (!selections || selections.length === 0) return;
-
         const clipLines = internalClipboard.split('\n');
         const usePerCursor = selections.length > 1 && clipLines.length === selections.length;
-
-        const editOperations = selections.map((sel, i) => ({
+        const editOperations = selections.map((sel: MonacoSelection, i: number) => ({
             identifier: { major: 1, minor: i },
             range: sel,
             text: usePerCursor ? clipLines[i] : internalClipboard,
             forceMoveMarkers: true
         }));
-
         editorRef.current.executeEdits("internal-paste", editOperations);
         logEditorEvent({ type: "paste_internal", length: internalClipboard.length, timestamp: Date.now() });
-        lastInternalPasteTime = Date.now();
-
-        if (!hasExternal) {
-            // Case 3: internal only → sync to external + toast
-            try { await navigator.clipboard.writeText(internalClipboard); } catch { /* ok */ }
-            toast.success("已从内部粘贴板粘贴 - Pasted from internal clipboard");
-        } else if (internalClipboard === externalText) {
-            // Case 4: same content → silent paste (user copied internally, system clipboard synced)
-        } else {
-            // Case 5: different → sync internal to external + warn
-            try { await navigator.clipboard.writeText(internalClipboard); } catch { /* ok */ }
-            toast.warning("禁止外部粘贴板粘贴，已从内部粘贴板粘贴 - External paste blocked, pasted from internal clipboard");
-        }
+        toast.success("Pasted from internal clipboard");
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -476,10 +438,6 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                 e.preventDefault();
                 e.stopPropagation();
                 handleCutInternal();
-            } else if (e.keyCode === monaco.KeyCode.KeyV) {
-                e.preventDefault();
-                e.stopPropagation();
-                handlePasteInternal();
             }
         });
     };
@@ -572,7 +530,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                             <TooltipContent className={`bg-[var(--sidebar-accent)] border ${theme === "dark" ? 'text-neutral-200 border-gray-600' : 'text-gray-600 border-gray-300'}`}>Copy (Internal)</TooltipContent>
                         </Tooltip>
                         <Tooltip>
-                            <TooltipTrigger onClick={handlePasteInternal} className='cursor-pointer'>
+                            <TooltipTrigger onClick={handlePasteButton} className='cursor-pointer'>
                                 <CodeXml className='resize-custom w-4' />
                             </TooltipTrigger>
                             <TooltipContent className={`bg-[var(--sidebar-accent)] border ${theme === "dark" ? 'text-neutral-200 border-gray-600' : 'text-gray-600 border-gray-300'}`}>Paste (Internal Only)</TooltipContent>
@@ -606,6 +564,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                     minimap: { enabled: false },
                     lineNumbers: "on",
                     pasteAs: { enabled: false },
+                    ...(win98Theme === 'win98' ? { fontFamily: '"Courier New", monospace' } : {}),
                 }}
                 className='w-full h-[calc(100vh-8.7rem)]'
             />
