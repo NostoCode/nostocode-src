@@ -198,7 +198,7 @@ export default function Page() {
         <div className="w-full h-full bg-[var(--sidebar-accent)] rounded-md p-6 flex flex-col gap-2">
           <img src="/problem page logo.png" alt="" className="w-22 rounded-md" />
           <h2 className="text-2xl font-semibold">All Problems</h2>
-          <p className="text-gray-500 text-sm mb-2">NostoCode — {allProblems.length} problems · {fullUserInfo?.solvedQuestions.length || 0} solved</p>
+          <p className="text-gray-500 text-sm mb-2">NostoCode — {allProblems.length} problems · {new Set((fullUserInfo?.solvedQuestions as IProblem[] || []).map(q => q._id?.toString())).size || 0} solved</p>
           <div className="flex items-center gap-3 mb-2">
             <Button className='rounded-full font-semibold w-32 text-base flex items-center h-10 cursor-pointer'><Play className='resize-custom w-5' /> Practice</Button>
             <Button variant="outline" className='rounded-full w-10 h-10 cursor-pointer'><Star className='resize-custom w-5 text-gray-400' /></Button>

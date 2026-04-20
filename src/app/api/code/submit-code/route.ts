@@ -97,9 +97,15 @@ export async function POST(req: NextRequest) {
                     failedCase = { index: parsed.index, input: parsed.input, expected: parsed.expected, actual: parsed.actual };
                 }
             } catch {
-                // Not JSON: compile error or unhandled runtime error before any output
-                const stderr = apiResponse.result[0]?.stderr?.trim();
-                currentStatus = stderr ? "Runtime Error" : "Wrong Answer";
+                // Not JSON: TLE, compile error, or unhandled runtime error before any output.
+                // Trust Piston's status from mapStatus first, then fall back to stderr check.
+                const pistonStatus = apiResponse.result[0]?.status?.description;
+                if (pistonStatus && pistonStatus !== "Accepted") {
+                    currentStatus = pistonStatus; // e.g. "Time Limit Exceeded", "Runtime Error"
+                } else {
+                    const stderr = apiResponse.result[0]?.stderr?.trim();
+                    currentStatus = stderr ? "Runtime Error" : "Wrong Answer";
+                }
             }
         } else {
             for (let i = 0; i < apiResponse.result.length; i++) {
@@ -156,8 +162,10 @@ export async function POST(req: NextRequest) {
 
         user.submissions.push(newSubmission._id);
         if (currentStatus === "Accepted") {
-            const alreadySolved = user.solvedQuestions.some(
-                (q: unknown) => q?.toString() === problemId.toString()
+            // Use $addToSet semantics: only push if this problemId is not already present.
+            // Works even if previous duplicates exist in the array.
+            const alreadySolved = (user.solvedQuestions as unknown[]).some(
+                (q) => (q as { toString(): string })?.toString() === problemId.toString()
             );
             if (!alreadySolved) {
                 user.solvedQuestions.push(problemId);
