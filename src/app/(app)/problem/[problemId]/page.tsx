@@ -161,7 +161,8 @@ export default function Page() {
         languageId: selectedLanguageCode,
         testCases: problemInfo.testCases,
         ancientCodeScore: scoringResult ? scoringResult.score : 100,
-        ancientCodeLevel: scoringResult ? scoringResult.level : "🟢 Ancient Master"
+        ancientCodeLevel: scoringResult ? scoringResult.level : "🟢 Ancient Master",
+        scoreDetails: scoringResult ? scoringResult.details : undefined,
       }
 
       const parsedData = codeSubmissionValidation.safeParse(data);
@@ -173,27 +174,6 @@ export default function Page() {
 
       const res = await axios.post<ApiResponse>("/api/code/submit-code", data);
       toast.success("Code submitted successfully");
-
-      // Show Ancient Code Score
-      if (scoringResult) {
-        let scoreMsg = `Ancient Level: ${scoringResult.level} (${scoringResult.score})\n\n`;
-        scoreMsg += `Details:\n`;
-        scoreMsg += `- Typing Ratio: ${scoringResult.details.typingRatio}%\n`;
-        scoreMsg += `- Rhythm Score: ${scoringResult.details.rhythmScore}\n`;
-        scoreMsg += `- Edit Activity: ${scoringResult.details.editActivity}%\n`;
-        scoreMsg += `- Large Inserts: ${scoringResult.details.largeInserts}\n`;
-        scoreMsg += `- Speed Score: ${scoringResult.details.speedScore}\n`;
-        scoreMsg += `- Burst Score: ${scoringResult.details.burstScore}\n`;
-        scoreMsg += `- Session: ${scoringResult.details.sessionSecs}s`;
-        toast.info(
-          `${scoringResult.level} (${scoringResult.score}/100)`,
-          {
-            description: `Rhythm: ${scoringResult.details.rhythmScore} · Speed: ${scoringResult.details.speedScore} · Burst: ${scoringResult.details.burstScore} · Session: ${scoringResult.details.sessionSecs}s`,
-            duration: 8000,
-          }
-        );
-      }
-
       console.log("Code submitted successfully: ", res.data.submissionOutput);
       setSubmissionOutput(res.data.submissionOutput ?? null);
       setTotalTestCases(res.data.totalTestCases ?? 0);

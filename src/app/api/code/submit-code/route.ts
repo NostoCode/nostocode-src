@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { userId, language, problemId, sourceCode, languageId, testCases, ancientCodeScore, ancientCodeLevel } = body;
+        const { userId, language, problemId, sourceCode, languageId, testCases, ancientCodeScore, ancientCodeLevel, scoreDetails } = body;
 
         const parsedData1 = codeSubmissionValidation.safeParse({ userId, language, sourceCode, problemId });
 
@@ -122,6 +122,7 @@ export async function POST(req: NextRequest) {
             sourceCode,
             ancientCodeScore: ancientCodeScore ?? 100,
             ancientCodeLevel: ancientCodeLevel ?? "🟢 Ancient Master",
+            scoreDetails: scoreDetails ?? undefined,
             problemId
         });
 

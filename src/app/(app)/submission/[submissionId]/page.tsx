@@ -1,5 +1,4 @@
 "use client";
-import CustomBarChart from '@/components/CustomBarChart';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatDate } from '@/helpers/formatDate';
@@ -128,17 +127,23 @@ export default function Page() {
                       'text-red-500'
                     }`}>{submissionOutput.ancientCodeScore} / 100</h2>
                     <h2 className="text-sm">{ancientScoreLevel(submissionOutput.ancientCodeScore!)}</h2>
+                    {submissionOutput.scoreDetails && (
+                      <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span>Typing Ratio</span><span className="font-mono text-right">{submissionOutput.scoreDetails.typingRatio}%</span>
+                        <span>Rhythm Score</span><span className="font-mono text-right">{submissionOutput.scoreDetails.rhythmScore}</span>
+                        <span>Edit Activity</span><span className="font-mono text-right">{submissionOutput.scoreDetails.editActivity}%</span>
+                        <span>Large Inserts</span><span className="font-mono text-right">{submissionOutput.scoreDetails.largeInserts}</span>
+                        <span>Speed Score</span><span className="font-mono text-right">{submissionOutput.scoreDetails.speedScore}</span>
+                        <span>Burst Score</span><span className="font-mono text-right">{submissionOutput.scoreDetails.burstScore}</span>
+                        <span>Session</span><span className="font-mono text-right">{submissionOutput.scoreDetails.sessionSecs}s</span>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <h2 className="text-xl text-gray-400">N/A</h2>
                 )}
               </div>
             </div>
-            {isAccepted && (
-              <div className="w-full h-[20rem] overflow-hidden mt-4">
-                <CustomBarChart session={session} labelValue={submissionOutput.time} />
-              </div>
-            )}
           </div>
           <div className="w-[60%]">
             <h1 className='text-muted-foreground my-4 font-semibold'>Code | {submissionOutput.language}</h1>
