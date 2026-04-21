@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Settings, FlaskConical, CreditCard, Package, LogOut } from "lucide-react"
 import { signOut } from 'next-auth/react';
 import { Session } from 'next-auth';
+import { useWin98Theme } from '@/context/ThemeContext';
 
 interface NavDropdownPropsType {
     session: Session | null,
@@ -46,6 +47,7 @@ function AvatarImg({ src, username, className }: { src?: string; username?: stri
 }
 
 export default function NavDropdown({ session, signOut, theme }: NavDropdownPropsType) {
+    const { theme: win98Theme } = useWin98Theme();
 
     return (
         <div className="flex items-center gap-4">
@@ -92,8 +94,10 @@ export default function NavDropdown({ session, signOut, theme }: NavDropdownProp
                         </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <div className='p-1 flex gap-4 items-center sm:text-base'><ModeToggle /> {theme && theme[0].toUpperCase() + theme?.slice(1)}</div>
-                    <DropdownMenuSeparator />
+                    {win98Theme !== 'win98' && (
+                        <div className='p-1 flex gap-4 items-center sm:text-base'><ModeToggle /> {theme && theme[0].toUpperCase() + theme?.slice(1)}</div>
+                    )}
+                    {win98Theme !== 'win98' && <DropdownMenuSeparator />}
                     <DropdownMenuItem onClick={() => signOut()} className='sm:text-base cursor-pointer'>
                         <LogOut className='resize-custom w-5 mr-2' /> Sign out
                     </DropdownMenuItem>

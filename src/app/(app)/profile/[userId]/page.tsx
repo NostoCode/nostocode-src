@@ -21,11 +21,14 @@ import { z } from "zod";
 import { updateUserValidation } from '@/schemas/updateUserSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 
+type ProfileTab = 'basic' | 'account' | 'labs' | 'privacy' | 'billing' | 'orders';
+
 export default function Page() {
 
     const { userId } = useParams()
     const [fullUserInfo, setFullUserInfo] = useState<IUser | null>(null)
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [activeTab, setActiveTab] = useState<ProfileTab>('basic');
 
     const form = useForm<z.infer<typeof updateUserValidation>>({
         resolver: zodResolver(updateUserValidation),
@@ -41,7 +44,6 @@ export default function Page() {
     })
 
     const allValues = form.watch();
-    console.log(allValues)
 
     const fetchFullUserInfo = useCallback(async () => {
         try {
@@ -62,10 +64,8 @@ export default function Page() {
         } catch (error) {
             if (isAxiosError(error) && error.response) {
                 toast.error(error.response.data.message || "Problem occur while fetching userinfo")
-                console.log("Problem occur while fetching userinfo: ", error.response.data.message);
             } else {
                 toast.error("Error while fetching user info");
-                console.log("Error while fetching user info: ", error);
             }
         }
     }, [userId, setFullUserInfo]);
@@ -83,15 +83,30 @@ export default function Page() {
         } catch (error) {
             if(isAxiosError(error) && error.response){
                 toast.error(error.response.data.message || "Problem occur while submitting info")
-                console.log("Problem occur while submitting information: ", error.response.data.message);
             }else{
                 toast.error("Error while submitting user info")
-                console.log("Error while submitting user info: ", error);
             }
         } finally {
             setIsSubmitting(false);
         }
     }
+
+    const handleShareProfile = () => {
+        const url = `${window.location.origin}/dashboard/${userId}`;
+        navigator.clipboard.writeText(url).then(() => {
+            toast.success("Profile link copied!");
+        }).catch(() => {
+            toast.info(`Profile URL: ${url}`);
+        });
+    };
+
+    const navItems: { key: ProfileTab; label: string; icon: React.ReactNode }[] = [
+        { key: 'account', label: 'Account', icon: <Settings className='resize-custom w-5' /> },
+        { key: 'labs', label: 'Labs', icon: <FlaskConical className='resize-custom w-5' /> },
+        { key: 'privacy', label: 'Privacy', icon: <ShieldCheck className='resize-custom w-5' /> },
+        { key: 'billing', label: 'Billing', icon: <CreditCard className='resize-custom w-5' /> },
+        { key: 'orders', label: 'Orders', icon: <Package className='resize-custom w-5' /> },
+    ];
 
     return (
         <div className='w-full h-screen'>
@@ -112,7 +127,12 @@ export default function Page() {
                     )}
                 </div>
                 <div className="">
-                    <h1 className="text-2xl font-semibold flex items-center gap-4">{fullUserInfo?.username} <ExternalLink className='resize-custom w-5 text-blue-500' /></h1>
+                    <h1 className="text-2xl font-semibold flex items-center gap-4">
+                        {fullUserInfo?.username}
+                        <button onClick={handleShareProfile} title="Copy profile link" className="cursor-pointer hover:opacity-70">
+                            <ExternalLink className='resize-custom w-5 text-blue-500' />
+                        </button>
+                    </h1>
                     <p className="text-gray-500">NostoCode ID: {(fullUserInfo?._id || "").toString()}</p>
                 </div>
             </div>
@@ -120,28 +140,22 @@ export default function Page() {
                 <div className="absolute top-[42%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-full h-full flex justify-center items-center">
                     <div className="w-[20%]">
                         <h2 className="w-full bg-blue-400 py-4 px-8 text-lg rounded-md">Basic Info</h2>
-                        <div className="flex items-center gap-4 px-4 py-3 cursor-pointer text-gray-500">
-                            <Settings className='resize-custom w-5' />
-                            <h3 className="">Account</h3>
-                        </div>
-                        <div className="flex items-center gap-4 px-4 py-3 cursor-pointer text-gray-500">
-                            <FlaskConical className='resize-custom w-5' />
-                            <h3 className="">Labs</h3>
-                        </div>
-                        <div className="flex items-center gap-4 px-4 py-3 cursor-pointer text-gray-500">
-                            <ShieldCheck className='resize-custom w-5' />
-                            <h3 className="">Privacy</h3>
-                        </div>
-                        <div className="flex items-center gap-4 px-4 py-3 cursor-pointer text-gray-500">
-                            <CreditCard className='resize-custom w-5' />
-                            <h3 className="">Billing</h3>
-                        </div>
-                        <div className="flex items-center gap-4 px-4 py-3 cursor-pointer text-gray-500">
-                            <Package className='resize-custom w-5' />
-                            <h3 className="">Orders</h3>
-                        </div>
+                        {navItems.map(({ key, label, icon }) => (
+                            <div key={key} onClick={() => setActiveTab(key)} className={`flex items-center gap-4 px-4 py-3 cursor-pointer ${activeTab === key ? 'text-foreground' : 'text-gray-500'}`}>
+                                {icon}
+                                <h3>{label}</h3>
+                                <span className="ml-auto text-xs text-gray-400">Soon</span>
+                            </div>
+                        ))}
                     </div>
-                    <div className="w-[60%] h-[48rem] customBackground rounded-md py-4 px-8 border">
+                    <div className="w-[60%] h-[48rem] customBackground rounded-md py-4 px-8 border relative overflow-hidden">
+                        {activeTab !== 'basic' && (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 z-10">
+                                <p className="text-xl font-semibold text-gray-500">Coming Soon</p>
+                                <p className="text-sm text-gray-400 mt-2">This section is under construction.</p>
+                                <Button variant="outline" className="mt-4 cursor-pointer" onClick={() => setActiveTab('basic')}>Back to Basic Info</Button>
+                            </div>
+                        )}
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className='flex flex-col gap-4'>
                                 <h1 className="font-semibold pt-2 pb-4">Basic Info</h1>
