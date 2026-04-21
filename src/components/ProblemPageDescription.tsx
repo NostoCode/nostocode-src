@@ -5,6 +5,7 @@ import MDEditor from '@uiw/react-md-editor';
 import { CircleCheckBig, Lock, Tag } from 'lucide-react';
 import ProblemPageCollapseButton from './ProblemPageCollapseButton';
 import { useTheme } from 'next-themes';
+import { useWin98Theme } from '@/context/ThemeContext';
 import { IUser } from '@/models/User';
 import { Session } from 'next-auth';
 import axios from 'axios';
@@ -14,6 +15,8 @@ import { ObjectId } from 'mongoose';
 
 export default function ProblemPageDescription({ problemInfo, session }: { problemInfo: IProblem, session: Session | null }) {
     const { theme } = useTheme();
+    const { theme: win98Theme } = useWin98Theme();
+    const colorMode = win98Theme === 'win98' ? 'light' : theme === 'dark' ? 'dark' : 'light';
     const [fullUserInfo, setFullUserInfo] = useState<IUser | null>(null);
     const [isSolved, setIsSolved] = useState<boolean>(false);
 
@@ -70,12 +73,12 @@ export default function ProblemPageDescription({ problemInfo, session }: { probl
                 <div className="flex gap-1 items-center text-sm px-2.5 py-1 rounded-full bg-[var(--sidebar-accent)]"><Tag className='resize-custom w-4' /> Topics</div>
                 <div className="flex gap-1 items-center text-sm px-2.5 py-1 rounded-full bg-[var(--sidebar-accent)] text-orange-400"><Lock className='resize-custom w-4' /> Companies</div>
             </div>
-            <div className="text w-full mt-4" data-color-mode={theme === "dark" ? "dark" : "light"}>
+            <div className="text w-full mt-4" data-color-mode={colorMode}>
                 <MDEditor.Markdown source={[problemInfo.description, problemInfo.examples, problemInfo.constraints].filter(Boolean).join("\n\n").replace(/\n(?!\n)/g, "  \n")} className="markdown-body customTextWhite w-full" style={{ background: "var(--card)" }} />
             </div>
 
             <ProblemPageCollapseButton problemInfo={problemInfo} />
-            <p className={`${theme === "dark" ? 'text-neutral-400' : ''} text-xs font-semibold mt-8`}>Copyright © {new Date().getFullYear()} NostoCode. All rights reserved.</p>
+            <p className={`${theme === "dark" && win98Theme !== 'win98' ? 'text-neutral-400' : ''} text-xs font-semibold mt-8`}>Copyright © {new Date().getFullYear()} NostoCode. All rights reserved.</p>
         </div>
     )
 }

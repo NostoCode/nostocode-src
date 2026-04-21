@@ -500,7 +500,7 @@
 }
 
 /* ---------- Win98 Problem list: separator between rows ---------- */
-[data-win98="true"] .problems-outer-container a {
+[data-win98="true"] .problems-outer-container a > div {
   border-bottom: 1px solid var(--win98-dark) !important;
 }
 

@@ -109,8 +109,8 @@ export default function Page() {
     ];
 
     return (
-        <div className='w-full h-screen'>
-            <div className="w-full h-[40%] flex items-center gap-12 mb-4 px-24">
+        <div className='w-full min-h-screen'>
+            <div className="w-full flex items-center gap-12 py-8 px-24">
                 <div className="w-40 h-40 border-white border-4 rounded-lg overflow-hidden bg-gray-400 flex items-center justify-center relative">
                     <span className="text-4xl font-bold text-white z-0 select-none">
                       {fullUserInfo?.username?.[0]?.toUpperCase() ?? "?"}
@@ -136,8 +136,8 @@ export default function Page() {
                     <p className="text-gray-500">NostoCode ID: {(fullUserInfo?._id || "").toString()}</p>
                 </div>
             </div>
-            <div className="w-full h-[100%] relative customBackground">
-                <div className="absolute top-[42%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-full h-full flex justify-center items-center">
+            <div className="w-full customBackground pb-8">
+                <div className="w-full flex justify-center gap-8 items-start pt-8 px-8">
                     <div className="w-[20%]">
                         <h2 className="w-full bg-blue-400 py-4 px-8 text-lg rounded-md">Basic Info</h2>
                         {navItems.map(({ key, label, icon }) => (
