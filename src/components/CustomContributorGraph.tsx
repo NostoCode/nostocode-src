@@ -1,7 +1,7 @@
 import React from "react";
+import { codeSubmissionResultType } from "@/types/ApiResponse";
 
 const NUM_WEEKS = 53;
-const DAYS_PER_WEEK = 7;
 
 const getDaysInYear = (startDate: Date): string[] => {
   const days: string[] = [];
@@ -21,38 +21,26 @@ const colorMap = [
   "bg-teal-900 dark:bg-[#80df88]",
 ];
 
-const activityData = new Map([
-  ["2025-02-01", 5],
-  ["2025-02-03", 5],
-  ["2025-02-04", 10],
-  ["2025-02-06", 15],
-  ["2025-02-02", 20],
-  ["2025-03-02", 12],
-  ["2025-04-03", 22],
-  ["2025-04-04", 22],
-  ["2025-04-05", 29],
-  ["2025-04-06", 10],
-  ["2025-04-07", 2],
-  ["2025-04-08", 12],
-  ["2025-04-09", 2],
-  ["2025-04-10", 20],
-  ["2025-04-11", 5],
-  ["2025-04-12", 15],
-  ["2025-04-13", 22],
-  ["2025-05-07", 22],
-  ["2025-11-08", 10],
-  ["2025-11-09", 22],
-]);
+interface CustomContributorGraphProps {
+  submissions: codeSubmissionResultType[];
+}
 
-export default function CustomContributorGraph() {
+export default function CustomContributorGraph({ submissions }: CustomContributorGraphProps) {
   const today = new Date();
-const allDays = getDaysInYear(today);
+  const allDays = getDaysInYear(today);
 
+  // Build activity map from real submission dates
+  const activityData = new Map<string, number>();
+  for (const sub of submissions) {
+    if (!sub.createdAt) continue;
+    const date = new Date(sub.createdAt as Date).toISOString().substring(0, 10);
+    activityData.set(date, (activityData.get(date) || 0) + 1);
+  }
 
   const getColorLevel = (count: number): number => {
-    if (count > 20) return 4;
-    if (count > 10) return 3;
-    if (count > 5) return 2;
+    if (count > 5) return 4;
+    if (count > 3) return 3;
+    if (count > 1) return 2;
     if (count > 0) return 1;
     return 0;
   };
@@ -75,7 +63,7 @@ const allDays = getDaysInYear(today);
             <div
               key={date}
               className={`w-[0.8rem] h-[0.8rem] rounded-[2px] ${colorMap[level]} transition-colors`}
-              title={`${date}: ${count} activities`}
+              title={`${date}: ${count} submission${count !== 1 ? 's' : ''}`}
             />
           );
         })}

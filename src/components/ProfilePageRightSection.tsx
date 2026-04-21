@@ -1,7 +1,7 @@
 import React from 'react'
 import ProfilePageLInearChart from './ProfilePageLInearChart'
 import ProblemPageBarChart from './ProfilePageBarChart'
-import { ArrowRight, ChevronRight, ClipboardList, FileText, MessageCircleMore, SquareCheckBig, Award, Medal, Trophy } from 'lucide-react'
+import { ArrowRight, ChevronRight, ClipboardList, Construction, FileText, MessageCircleMore, SquareCheckBig } from 'lucide-react'
 import CustomContributorGraph from './CustomContributorGraph'
 import { LevelWiseProblemType } from '@/app/(app)/problems/page'
 import CustomRadialChart from './CustomRadialChart'
@@ -26,10 +26,8 @@ export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQ
       <div className="flex gap-4 w-full h-56">
         <div className="customBackground border w-1/2 h-full rounded-md">
           <div className="w-full h-full flex gap-3 p-2">
-            <div className="w-[75%] h-full bg-[var(--popover)] rounded-md overflow-hidden relative">
-              <div className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
-                <CustomRadialChart totalLevelWiseProblem={allQuestioinsLevelWise} userTotalLevelProblem={levelWiseSolvedQuestions} />
-              </div>
+            <div className="w-[75%] h-full bg-[var(--popover)] rounded-md overflow-hidden flex items-center justify-center">
+              <CustomRadialChart totalLevelWiseProblem={allQuestioinsLevelWise} userTotalLevelProblem={levelWiseSolvedQuestions} />
             </div>
             <div className="w-[25%] h-full flex flex-col gap-3">
               <div className="w-full h-[30%] bg-[var(--sidebar-accent)] rounded-md flex justify-center items-center flex-col font-semibold text-sm">
@@ -47,27 +45,14 @@ export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQ
             </div>
           </div>
         </div>
-        <div className="customBackground border w-1/2 h-full rounded-md py-3 px-4">
-          <div className="flex w-full justify-between">
-            <div className="">
-              <p className='text-gray-400'>Badges</p>
-              <h2 className="text-2xl font-semibold">3</h2>
-            </div>
-            <ArrowRight className='text-gray-400' />
-          </div>
-          <div className="w-full h-24 flex gap-3 justify-center items-center">
-            <Award className='w-16 h-16 text-yellow-500' />
-            <Medal className='w-16 h-16 text-gray-400' />
-            <Trophy className='w-16 h-16 text-orange-400' />
-          </div>
-          <div className="">
-            <p className="text-gray-400 text-sm">Most recent badges</p>
-            <h2 className='font-semibold text-lg text-gray-400'>Coming Soon</h2>
-          </div>
+        <div className="customBackground border w-1/2 h-full rounded-md py-3 px-4 flex flex-col items-center justify-center gap-2">
+          <Construction className="w-10 h-10 text-gray-400" />
+          <p className='text-gray-400 font-semibold'>Badges</p>
+          <h2 className='font-semibold text-lg text-gray-400'>Coming Soon</h2>
         </div>
       </div>
       <div className="customBackground flex w-full h-60 rounded-md py-4">
-        <CustomContributorGraph />
+        <CustomContributorGraph submissions={allSubmissions} />
       </div>
       <div className="customBackground flex flex-col w-full h-[34.5rem] rounded-md">
         <div className="w-full h-20 flex justify-between items-center gap-3 px-4">

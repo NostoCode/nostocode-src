@@ -49,13 +49,13 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
 
   return (
     <div style={{ background: "var(--card)" }} className='w-full min-h-[calc(100vh-6.5rem)] flex flex-col p-4 pb-12'>
-      <div className="w-full flex items-center justify-between py-1 border-b border-t px-2 gap-4">
-        <p className={`flex-none ${theme === "dark" ? 'text-neutral-300' : ''}`}>No</p>
-        <h1 className={`text-lg flex-none ${theme === "dark" ? 'text-neutral-300' : ''}`}>Status</h1>
-        <div className="flex items-center gap-8 w-[40rem]">
-          <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Language <ChevronDown className='resize-custom w-4' /></h3>
-          <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Runtime <ChevronDown className='resize-custom w-4' /></h3>
-          <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Memory <ChevronDown className='resize-custom w-4' /></h3>
+      <div className="w-full flex items-center py-1 border-b border-t px-2 gap-2">
+        <p className={`w-10 flex-none ${theme === "dark" ? 'text-neutral-300' : ''}`}>No</p>
+        <h1 className={`w-48 flex-none text-lg ${theme === "dark" ? 'text-neutral-300' : ''}`}>Status</h1>
+        <div className="flex items-center gap-6 flex-1">
+          <h3 className={`w-24 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Language <ChevronDown className='resize-custom w-4' /></h3>
+          <h3 className={`w-28 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Runtime <ChevronDown className='resize-custom w-4' /></h3>
+          <h3 className={`w-24 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Memory <ChevronDown className='resize-custom w-4' /></h3>
           <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Shield className='resize-custom w-4' /> Ancient Score</h3>
         </div>
       </div>
@@ -76,16 +76,16 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
       }
 
       {submission && !loading && submission.map((ele, index) =>
-        <div key={index} onClick={()=> handleClick(ele)} className="w-full flex items-center justify-between py-1 border-b border-t cursor-pointer px-2">
-          <p className=''>{index + 1}</p>
-          <div className="">
+        <div key={index} onClick={()=> handleClick(ele)} className="w-full flex items-center py-1 border-b cursor-pointer px-2 gap-2">
+          <p className='w-10 flex-none'>{index + 1}</p>
+          <div className="w-48 flex-none">
             <h1 className={`text-lg font-semibold ${ele.status === "Accepted"? 'text-green-500' : 'text-red-500'}`}>{ele.status}</h1>
             <h2 className={`text-sm ${theme === "dark" ? 'text-neutral-300' : ''}`}>{formatDate(ele.createdAt as Date)}</h2>
           </div>
-          <div className="flex items-center gap-8 w-[40rem]">
-            <h3 className="px-2 py-0.5 rounded-full bg-[var(--sidebar-accent)]">{ele.language}</h3>
-            <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Clock4 className='resize-custom w-4' /> {ele.status === "Accepted"? `${(ele.time * 1000).toFixed(2)} ms` : 'N/A'}</h3>
-            <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Cpu className='resize-custom w-4' /> {ele.status === "Accepted"? `${(ele.memory).toFixed(2)} MB` : 'N/A'}</h3>
+          <div className="flex items-center gap-6 flex-1">
+            <h3 className="w-24 px-2 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm truncate">{ele.language}</h3>
+            <h3 className={`w-28 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Clock4 className='resize-custom w-4' /> {ele.status === "Accepted"? `${(ele.time * 1000).toFixed(2)} ms` : 'N/A'}</h3>
+            <h3 className={`w-24 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Cpu className='resize-custom w-4' /> N/A</h3>
             <h3 className={`flex items-center gap-1 font-semibold ${
               ele.ancientCodeScore !== undefined
                 ? ele.ancientCodeScore >= 90 ? 'text-green-500'

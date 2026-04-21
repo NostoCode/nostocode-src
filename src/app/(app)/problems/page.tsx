@@ -200,10 +200,10 @@ export default function Page() {
           <h2 className="text-2xl font-semibold">All Problems</h2>
           <p className="text-gray-500 text-sm mb-2">NostoCode — {allProblems.length} problems · {new Set((fullUserInfo?.solvedQuestions as IProblem[] || []).map(q => q._id?.toString())).size || 0} solved</p>
           <div className="flex items-center gap-3 mb-2">
-            <Button className='rounded-full font-semibold w-32 text-base flex items-center h-10 cursor-pointer'><Play className='resize-custom w-5' /> Practice</Button>
-            <Button variant="outline" className='rounded-full w-10 h-10 cursor-pointer'><Star className='resize-custom w-5 text-gray-400' /></Button>
-            <Button variant="outline" className='rounded-full w-10 h-10 cursor-pointer'><ExternalLink className='resize-custom w-5 text-gray-400' /></Button>
-            <Button variant="outline" className='rounded-full w-10 h-10 cursor-pointer'><GitFork className='text-gray-400' /></Button>
+            <Button onClick={handleShuffle} disabled={isShuffling} className='rounded-full font-semibold w-32 text-base flex items-center h-10 cursor-pointer'><Play className='resize-custom w-5' /> Practice</Button>
+            <Button onClick={() => toast.info("Favorites coming soon")} variant="outline" className='rounded-full w-10 h-10 cursor-pointer'><Star className='resize-custom w-5 text-gray-400' /></Button>
+            <Button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Link copied!"); }} variant="outline" className='rounded-full w-10 h-10 cursor-pointer'><ExternalLink className='resize-custom w-5 text-gray-400' /></Button>
+            <Button onClick={() => toast.info("Fork coming soon")} variant="outline" className='rounded-full w-10 h-10 cursor-pointer'><GitFork className='text-gray-400' /></Button>
           </div>
           <p className="text-gray-500 text-sm border-b-2 pb-4">Updated 15 days ago</p>
           <div className="w-full flex items-center justify-between">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Editor from '@monaco-editor/react';
 import type { OnMount } from '@monaco-editor/react';
-import { Bookmark, ChevronUp, CodeXml, Copy, Maximize, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
+import { Bookmark, ChevronUp, CodeXml, Copy, Info, Maximize, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import {
     Tooltip,
@@ -215,7 +215,7 @@ function resetEditorEvents() {
 export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSelectedLanguage, setSelectedLanguageCode, sourceCode, setSourceCode, starterCode }: ProblemPageCodeEditorType & { starterCode?: string }) {
     const [isFullScreen, setIsFullScreen] = useState(!document.fullscreenElement);
     const { theme: win98Theme } = useWin98Theme();
-    const monacoTheme = win98Theme === 'win98' ? 'vs' : 'vs-dark';
+    const monacoTheme = win98Theme === 'win98' || theme === 'light' ? 'vs' : 'vs-dark';
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const editorRef = useRef<any>(null);
 
@@ -519,10 +519,15 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                 <div style={{ background: "var(--card)" }} className={`w-full h-6 px-3 py-4 flex items-center justify-between ${theme === "dark" ? 'text-neutral-400' : ''}`}>
                     <div className='flex items-center gap-2 px-1'>
                         <span className="font-medium">Python</span>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">Only</span>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button className="cursor-default"><Info className="resize-custom w-3.5 h-3.5 text-blue-400" /></button>
+                            </TooltipTrigger>
+                            <TooltipContent className={`bg-[var(--sidebar-accent)] border ${theme === "dark" ? 'text-neutral-200 border-gray-600' : 'text-gray-600 border-gray-300'}`}>Other languages support Coming Soon</TooltipContent>
+                        </Tooltip>
                     </div>
                     <div className="flex gap-3">
-                        <Bookmark className='resize-custom w-4' />
+                        <Bookmark onClick={() => toast.info("Bookmarks coming soon")} className='resize-custom w-4 cursor-pointer' />
                         <Tooltip>
                             <TooltipTrigger onClick={handleCopyInternal} className='cursor-pointer'>
                                 <Copy className='resize-custom w-4' />

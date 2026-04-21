@@ -492,3 +492,27 @@
 [data-win98="true"] [data-color-mode="dark"] code {
   font-family: "Courier New", Courier, monospace !important;
 }
+
+/* ---------- Win98 Discuss page: "Back to Problems" button text visibility ---------- */
+[data-win98="true"] a.bg-primary,
+[data-win98="true"] a[class*="bg-primary"] {
+  color: #ffffff !important;
+}
+
+/* ---------- Win98 Problem list: separator between rows ---------- */
+[data-win98="true"] .problems-outer-container a {
+  border-bottom: 1px solid var(--win98-dark) !important;
+}
+
+/* ---------- Win98 Monaco editor: Courier New in ancient mode ---------- */
+[data-win98="true"] .monaco-editor .view-lines {
+  font-family: "Courier New", Courier, monospace !important;
+}
+
+/* ---------- Win98 MDEditor light mode code blocks ---------- */
+[data-win98="true"] [data-color-mode="light"] pre,
+[data-win98="true"] [data-color-mode="light"] pre code,
+[data-win98="true"] [data-color-mode="light"] code {
+  font-family: "Courier New", Courier, monospace !important;
+}
+

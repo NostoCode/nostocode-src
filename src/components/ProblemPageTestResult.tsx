@@ -169,7 +169,11 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                             <p className={`text-sm ${theme === "dark" ? 'text-neutral-400' : ''}`}>Submitted at {formatDate(submissionOutput.createdAt as Date)}</p>
                         </div>
                     </div>
-                    {submissionOutput.status === "Accepted" ? <Link href={`/add-solution?id=${submissionOutput._id}`}><Button className='bg-green-500 text-white font-semibold cursor-pointer hover:bg-green-600 duration-300'><SquarePen className='resize-custom w-4 h-4' /> Solution</Button></Link> :
+                    {submissionOutput.status === "Accepted" ?
+                        <div className="flex gap-2">
+                            <Button onClick={handleSubmissionClose} variant="outline" className='font-semibold cursor-pointer'><X className='resize-custom w-4 h-4' /> Close</Button>
+                            <Link href={`/add-solution?id=${submissionOutput._id}`}><Button className='bg-green-500 text-white font-semibold cursor-pointer hover:bg-green-600 duration-300'><SquarePen className='resize-custom w-4 h-4' /> Solution</Button></Link>
+                        </div> :
                         <Button onClick={handleSubmissionClose} className='bg-red-500 text-white font-semibold  cursor-pointer hover:bg-red-600 duration-300'><X className='resize-custom w-5 h-5' /> Close</Button>
                     }
                 </div>
@@ -241,7 +245,7 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                     <h2 className="font-semibold px-2">{submissionOutput.language}</h2>
                 </div>
                 <div className="w-full border rounded-md overflow-hidden mb-8">
-                    <div data-color-mode="dark">
+                    <div data-color-mode={theme === "dark" ? "dark" : "light"}>
                         <MDEditor.Markdown
                             source={`\`\`\`\n${submissionOutput.sourceCode}\n\`\`\``}
                             className="markdown-body w-full" style={{ background: "var(--card)" }} />

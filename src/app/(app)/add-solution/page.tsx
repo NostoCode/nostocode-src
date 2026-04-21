@@ -24,6 +24,8 @@ import { ISubmission } from '@/models/Submission';
 import { toast } from 'sonner';
 import { Types } from 'mongoose';
 import Link from 'next/link';
+import { useTheme } from 'next-themes';
+import { useWin98Theme } from '@/context/ThemeContext';
 
 function AddSolutionContent() {
 
@@ -33,6 +35,9 @@ function AddSolutionContent() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const searchParams = useSearchParams();
   const submissionId = searchParams.get("id")
+  const { theme } = useTheme();
+  const { theme: win98Theme } = useWin98Theme();
+  const colorMode = win98Theme === 'win98' || theme === 'light' ? 'light' : 'dark';
   const router = useRouter();
 
   const form = useForm<z.infer<typeof solutionValidation>>({
@@ -178,6 +183,7 @@ function AddSolutionContent() {
                         preview='edit'
                         hideToolbar={true}
                         className='p-2 w-full customTextWhite'
+                        data-color-mode={colorMode}
                       />
                       <FormMessage />
                     </FormItem>
@@ -185,7 +191,7 @@ function AddSolutionContent() {
                 />
               </ScrollArea>
               <ScrollArea className="w-1/2 h-full rounded-md">
-                <MDEditor.Markdown source={explanationValue} className='markdown-body customTextWhite min-h-full p-4' />
+                <MDEditor.Markdown source={explanationValue} className='markdown-body customTextWhite min-h-full p-4' data-color-mode={colorMode} />
               </ScrollArea>
             </div>
           </form>
