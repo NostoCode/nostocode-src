@@ -38,16 +38,16 @@ export default function CustomRadialChart({totalLevelWiseProblem, userTotalLevel
   return (
     <Card className="w-full h-full bg-[var(--popover)] border-none">
       <CardContent className="flex flex-1 items-center pb-0">
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-[250px]">
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-[230px]">
           <RadialBarChart
             data={chartData}
-            endAngle={270}
-            innerRadius={80}
-            outerRadius={100}
-            className="origin-center rotate-45"
+            startAngle={90}
+            endAngle={-270}
+            innerRadius={65}
+            outerRadius={90}
           >
 
-            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false} className="origin-center -rotate-45">
+            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
                 content={({ viewBox }) => {
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {

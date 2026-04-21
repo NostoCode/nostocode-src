@@ -151,6 +151,13 @@
   color: var(--foreground) !important;
 }
 
+/* MDEditor: textarea must be transparent so the syntax-highlighted pre layer shows through.
+   Use 3-class specificity (.w-md-editor .w-md-editor-text .w-md-editor-text-input = 0,3,0)
+   to beat the win98-theme.css textarea rule ([data-win98] textarea:not(.no-win98) = 0,2,1) */
+.w-md-editor .w-md-editor-text .w-md-editor-text-input {
+  background: transparent !important;
+}
+
 /* In light (non-dark) Modern mode, override gray text utilities for readability */
 :root:not([data-win98="true"]) .light .text-gray-300,
 :root:not([data-win98="true"]):not(.dark) .text-gray-300 {

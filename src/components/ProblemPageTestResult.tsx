@@ -22,9 +22,10 @@ interface ProblemPageTestResultType {
     totalTestCases?: number,
     runFailedCase?: FailedCase | null,
     submitFailedCase?: FailedCase | null,
+    setCurrentTab?: React.Dispatch<React.SetStateAction<string>>,
 }
 
-export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme, problemInfo, session, submissionOutput, setSubmissionOutput, totalTestCases, runFailedCase, submitFailedCase }: ProblemPageTestResultType) {
+export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme, problemInfo, session, submissionOutput, setSubmissionOutput, totalTestCases, runFailedCase, submitFailedCase, setCurrentTab }: ProblemPageTestResultType) {
     const [viewTestCase, setViewTestCase] = useState<number>(0);
     const [inputValues, setInputValues] = useState<string[]>([]);
     const [outputValues, setOutputValues] = useState<string[]>([]);
@@ -61,6 +62,7 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
 
     const handleSubmissionClose = () => {
         setSubmissionOutput(null);
+        if (setCurrentTab) setCurrentTab("submissions");
     }
 
     return (

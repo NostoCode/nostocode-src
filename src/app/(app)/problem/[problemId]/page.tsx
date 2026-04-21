@@ -230,7 +230,7 @@ export default function Page() {
             {(problemInfo && currentTab === "description") && <ProblemPageDescription problemInfo={problemInfo} session={session} />}
             {(problemInfo && currentTab === "solutions") && <ProblemPageSoluction problemId={problemId?.toString() || ""} />}
             {(problemInfo && currentTab === "submissions") && <ProblemPageSubmission theme={theme} problemInfo={problemInfo} setCurrentTab={setCurrentTab} setSubmissionOutput={setSubmissionOutput} />}
-            {(problemInfo && currentTab === "testResult") && <ProblemPageTestResult codeOutput={codeOutput} isCodeRunning={isCodeRunning} theme={theme} problemInfo={problemInfo} session={session} submissionOutput={submissionOutput} setSubmissionOutput={setSubmissionOutput} totalTestCases={totalTestCases} runFailedCase={runFailedCase} submitFailedCase={submitFailedCase} />}
+            {(problemInfo && currentTab === "testResult") && <ProblemPageTestResult codeOutput={codeOutput} isCodeRunning={isCodeRunning} theme={theme} problemInfo={problemInfo} session={session} submissionOutput={submissionOutput} setSubmissionOutput={setSubmissionOutput} totalTestCases={totalTestCases} runFailedCase={runFailedCase} submitFailedCase={submitFailedCase} setCurrentTab={setCurrentTab} />}
             <ProblemSideFooter />
           </ScrollArea>
 
