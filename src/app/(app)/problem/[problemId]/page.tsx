@@ -21,6 +21,7 @@ import ProblemPageDescription from '@/components/ProblemPageDescription';
 
 import ProblemPageCodeEditor from '@/components/ProblemPageCodeEditor';
 import { useTheme } from 'next-themes';
+import { useWin98Theme } from '@/context/ThemeContext';
 
 import { useSession } from 'next-auth/react';
 import { codeRunValidation } from '@/schemas/codeRunSchema';import ProblemPageSoluction from '@/components/ProblemPageSoluction';
@@ -36,7 +37,10 @@ export default function Page() {
   const [mounted, setMounted] = useState<boolean>(false);
   const pathname = useParams();
   const { problemId } = pathname;
-  const { theme } = useTheme()
+  const { theme: rawTheme } = useTheme()
+  const { theme: win98Theme } = useWin98Theme();
+  // In Ancient/Win98 mode always treat as light, regardless of next-themes state
+  const theme = win98Theme === 'win98' ? 'light' : rawTheme;
   const { data: session, status } = useSession();
   const [problemInfo, setProblemInfo] = useState<IProblem | null>(null);
 
