@@ -13,28 +13,61 @@ export function extractAssertLines(testCode: string): string[] {
  * The "input" field is formatted as "param = value\nparam2 = value2" using inspect.signature
  * so it matches LeetCode's display style.
  *
- * @param allowAnyOrder - if true, list-of-list outputs are normalized before comparison
- *   (outer order and inner order ignored). Use for problems like 3Sum where order doesn't matter.
- *   Problems opt in by including "# ALLOW_ANY_ORDER" anywhere in their testCode.
+ * Order-insensitive comparison flags (opt-in via comments in testCode):
+ *
+ * @param allowAnyOrder - "# ALLOW_ANY_ORDER" in testCode.
+ *   Sort both outer list AND each inner list before comparing.
+ *   Use when neither the outer order nor the inner-element order matters,
+ *   e.g. 3Sum (each triplet's element order is irrelevant), Combination Sum,
+ *   Subsets, Group Anagrams.
+ *
+ * @param allowOuterOrder - "# ALLOW_OUTER_ORDER" in testCode.
+ *   Sort only the outer list (or a flat list) before comparing; inner order preserved.
+ *   Use when outer order is implementation-defined but inner order IS the answer,
+ *   e.g. Permutations (each permutation's element order matters),
+ *   N-Queens, Path Sum II, Palindrome Partitioning, and flat-list problems like
+ *   Letter Combinations, Generate Parentheses.
  */
 export function buildDetailedHarness(
     promptCode: string,
     userCode: string,
     assertLines: string[],
-    allowAnyOrder: boolean = false
+    allowAnyOrder: boolean = false,
+    allowOuterOrder: boolean = false
 ): string {
     // Encode assert lines as base64 JSON to avoid any escaping issues in the Python source
     const assertLinesB64 = Buffer.from(JSON.stringify(assertLines)).toString('base64');
-    const normalizeBlock = allowAnyOrder ? `\
+
+    let normalizeBlock: string;
+    if (allowAnyOrder) {
+        // Sort inner elements within each sub-list, then sort the outer list.
+        // Also handles flat lists (sorts them directly).
+        normalizeBlock = `\
             def _normalize(_v):
                 if isinstance(_v, list) and _v and isinstance(_v[0], list):
                     try:
                         return sorted([sorted(_x) for _x in _v])
                     except TypeError:
-                        pass
+                        try: return sorted(_v)
+                        except TypeError: return _v
+                elif isinstance(_v, list):
+                    try: return sorted(_v)
+                    except TypeError: return _v
                 return _v
-            _cmp_actual, _cmp_expected = _normalize(_actual), _normalize(_expected)` :
-        `            _cmp_actual, _cmp_expected = _actual, _expected`;
+            _cmp_actual, _cmp_expected = _normalize(_actual), _normalize(_expected)`;
+    } else if (allowOuterOrder) {
+        // Sort only the outer list (preserves inner order).
+        // Works for both 2D lists and flat lists.
+        normalizeBlock = `\
+            def _normalize(_v):
+                if isinstance(_v, list):
+                    try: return sorted(_v)
+                    except TypeError: return _v
+                return _v
+            _cmp_actual, _cmp_expected = _normalize(_actual), _normalize(_expected)`;
+    } else {
+        normalizeBlock = `            _cmp_actual, _cmp_expected = _actual, _expected`;
+    }
 
     return `${promptCode}
 

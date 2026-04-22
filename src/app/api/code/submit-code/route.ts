@@ -52,12 +52,23 @@ export async function POST(req: NextRequest) {
             const problemForTemplate = await problemModel.findById(problemId).select('promptCode testCode');
             if (problemForTemplate?.promptCode && problemForTemplate?.testCode) {
                 const allAsserts = extractAssertLines(problemForTemplate.testCode);
+                // Limit assert lines to stay within Piston's 100KB body-parser limit.
+                // The assert JSON is base64-encoded into the Python harness; budget ~65KB raw.
+                const assertBudgetBytes = 65_000;
+                let budgetUsed = 2; // JSON array brackets
+                const budgetedAsserts = allAsserts.filter(line => {
+                    const cost = JSON.stringify(line).length + 1; // +1 for comma
+                    if (budgetUsed + cost > assertBudgetBytes) return false;
+                    budgetUsed += cost;
+                    return true;
+                });
                 let cleanPrompt = problemForTemplate.promptCode;
                 if (!problemForTemplate.testCode.includes('SortedList') && !sourceCode.includes('SortedList')) {
                     cleanPrompt = cleanPrompt.replace(/^from sortedcontainers import SortedList\n?/m, '');
                 }
                 const allowAnyOrder = problemForTemplate.testCode.includes('# ALLOW_ANY_ORDER');
-                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, allAsserts, allowAnyOrder);
+                const allowOuterOrder = problemForTemplate.testCode.includes('# ALLOW_OUTER_ORDER');
+                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, budgetedAsserts, allowAnyOrder, allowOuterOrder);
                 finalTestCases = [{ input: "", output: "" }];
                 isTemplateMode = true;
             }
