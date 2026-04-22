@@ -50,7 +50,8 @@ export async function POST(req: NextRequest) {
                 }
 
                 const allowAnyOrder = problem.testCode.includes('# ALLOW_ANY_ORDER');
-                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, exampleAsserts, allowAnyOrder);
+                const allowOuterOrder = problem.testCode.includes('# ALLOW_OUTER_ORDER');
+                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, exampleAsserts, allowAnyOrder, allowOuterOrder);
                 finalTestCases = [{ input: "", output: "" }];
                 isTemplateMode = true;
             }
