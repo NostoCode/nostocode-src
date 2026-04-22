@@ -37,7 +37,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/* No-flash script: sets data-win98 before CSS paints */}
-        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('nostocode-theme')||'win98';if(t==='win98'){document.documentElement.setAttribute('data-win98','true');}}catch(e){}})();` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('nostocode-theme')||'win98';if(t==='win98'){document.documentElement.setAttribute('data-win98','true');document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');}}catch(e){}})();` }} />
         <Win98ThemeProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <AuthProvider>

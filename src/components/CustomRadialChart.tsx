@@ -36,9 +36,9 @@ export default function CustomRadialChart({totalLevelWiseProblem, userTotalLevel
   const totalMax = chartData[0].easyMax + chartData[0].mediumMax + chartData[0].hardMax;
 
   return (
-    <Card className="w-full h-full bg-[var(--popover)] border-none">
-      <CardContent className="flex flex-1 items-center pb-0">
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-[230px]">
+    <Card className="w-full h-full bg-[var(--popover)] border-none py-0 gap-0">
+      <CardContent className="p-0 h-full flex items-center justify-center">
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-[200px]">
           <RadialBarChart
             data={chartData}
             startAngle={90}

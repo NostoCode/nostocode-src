@@ -64,7 +64,14 @@ def _run_assert(_idx, _line):
                         _input_repr = '\\n'.join(_parts)
                 except Exception:
                     pass
-            if _actual != _expected:
+            def _normalize(_v):
+                if isinstance(_v, list) and _v and isinstance(_v[0], list):
+                    try:
+                        return sorted([sorted(_x) for _x in _v])
+                    except TypeError:
+                        pass
+                return _v
+            if _normalize(_actual) != _normalize(_expected):
                 return {'ok': False, 'index': _idx, 'input': _input_repr, 'expected': repr(_expected), 'actual': repr(_actual)}
             return None
         else:
