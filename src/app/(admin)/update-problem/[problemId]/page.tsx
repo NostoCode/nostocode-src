@@ -34,6 +34,7 @@ export default function Page() {
   const colorMode = win98Theme === 'win98' || theme === 'light' ? 'light' : 'dark';
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [problemInfo, setProblemInfo] = useState<IProblem | null>(null);
+  const [orderFlag, setOrderFlag] = useState<'' | '# ALLOW_ANY_ORDER' | '# ALLOW_OUTER_ORDER'>('');
   const router = useRouter();
   const { problemId } = useParams();
   console.log("problem: ", problemInfo)
@@ -70,7 +71,15 @@ export default function Page() {
   const onSubmit = async (data: z.infer<typeof createProblemValidation>) => {
     setIsSubmitting(true);
     try {
-      const res = await axios.patch<ApiResponse>(`/api/problem/update-problem?problemId=${problemId}`, data);
+      // Build updated testCode with the selected order flag
+      const payload: Record<string, unknown> = { ...data };
+      if (problemInfo?.testCode) {
+        const baseCode = problemInfo.testCode.startsWith('# ALLOW')
+          ? problemInfo.testCode.split('\n').slice(1).join('\n')
+          : problemInfo.testCode;
+        payload.testCode = orderFlag ? `${orderFlag}\n${baseCode}` : baseCode;
+      }
+      const res = await axios.patch<ApiResponse>(`/api/problem/update-problem?problemId=${problemId}`, payload);
       toast.success("Problem updated successfully");
       router.replace(`/problem/${problemId}`);
     } catch (error) {
@@ -92,6 +101,12 @@ export default function Page() {
 
       setProblemInfo(res.data.problem || null);
       if (!res.data.problem) return;
+
+      // Extract existing order flag from testCode
+      const tc = res.data.problem.testCode || '';
+      if (tc.startsWith('# ALLOW_ANY_ORDER')) setOrderFlag('# ALLOW_ANY_ORDER');
+      else if (tc.startsWith('# ALLOW_OUTER_ORDER')) setOrderFlag('# ALLOW_OUTER_ORDER');
+      else setOrderFlag('');
 
       form.reset({
         title: res.data.problem.title,
@@ -292,6 +307,26 @@ export default function Page() {
                   </FormItem>
                 )}
               />
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Judge Comparison Mode
+                </label>
+                <select
+                  value={orderFlag}
+                  onChange={(e) => setOrderFlag(e.target.value as typeof orderFlag)}
+                  className="w-full h-11 border rounded-md px-3 text-sm bg-transparent cursor-pointer"
+                >
+                  <option value="">Strict (default) — exact match required</option>
+                  <option value="# ALLOW_ANY_ORDER"># ALLOW_ANY_ORDER — inner + outer list order ignored (combinations, subsets, anagrams)</option>
+                  <option value="# ALLOW_OUTER_ORDER"># ALLOW_OUTER_ORDER — outer list order ignored (permutations, paths, partitions)</option>
+                </select>
+                {orderFlag && (
+                  <p className="text-xs text-muted-foreground">
+                    Flag <code className="font-mono">{orderFlag}</code> will be prepended to testCode on save.
+                  </p>
+                )}
+              </div>
 
               <Button type="submit" className='w-full h-11 text-base font-semibold cursor-pointer'>{isSubmitting ? <><Loader2 className='resize-custom animate-spin w-7 h-7' /> Please wait</> : 'Update'}</Button>
             </form>
