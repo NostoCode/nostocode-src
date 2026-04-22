@@ -23,12 +23,15 @@ import { ApiResponse } from '@/types/ApiResponse';
 import { toast } from 'sonner';
 import { useParams, useRouter } from 'next/navigation';
 import { IProblem } from '@/models/Problem';
+import { useWin98Theme } from '@/context/ThemeContext';
 
 
 export default function Page() {
 
   const [mounted, setMounted] = useState(false);
   const { theme, systemTheme, setTheme } = useTheme();
+  const { theme: win98Theme } = useWin98Theme();
+  const colorMode = win98Theme === 'win98' || theme === 'light' ? 'light' : 'dark';
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [problemInfo, setProblemInfo] = useState<IProblem | null>(null);
   const router = useRouter();
@@ -177,6 +180,7 @@ export default function Page() {
                       preview='edit'
                       hideToolbar={true}
                       className='p-2 w-full'
+                      data-color-mode={colorMode}
                     />
                     <FormMessage />
                   </FormItem>
@@ -195,6 +199,7 @@ export default function Page() {
                       preview='edit'
                       hideToolbar={true}
                       className='p-2 w-full'
+                      data-color-mode={colorMode}
                     />
                     <FormMessage />
                   </FormItem>
@@ -213,6 +218,7 @@ export default function Page() {
                       preview='edit'
                       hideToolbar={true}
                       className='p-2 w-full'
+                      data-color-mode={colorMode}
                     />
                     <FormMessage />
                   </FormItem>
@@ -293,18 +299,14 @@ export default function Page() {
         </div>
       </ScrollArea>
       <ScrollArea className='relative w-1/2 h-[calc(100vh-3rem)] border-l-2 py-4'>
-        <>
+        <div data-color-mode={colorMode}>
           <h2 className="mb-2 pl-3 font-semibold text-lg">Description View</h2>
-          <MDEditor.Markdown source={descriptionValue} className='markdown-body customTextWhite py-4 px-4 mb-6' />
-        </>
-        <>
+          <MDEditor.Markdown source={descriptionValue} className='markdown-body customTextWhite py-4 px-4 mb-6' style={{ background: "var(--card)" }} />
           <h2 className="mb-2 pl-3 font-semibold text-lg">Examples View</h2>
-          <MDEditor.Markdown source={examplesValue} className='markdown-body customTextWhite py-4 px-4 mb-6' />
-        </>
-        <>
+          <MDEditor.Markdown source={examplesValue} className='markdown-body customTextWhite py-4 px-4 mb-6' style={{ background: "var(--card)" }} />
           <h2 className="mb-2 pl-3 font-semibold text-lg">Constraints View</h2>
-          <MDEditor.Markdown source={constraintsValue} className='markdown-body customTextWhite py-4 px-4' />
-        </>
+          <MDEditor.Markdown source={constraintsValue} className='markdown-body customTextWhite py-4 px-4' style={{ background: "var(--card)" }} />
+        </div>
       </ScrollArea>
     </div>
   )
