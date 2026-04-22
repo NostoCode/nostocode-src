@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
                 if (!problemForTemplate.testCode.includes('SortedList') && !sourceCode.includes('SortedList')) {
                     cleanPrompt = cleanPrompt.replace(/^from sortedcontainers import SortedList\n?/m, '');
                 }
-                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, allAsserts);
+                const allowAnyOrder = problemForTemplate.testCode.includes('# ALLOW_ANY_ORDER');
+                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, allAsserts, allowAnyOrder);
                 finalTestCases = [{ input: "", output: "" }];
                 isTemplateMode = true;
             }

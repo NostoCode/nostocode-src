@@ -10,10 +10,14 @@ import NavLinks from './NavLinks';
 import NavRunButtonsContainer from './NavRunButtonsContainer';
 import { usePathname } from 'next/navigation';
 import { ThemeToggle } from './ThemeToggle';
+import { useWin98Theme } from '@/context/ThemeContext';
 
 export default function Header() {
   const [mounted, setMounted] = useState<boolean>(false);
-  const { theme, setTheme, systemTheme } = useTheme();
+  const { theme: rawTheme, setTheme, systemTheme } = useTheme();
+  const { theme: win98Theme } = useWin98Theme();
+  // In Ancient/Win98 mode always treat as light, regardless of next-themes state
+  const theme = win98Theme === 'win98' ? 'light' : rawTheme;
   const { data: session, status } = useSession();
   const pathname = usePathname();
 

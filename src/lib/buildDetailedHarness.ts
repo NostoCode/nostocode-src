@@ -12,14 +12,29 @@ export function extractAssertLines(testCode: string): string[] {
  *
  * The "input" field is formatted as "param = value\nparam2 = value2" using inspect.signature
  * so it matches LeetCode's display style.
+ *
+ * @param allowAnyOrder - if true, list-of-list outputs are normalized before comparison
+ *   (outer order and inner order ignored). Use for problems like 3Sum where order doesn't matter.
+ *   Problems opt in by including "# ALLOW_ANY_ORDER" anywhere in their testCode.
  */
 export function buildDetailedHarness(
     promptCode: string,
     userCode: string,
-    assertLines: string[]
+    assertLines: string[],
+    allowAnyOrder: boolean = false
 ): string {
     // Encode assert lines as base64 JSON to avoid any escaping issues in the Python source
     const assertLinesB64 = Buffer.from(JSON.stringify(assertLines)).toString('base64');
+    const normalizeBlock = allowAnyOrder ? `\
+            def _normalize(_v):
+                if isinstance(_v, list) and _v and isinstance(_v[0], list):
+                    try:
+                        return sorted([sorted(_x) for _x in _v])
+                    except TypeError:
+                        pass
+                return _v
+            _cmp_actual, _cmp_expected = _normalize(_actual), _normalize(_expected)` :
+        `            _cmp_actual, _cmp_expected = _actual, _expected`;
 
     return `${promptCode}
 
@@ -64,14 +79,8 @@ def _run_assert(_idx, _line):
                         _input_repr = '\\n'.join(_parts)
                 except Exception:
                     pass
-            def _normalize(_v):
-                if isinstance(_v, list) and _v and isinstance(_v[0], list):
-                    try:
-                        return sorted([sorted(_x) for _x in _v])
-                    except TypeError:
-                        pass
-                return _v
-            if _normalize(_actual) != _normalize(_expected):
+${normalizeBlock}
+            if _cmp_actual != _cmp_expected:
                 return {'ok': False, 'index': _idx, 'input': _input_repr, 'expected': repr(_expected), 'actual': repr(_actual)}
             return None
         else:

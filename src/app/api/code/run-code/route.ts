@@ -49,7 +49,8 @@ export async function POST(req: NextRequest) {
                     cleanPrompt = cleanPrompt.replace(/^from sortedcontainers import SortedList\n?/m, '');
                 }
 
-                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, exampleAsserts);
+                const allowAnyOrder = problem.testCode.includes('# ALLOW_ANY_ORDER');
+                finalCode = buildDetailedHarness(cleanPrompt, sourceCode, exampleAsserts, allowAnyOrder);
                 finalTestCases = [{ input: "", output: "" }];
                 isTemplateMode = true;
             }
