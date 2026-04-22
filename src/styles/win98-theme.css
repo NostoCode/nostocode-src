@@ -109,6 +109,9 @@
   align-items: center;
   gap: 6px;
   font-family: var(--win98-font);
+  white-space: nowrap;
+  overflow: visible;
+  flex-shrink: 0;
 }
 
 [data-win98="true"] .win98-titlebar-icon {
