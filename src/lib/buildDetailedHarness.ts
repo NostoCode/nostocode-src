@@ -92,16 +92,17 @@ def _run_assert(_idx, _line):
             _left = _node.left
             _exp_str = _ast.unparse(_node.comparators[0])
             _call_str = _ast.unparse(_left)
-            _actual = eval(_call_str, {'candidate': _candidate})
-            _expected = eval(_exp_str, {})
+            _G = {**globals(), 'candidate': _candidate}
+            _actual = eval(_call_str, _G)
+            _expected = eval(_exp_str, _G)
             # Try to format input with parameter names (LeetCode style)
             _input_repr = _call_str
             if isinstance(_left, _ast.Call):
                 try:
                     _sig = _inspect.signature(_candidate)
                     _params = list(_sig.parameters.keys())
-                    _arg_vals = [eval(_ast.unparse(a), {}) for a in _left.args]
-                    _kw_vals = {kw.arg: eval(_ast.unparse(kw.value), {}) for kw in _left.keywords}
+                    _arg_vals = [eval(_ast.unparse(a), _G) for a in _left.args]
+                    _kw_vals = {kw.arg: eval(_ast.unparse(kw.value), _G) for kw in _left.keywords}
                     _parts = []
                     for _pi, _pname in enumerate(_params):
                         if _pi < len(_arg_vals):
@@ -117,7 +118,7 @@ ${normalizeBlock}
                 return {'ok': False, 'index': _idx, 'input': _input_repr, 'expected': repr(_expected), 'actual': repr(_actual)}
             return None
         else:
-            _r = eval(_expr, {'candidate': _candidate})
+            _r = eval(_expr, {**globals(), 'candidate': _candidate})
             if not _r:
                 return {'ok': False, 'index': _idx, 'input': _expr, 'expected': 'True', 'actual': 'False'}
             return None
