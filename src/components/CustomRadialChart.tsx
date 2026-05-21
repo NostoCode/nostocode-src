@@ -1,22 +1,75 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
-
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { IUser } from "@/models/User";
-import { IProblem } from "@/models/Problem";
 import { LevelWiseProblemType } from "@/app/(app)/problems/page";
+import { useWin98Theme } from "@/context/ThemeContext";
 
-// Chart configuration
 const chartConfig = {
   easy: { label: "Easy", color: "#00c950" },
   medium: { label: "Medium", color: "#d79f02" },
   hard: { label: "Hard", color: "#bb252d" },
 } satisfies ChartConfig;
 
+function Win98ProgressBars({ totalLevelWiseProblem, userTotalLevelProblem }: { totalLevelWiseProblem: LevelWiseProblemType, userTotalLevelProblem: LevelWiseProblemType }) {
+  const easyPct = totalLevelWiseProblem.easy > 0 ? (userTotalLevelProblem.easy / totalLevelWiseProblem.easy * 100) : 0;
+  const mediumPct = totalLevelWiseProblem.medium > 0 ? (userTotalLevelProblem.medium / totalLevelWiseProblem.medium * 100) : 0;
+  const hardPct = totalLevelWiseProblem.hard > 0 ? (userTotalLevelProblem.hard / totalLevelWiseProblem.hard * 100) : 0;
 
-export default function CustomRadialChart({totalLevelWiseProblem, userTotalLevelProblem}: {totalLevelWiseProblem: LevelWiseProblemType, userTotalLevelProblem: LevelWiseProblemType}) {
+  return (
+    <div className="flex flex-col gap-3 w-full h-full justify-center p-4 font-[var(--win98-font)] text-[11px]">
+      <div className="text-center font-bold text-sm">Solved</div>
+
+      {/* Easy */}
+      <div className="flex items-center gap-2">
+        <span className="w-12 text-right text-[#008000] font-bold">Easy</span>
+        <div className="win98-progress-track flex-1">
+          <div className="win98-progress-fill easy" style={{ width: `${easyPct}%` }} />
+        </div>
+        <span className="w-16 text-left">{userTotalLevelProblem.easy}/{totalLevelWiseProblem.easy}</span>
+      </div>
+
+      {/* Medium */}
+      <div className="flex items-center gap-2">
+        <span className="w-12 text-right text-[#b08000] font-bold">Med.</span>
+        <div className="win98-progress-track flex-1">
+          <div className="win98-progress-fill medium" style={{ width: `${mediumPct}%` }} />
+        </div>
+        <span className="w-16 text-left">{userTotalLevelProblem.medium}/{totalLevelWiseProblem.medium}</span>
+      </div>
+
+      {/* Hard */}
+      <div className="flex items-center gap-2">
+        <span className="w-12 text-right text-[#cc0000] font-bold">Hard</span>
+        <div className="win98-progress-track flex-1">
+          <div className="win98-progress-fill hard" style={{ width: `${hardPct}%` }} />
+        </div>
+        <span className="w-16 text-left">{userTotalLevelProblem.hard}/{totalLevelWiseProblem.hard}</span>
+      </div>
+
+      {/* Total */}
+      <div className="flex items-center gap-2 mt-1 pt-1 border-t border-[var(--win98-dark)]">
+        <span className="w-12 text-right font-bold">Total</span>
+        <div className="win98-progress-track flex-1">
+          <div className="win98-progress-fill" style={{ width: `${totalLevelWiseProblem.easy + totalLevelWiseProblem.medium + totalLevelWiseProblem.hard > 0 ? ((userTotalLevelProblem.easy + userTotalLevelProblem.medium + userTotalLevelProblem.hard) / (totalLevelWiseProblem.easy + totalLevelWiseProblem.medium + totalLevelWiseProblem.hard) * 100) : 0}%` }} />
+        </div>
+        <span className="w-16 text-left font-bold">{userTotalLevelProblem.easy + userTotalLevelProblem.medium + userTotalLevelProblem.hard}/{totalLevelWiseProblem.easy + totalLevelWiseProblem.medium + totalLevelWiseProblem.hard}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function CustomRadialChart({ totalLevelWiseProblem, userTotalLevelProblem }: { totalLevelWiseProblem: LevelWiseProblemType, userTotalLevelProblem: LevelWiseProblemType }) {
+  const { theme } = useWin98Theme();
+
+  if (theme === "win98") {
+    return (
+      <div className="w-full h-full bg-[var(--popover)] win98-groupbox" data-label="Progress">
+        <Win98ProgressBars totalLevelWiseProblem={totalLevelWiseProblem} userTotalLevelProblem={userTotalLevelProblem} />
+      </div>
+    );
+  }
 
   const chartData = [
     {
@@ -46,10 +99,10 @@ export default function CustomRadialChart({totalLevelWiseProblem, userTotalLevel
             innerRadius={65}
             outerRadius={90}
           >
-
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
-                content={({ viewBox }) => {
+                content={(props: any) => {
+                  const viewBox = props?.viewBox;
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                     return (
                       <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle" className="flex flex-col gap-4">
@@ -74,46 +127,12 @@ export default function CustomRadialChart({totalLevelWiseProblem, userTotalLevel
                 }}
               />
             </PolarRadiusAxis>
-
-            <RadialBar
-              dataKey="hardRemaining"
-              fill="rgba(156, 163, 175, 0.2)"
-              stackId="a"
-              cornerRadius={5}
-            />
-            <RadialBar
-              dataKey="hard"
-              fill="#bb252d"
-              stackId="a"
-              cornerRadius={5}
-              className="stroke-transparent"
-            />
-            <RadialBar
-              dataKey="mediumRemaining"
-              fill="rgba(156, 163, 175, 0.2)"
-              stackId="a"
-              cornerRadius={5}
-            />
-            <RadialBar
-              dataKey="medium"
-              fill="#d79f02"
-              stackId="a"
-              cornerRadius={5}
-              className="stroke-transparent"
-            />
-            <RadialBar
-              dataKey="easyRemaining"
-              fill="rgba(156, 163, 175, 0.2)"
-              stackId="a"
-              cornerRadius={5}
-            />
-            <RadialBar
-              dataKey="easy"
-              fill="#00c950"
-              stackId="a"
-              cornerRadius={5}
-              className="stroke-transparent"
-            />
+            <RadialBar dataKey="hardRemaining" fill="rgba(156, 163, 175, 0.2)" stackId="a" cornerRadius={5} />
+            <RadialBar dataKey="hard" fill="#bb252d" stackId="a" cornerRadius={5} className="stroke-transparent" />
+            <RadialBar dataKey="mediumRemaining" fill="rgba(156, 163, 175, 0.2)" stackId="a" cornerRadius={5} />
+            <RadialBar dataKey="medium" fill="#d79f02" stackId="a" cornerRadius={5} className="stroke-transparent" />
+            <RadialBar dataKey="easyRemaining" fill="rgba(156, 163, 175, 0.2)" stackId="a" cornerRadius={5} />
+            <RadialBar dataKey="easy" fill="#00c950" stackId="a" cornerRadius={5} className="stroke-transparent" />
           </RadialBarChart>
         </ChartContainer>
       </CardContent>

@@ -10,7 +10,7 @@ import { IProblem } from '@/models/Problem'
 import { timeAgoFunction } from '@/helpers/timeAgoFunction'
 import Link from 'next/link'
 
-export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQuestioinsLevelWise, allSubmissions }: { levelWiseSolvedQuestions: LevelWiseProblemType, allQuestioinsLevelWise: LevelWiseProblemType, allSubmissions: codeSubmissionResultType[] }) {
+export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQuestioinsLevelWise, allSubmissions, userId }: { levelWiseSolvedQuestions: LevelWiseProblemType, allQuestioinsLevelWise: LevelWiseProblemType, allSubmissions: codeSubmissionResultType[], userId: string }) {
   console.log(allSubmissions)
 
   return (
@@ -75,7 +75,7 @@ export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQ
             </div>
           </div>
           <div className="flex gap-1 items-center text-gray-300 cursor-pointer">
-            <Link href={`/all-submissions/${allSubmissions[0]?.userId}`}>
+            <Link href={`/all-submissions/${userId}`}>
               <h3 className="">View all solutions</h3>
             </Link>
             <ChevronRight className='resize-custom w-5' />

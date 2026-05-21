@@ -55,6 +55,13 @@ export default function RootLayout({
                     <button className="no-win98 win98-chrome-btn" tabIndex={-1}>✕</button>
                   </div>
                 </div>
+                {/* Win98 Menu Bar */}
+                <div className="win98-menubar" aria-label="Menu bar">
+                  <span className="win98-menubar-item">File</span>
+                  <span className="win98-menubar-item">Edit</span>
+                  <span className="win98-menubar-item">View</span>
+                  <span className="win98-menubar-item">Help</span>
+                </div>
                 <Header />
                 {children}
               </div>

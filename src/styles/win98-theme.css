@@ -52,7 +52,7 @@
   font-family: var(--win98-font);
   font-size: 11px;
   color: var(--win98-black);
-  padding-bottom: 40px;
+  padding-bottom: 44px;
   -webkit-font-smoothing: none;
   -moz-osx-font-smoothing: unset;
 }
@@ -79,7 +79,7 @@
   box-shadow: inset -1px -1px var(--win98-black), inset 1px 1px var(--win98-light),
     inset -2px -2px var(--win98-dark), inset 2px 2px var(--win98-white);
   margin: 4px 4px 0 4px;
-  min-height: calc(100vh - 48px);
+  min-height: calc(100vh - 52px);
 }
 
 /* ---------- Chrome Title Bar ---------- */
@@ -250,28 +250,29 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: 36px;
+  height: 40px;
   background: var(--win98-gray);
-  box-shadow: inset 0 1px 0 var(--win98-white);
-  padding: 2px 4px;
+  box-shadow: inset 0 2px 0 var(--win98-white);
+  padding: 3px 4px;
   z-index: 9999;
-  gap: 4px;
+  gap: 6px;
 }
 
 [data-win98="true"] .win98-start-button {
   background: var(--win98-gray) !important;
   box-shadow: var(--win98-raised) !important;
   border: none !important;
-  height: 28px;
-  padding: 2px 8px !important;
+  height: 32px;
+  padding: 3px 10px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 4px !important;
+  gap: 5px !important;
   font-weight: bold;
-  font-size: 11px !important;
+  font-size: 12px !important;
   font-family: var(--win98-font) !important;
   cursor: pointer !important;
   color: var(--win98-black) !important;
+  min-width: 64px;
 }
 
 [data-win98="true"] .win98-start-button:active {
@@ -284,13 +285,13 @@
 
 [data-win98="true"] .win98-taskbar-clock {
   box-shadow: var(--win98-sunken);
-  padding: 2px 8px;
-  font-size: 11px;
+  padding: 3px 10px;
+  font-size: 12px;
   font-family: var(--win98-font);
   background: var(--win98-gray);
-  min-width: 60px;
+  min-width: 64px;
   text-align: center;
-  height: 28px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -362,6 +363,252 @@
 [data-win98="true"] h5,
 [data-win98="true"] h6 {
   font-family: var(--win98-font);
+}
+
+[data-win98="true"] p,
+[data-win98="true"] span,
+[data-win98="true"] div,
+[data-win98="true"] li,
+[data-win98="true"] label,
+[data-win98="true"] a {
+  font-family: var(--win98-font);
+}
+
+/* ---------- Menu Bar ---------- */
+.win98-menubar {
+  display: none;
+}
+
+[data-win98="true"] .win98-menubar {
+  display: flex;
+  align-items: center;
+  background: var(--win98-gray);
+  border-bottom: 1px solid var(--win98-dark);
+  padding: 1px 4px;
+  gap: 2px;
+  flex-shrink: 0;
+  height: 22px;
+}
+
+[data-win98="true"] .win98-menubar-item {
+  background: transparent;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 2px 8px !important;
+  font-family: var(--win98-font);
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--win98-black);
+  min-height: 18px;
+}
+
+[data-win98="true"] .win98-menubar-item:hover {
+  background: var(--win98-blue);
+  color: var(--win98-white);
+  box-shadow: none !important;
+}
+
+/* ---------- Progress Bar (classic Win98 style) ---------- */
+.win98-progress {
+  display: none;
+}
+
+[data-win98="true"] .win98-progress {
+  display: block;
+}
+
+[data-win98="true"] .win98-progress-track {
+  background: var(--win98-white);
+  box-shadow: var(--win98-sunken);
+  height: 18px;
+  width: 100%;
+  padding: 2px;
+}
+
+[data-win98="true"] .win98-progress-fill {
+  height: 100%;
+  background-color: var(--win98-blue);
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 11px,
+    rgba(0,0,0,0.25) 11px,
+    rgba(0,0,0,0.25) 12px
+  );
+  transition: width 0.3s ease;
+}
+
+[data-win98="true"] .win98-progress-fill.easy {
+  background-color: #00a000;
+}
+
+[data-win98="true"] .win98-progress-fill.medium {
+  background-color: #c08000;
+}
+
+[data-win98="true"] .win98-progress-fill.hard {
+  background-color: #cc0000;
+}
+
+/* ---------- Win98 GroupBox (framed sections with label) ---------- */
+[data-win98="true"] .win98-groupbox {
+  border: none !important;
+  box-shadow: var(--win98-sunken);
+  background: var(--win98-gray);
+  padding: 12px 8px 8px 8px;
+  position: relative;
+  margin-top: 8px;
+}
+
+[data-win98="true"] .win98-groupbox::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -8px;
+  left: 8px;
+  background: var(--win98-gray);
+  padding: 0 4px;
+  font-family: var(--win98-font);
+  font-size: 11px;
+  color: var(--win98-black);
+}
+
+/* ---------- Classic Win98 Table / ListView ---------- */
+[data-win98="true"] .win98-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--win98-white);
+  box-shadow: var(--win98-sunken);
+}
+
+[data-win98="true"] .win98-table th {
+  background: var(--win98-gray);
+  box-shadow: var(--win98-raised);
+  padding: 3px 8px;
+  font-family: var(--win98-font);
+  font-size: 11px;
+  font-weight: bold;
+  text-align: left;
+  cursor: default;
+  user-select: none;
+  border-bottom: 1px solid var(--win98-dark);
+}
+
+[data-win98="true"] .win98-table td {
+  padding: 3px 8px;
+  font-family: var(--win98-font);
+  font-size: 11px;
+  border-bottom: 1px solid var(--win98-light);
+  color: var(--win98-black);
+}
+
+[data-win98="true"] .win98-table tr:nth-child(even) td {
+  background: #f5f5f5;
+}
+
+[data-win98="true"] .win98-table tr:hover td {
+  background: var(--win98-blue);
+  color: var(--win98-white);
+}
+
+/* ---------- Win98 Avatar — pixelated, no modern styling ---------- */
+[data-win98="true"] .win98-avatar {
+  image-rendering: pixelated;
+  border: 1px solid var(--win98-dark);
+  box-shadow: var(--win98-raised);
+  width: 48px;
+  height: 48px;
+  background: var(--win98-gray);
+}
+
+/* ---------- Icon pixelation ---------- */
+[data-win98="true"] img:not(.monaco-editor *):not(.no-win98) {
+  image-rendering: pixelated;
+}
+
+/* ---------- Card → GroupBox with etched border ---------- */
+[data-win98="true"] .card,
+[data-win98="true"] [class*="bg-card"],
+[data-win98="true"] [class*="rounded-xl"],
+[data-win98="true"] [class*="rounded-lg"],
+[data-win98="true"] [class*="rounded-md"] {
+  background: var(--win98-gray) !important;
+  box-shadow: var(--win98-sunken) !important;
+  border: none !important;
+}
+
+/* ---------- Select/dropdown combobox styling ---------- */
+[data-win98="true"] select:not(.no-win98) {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4h8L6 8z' fill='%230a0a0a'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  padding-right: 20px !important;
+}
+
+/* ---------- Header Stats panel — sunken stat boxes ---------- */
+[data-win98="true"] .win98-stat-box {
+  background: var(--win98-white);
+  box-shadow: var(--win98-sunken);
+  padding: 4px 12px;
+  text-align: center;
+  min-width: 60px;
+}
+
+[data-win98="true"] .win98-stat-box .stat-value {
+  font-weight: bold;
+  font-size: 14px;
+  color: var(--win98-blue);
+}
+
+[data-win98="true"] .win98-stat-box .stat-label {
+  font-size: 10px;
+  color: var(--win98-dark);
+}
+
+/* ---------- Difficulty Text (no pills, just colored text) ---------- */
+[data-win98="true"] .difficulty-easy {
+  color: #008000 !important;
+  font-weight: bold;
+}
+
+[data-win98="true"] .difficulty-medium {
+  color: #b08000 !important;
+  font-weight: bold;
+}
+
+[data-win98="true"] .difficulty-hard {
+  color: #cc0000 !important;
+  font-weight: bold;
+}
+
+/* ---------- Status Bar ---------- */
+[data-win98="true"] .win98-statusbar {
+  background: var(--win98-gray);
+  box-shadow: inset 0 1px 0 var(--win98-white);
+  border-top: 1px solid var(--win98-dark);
+  padding: 2px 8px;
+  font-family: var(--win98-font);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  gap: 12px;
+}
+
+[data-win98="true"] .win98-statusbar-panel {
+  box-shadow: var(--win98-sunken);
+  padding: 1px 8px;
+  min-width: 80px;
+  background: var(--win98-gray);
+}
+
+/* ---------- Resizable panel gutter ---------- */
+[data-win98="true"] [data-panel-group-direction] [role="separator"] {
+  background: var(--win98-gray);
+  border-left: 1px solid var(--win98-white);
+  border-right: 1px solid var(--win98-dark);
+  width: 4px;
 }
 
 /* ---------- hr / separator ---------- */
@@ -486,7 +733,7 @@
 
 /* ---------- Win98 Problems page: account for fixed taskbar at bottom ---------- */
 [data-win98="true"] .problems-outer-container {
-  height: calc(100vh - 3rem - 60px) !important;
+  height: calc(100vh - 3.5rem - 64px) !important;
 }
 
 /* ---------- Win98 MDEditor code blocks: Courier New font ---------- */
@@ -505,6 +752,56 @@
 /* ---------- Win98 Problem list: separator between rows ---------- */
 [data-win98="true"] .problems-outer-container a > div {
   border-bottom: 1px solid var(--win98-dark) !important;
+  border-radius: 0 !important;
+}
+
+/* ---------- Win98 ListView table-style rows ---------- */
+[data-win98="true"] [data-radix-scroll-area-viewport] a > div {
+  background: var(--win98-white) !important;
+  border-bottom: 1px solid var(--win98-light) !important;
+  border-radius: 0 !important;
+}
+
+[data-win98="true"] [data-radix-scroll-area-viewport] a:nth-child(even) > div {
+  background: #f0f0f0 !important;
+}
+
+[data-win98="true"] [data-radix-scroll-area-viewport] a:hover > div {
+  background: var(--win98-blue) !important;
+  color: var(--win98-white) !important;
+}
+
+/* ---------- Pagination as status bar ---------- */
+[data-win98="true"] .problems-outer-container .border-t {
+  background: var(--win98-gray);
+  box-shadow: inset 0 1px 0 var(--win98-white);
+  border-top: 1px solid var(--win98-dark) !important;
+}
+
+[data-win98="true"] .problems-outer-container .border-t button {
+  box-shadow: var(--win98-raised) !important;
+  border: none !important;
+  background: var(--win98-gray) !important;
+}
+
+[data-win98="true"] .problems-outer-container .border-t button:active {
+  box-shadow: var(--win98-sunken) !important;
+}
+
+[data-win98="true"] .problems-outer-container .border-t select {
+  background: var(--win98-white) !important;
+}
+
+/* ---------- Sidebar coming-soon items ---------- */
+[data-win98="true"] .problems-outer-container [class*="opacity-50"] {
+  color: var(--win98-dark) !important;
+}
+
+/* ---------- Sunken search container ---------- */
+[data-win98="true"] [class*="rounded-full"][class*="bg-input"] {
+  background: var(--win98-white) !important;
+  box-shadow: var(--win98-sunken) !important;
+  border-radius: 0 !important;
 }
 
 /* ---------- Win98 Monaco editor: Courier New in ancient mode ---------- */
