@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
+import { Label, type LabelProps, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { LevelWiseProblemType } from "@/app/(app)/problems/page";
@@ -101,7 +101,7 @@ export default function CustomRadialChart({ totalLevelWiseProblem, userTotalLeve
           >
             <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
               <Label
-                content={(props: any) => {
+                content={(props: LabelProps) => {
                   const viewBox = props?.viewBox;
                   if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                     return (
