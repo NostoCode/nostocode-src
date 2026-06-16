@@ -151,11 +151,61 @@
   color: var(--foreground) !important;
 }
 
+/* Modern light: ensure Monaco editor uses a light canvas */
+html:not(.dark) .monaco-editor .monaco-editor-background,
+html:not(.dark) .monaco-editor .margin {
+  background-color: #ffffff !important;
+}
+
+.markdown-body sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
 /* MDEditor: textarea must be transparent so the syntax-highlighted pre layer shows through.
    Use 3-class specificity (.w-md-editor .w-md-editor-text .w-md-editor-text-input = 0,3,0)
    to beat the win98-theme.css textarea rule ([data-win98] textarea:not(.no-win98) = 0,2,1) */
 .w-md-editor .w-md-editor-text .w-md-editor-text-input {
   background: transparent !important;
+}
+
+/* MDEditor: readable in Modern light + Ancient (add-solution, admin, descriptions) */
+.w-md-editor,
+.w-md-editor-content {
+  background: var(--card) !important;
+  color: var(--foreground) !important;
+}
+
+[data-color-mode="light"] .w-md-editor-text-pre,
+[data-color-mode="light"] .w-md-editor-text-input,
+[data-color-mode="light"] .w-md-editor-preview,
+[data-color-mode="light"] .wmde-markdown,
+[data-color-mode="light"] .wmde-markdown-color {
+  color: var(--foreground) !important;
+  background: var(--card) !important;
+}
+
+[data-color-mode="light"] .w-md-editor-text-pre code,
+[data-color-mode="light"] .wmde-markdown pre {
+  background: var(--sidebar-accent) !important;
+  color: var(--foreground) !important;
+}
+
+[data-win98="true"] .w-md-editor,
+[data-win98="true"] .w-md-editor-content,
+[data-win98="true"] .w-md-editor-text-pre,
+[data-win98="true"] .w-md-editor-text-input,
+[data-win98="true"] .w-md-editor-preview,
+[data-win98="true"] .wmde-markdown {
+  background: var(--win98-gray) !important;
+  color: var(--win98-black) !important;
+}
+
+[data-win98="true"] .w-md-editor-text-pre code,
+[data-win98="true"] .wmde-markdown pre {
+  background: var(--win98-white) !important;
+  color: var(--win98-black) !important;
+  border: 1px solid var(--win98-dark);
 }
 
 /* In light (non-dark) Modern mode, override gray text utilities for readability */

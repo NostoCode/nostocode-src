@@ -1,249 +1,39 @@
-"use client";
-import React, { useCallback, useEffect, useState } from 'react'
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable"
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
+import { mongodbObjectId } from "@/schemas/similarQuestionSchema";
+import { getProblemById, getUserProblemsProgress } from "@/lib/data/problems";
+import { serializeForClient } from "@/lib/serialize";
+import ProblemPageClient from "./ProblemPageClient";
+import type { IProblem } from "@/models/Problem";
 
-import ProblemPageNavigation from '@/components/ProblemPageNavigation';
-import { ScrollArea } from "@/components/ui/scroll-area"
-import ProblemSideFooter from '@/components/ProblemPageSideFooter';
-import { useParams } from 'next/navigation.js';
+interface PageProps {
+  params: Promise<{ problemId: string }>;
+}
 
-import { mongodbObjectId } from '@/schemas/similarQuestionSchema';
-import { toast } from 'sonner';
-import axios from 'axios';
-import { ApiResponse, codeSubmissionResultType, CodeRunResult, FailedCase } from '@/types/ApiResponse';
-import { IProblem } from '@/models/Problem.js';
-import { Skeleton } from "@/components/ui/skeleton"
-import ProblemPageDescription from '@/components/ProblemPageDescription';
+export default async function Page({ params }: PageProps) {
+  const { problemId } = await params;
+  const parsed = mongodbObjectId.safeParse(problemId);
+  let initialProblem: IProblem | null = null;
 
-import ProblemPageCodeEditor from '@/components/ProblemPageCodeEditor';
-import { useTheme } from 'next-themes';
-import { useWin98Theme } from '@/context/ThemeContext';
-
-import { useSession } from 'next-auth/react';
-import { codeRunValidation } from '@/schemas/codeRunSchema';import ProblemPageSoluction from '@/components/ProblemPageSoluction';
-import ProblemPageSubmission from '@/components/ProblemPageSubmission';
-import ProblemPageTestResult from '@/components/ProblemPageTestResult';
-import { codeSubmissionValidation } from '@/schemas/codeSubmissionSchema';
-import confetti from "canvas-confetti";
-import { updateProblemPageState, clearProblemPageState } from '@/context/ProblemPageContext';
-
-// Ancient Coding Mode - AI features removed
-
-export default function Page() {
-  const [mounted, setMounted] = useState<boolean>(false);
-  const pathname = useParams();
-  const { problemId } = pathname;
-  const { theme: rawTheme } = useTheme()
-  const { theme: win98Theme } = useWin98Theme();
-  // In Ancient/Win98 mode always treat as light, regardless of next-themes state
-  const theme = win98Theme === 'win98' ? 'light' : rawTheme;
-  const { data: session, status } = useSession();
-  const [problemInfo, setProblemInfo] = useState<IProblem | null>(null);
-
-  const [sourceCode, setSourceCode] = useState<string>("");
-  const [selectedLanguage, setSelectedLanguage] = useState<string>("Python");
-  const [selectedLanguageCode, setSelectedLanguageCode] = useState<number>(10);
-  const [isCodeRunning, setIsCodeRunning] = useState<boolean>(false);
-  const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(false);
-  const [currentTab, setCurrentTab] = useState<string>("description");
-  const [codeOutput, setCodeOutput] = useState<CodeRunResult[] | null>(null);
-  const [submissionOutput, setSubmissionOutput] = useState<codeSubmissionResultType | null>(null);
-  const [totalTestCases, setTotalTestCases] = useState<number>(0);
-  const [runFailedCase, setRunFailedCase] = useState<FailedCase | null>(null);
-  const [submitFailedCase, setSubmitFailedCase] = useState<FailedCase | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const fetchProblemDetails = async () => {
-      if (!mounted) return null;
-
-      try {
-        const parsedData = mongodbObjectId.safeParse(problemId);
-
-        if (!parsedData.success) {
-          console.log("Invalid Problem Id: ", problemId);
-          toast.error("Invalid Problem Id");
-          return;
-        }
-
-        const res = await axios.get<ApiResponse>(`/api/problem/get-problem?problemId=${problemId}`);
-
-        setProblemInfo(res.data.problem || null);
-      } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-          toast.error(error.response.data.message);
-          console.log("Problem fetching route error: ", error.response.data.message)
-        } else {
-          toast.error("Error while fetching error");
-          console.log("Error while fetching error: ", error);
-        }
-      }
-    }
-
-    fetchProblemDetails();
-  }, [mounted]);
-
-  const handleCodeRun = useCallback(async () => {
-    if (!problemInfo || !session) return;
-
-    setIsCodeRunning(true);
-    setCurrentTab("testResult");
-    setCodeOutput(null);
-    setSubmissionOutput(null);
-    setRunFailedCase(null);
-    try {
-      const data = {
-        sourceCode: sourceCode,
-        languageId: selectedLanguageCode,
-        problemId: problemId as string,
-        testCases: problemInfo.testCases
-      }
-
-      const parsedData = codeRunValidation.safeParse(data);
-      if (!parsedData.success) {
-        toast.error(parsedData.error.issues[0].message);
-        console.log(parsedData.error.issues[0].message);
-        return;
-      }
-
-      const res = await axios.post<ApiResponse>("/api/code/run-code", data);
-
-      toast.success("Code run successfully");
-      console.log("codeoutput: ", res.data.results);
-      setCodeOutput(res.data.results ?? null);
-      setRunFailedCase(res.data.failedCase ?? null);
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.log("Code run error: ", error.response.data.message || "Please check your code and try again.");
-        toast.error(error.response.data.message || "Please check your code and try again.");
-      } else {
-        console.log("Error while running the code", error);
-        toast.error("Error while running the code");
-      }
-    } finally {
-      setIsCodeRunning(false);
-    }
-  }, [problemInfo, session, sourceCode, selectedLanguageCode, problemId]);
-
-  const showConfetti = () => {
-    confetti({
-      particleCount: 200,
-      spread: 100,
-      origin: { y: 0.65 },
-    });
+  if (parsed.success) {
+    const raw = await getProblemById(problemId);
+    initialProblem = raw ? (serializeForClient(raw) as IProblem) : null;
   }
 
-  // Ancient Coding Mode: Get score from editor
-  const getScoringResult = () => {
-    if (typeof window !== 'undefined' && typeof (window as Window & { getAncientCodeScore?: () => unknown }).getAncientCodeScore === 'function') {
-      return (window as Window & { getAncientCodeScore?: () => unknown }).getAncientCodeScore!();
+  const session = await getServerSession(authOptions);
+  let isSolved = false;
+  if (session?.user?._id && initialProblem) {
+    const progress = await getUserProblemsProgress(session.user._id);
+    if (progress) {
+      isSolved = progress.solvedIds.includes(problemId);
     }
-    return null;
-  };
-
-  const handleCodeSubmission = useCallback(async () => {
-    if (!problemInfo || !session) return;
-
-    // Get Ancient Code Score from editor
-    const scoringResult = getScoringResult();
-
-    setIsSubmitLoading(true);
-    setCurrentTab("testResult");  // switch to result tab so user sees the outcome
-    try {
-      const data = {
-        userId: session?.user._id,
-        language: selectedLanguage,
-        problemId: problemInfo._id,
-        sourceCode,
-        languageId: selectedLanguageCode,
-        testCases: problemInfo.testCases,
-        ancientCodeScore: scoringResult ? scoringResult.score : 100,
-        ancientCodeLevel: scoringResult ? scoringResult.level : "🟢 Ancient Master",
-        scoreDetails: scoringResult ? scoringResult.details : undefined,
-      }
-
-      const parsedData = codeSubmissionValidation.safeParse(data);
-      if (!parsedData.success) {
-        toast.error(parsedData.error.issues[0].message);
-        console.log(parsedData.error.issues[0].message);
-        return;
-      }
-
-      const res = await axios.post<ApiResponse>("/api/code/submit-code", data);
-      toast.success("Code submitted successfully");
-      console.log("Code submitted successfully: ", res.data.submissionOutput);
-      setSubmissionOutput(res.data.submissionOutput ?? null);
-      setTotalTestCases(res.data.totalTestCases ?? 0);
-      setSubmitFailedCase(res.data.failedCase ?? null);
-      if (res.data.submissionOutput?.status === "Accepted") showConfetti();
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        toast.error(error.response.data.message || "Please check your code and try again.");
-        console.log("Code submission error: ", error.response.data.message || "Please check your code and try again.");
-      } else {
-        toast.error("Error while submitting the code");
-        console.log("Error while submitting the code ", error);
-      }
-    } finally {
-      setIsSubmitLoading(false);
-    }
-  }, [problemInfo, session, sourceCode, selectedLanguage, selectedLanguageCode]);
-
-  // Sync handlers and state into the module-level store for the header to read
-  useEffect(() => {
-    updateProblemPageState({
-      handleCodeRun,
-      handleCodeSubmission,
-      isCodeRunning,
-      isSubmitLoading,
-      isLoggedIn: !!session?.user,
-    });
-  }, [handleCodeRun, handleCodeSubmission, isCodeRunning, isSubmitLoading, session]);
-
-  // Clear store on unmount
-  useEffect(() => {
-    return () => { clearProblemPageState(); };
-  }, []);
-
-  if (!mounted) {
-    return null;
   }
 
   return (
-    <div className="w-full h-[calc(100vh-3rem)] px-3 py-2">
-      <ResizablePanelGroup direction="horizontal" className="w-full gap-1">
-        <ResizablePanel defaultSize={50} minSize={31} className='rounded-md bg-[var(--sidebar-accent)] border'>
-          <ProblemPageNavigation currentTab={currentTab} setCurrentTab={setCurrentTab} />
-
-          <ScrollArea className='relative w-full h-[calc(100vh-3.5rem-3rem)]'>
-            {!problemInfo && <div style={{ background: "var(--card)" }} className='absolute left-0 top-0 w-full h-full z-[90] p-4'>
-              <Skeleton className="h-8 w-36 rounded-md" />
-              <Skeleton className="h-8 w-[18rem] rounded-md mt-10" />
-              <Skeleton className="h-48 w-full rounded-md mt-4" />
-              <Skeleton className="h-52 w-full rounded-md mt-4" />
-            </div>
-            }
-
-            {(problemInfo && currentTab === "description") && <ProblemPageDescription problemInfo={problemInfo} session={session} />}
-            {(problemInfo && currentTab === "solutions") && <ProblemPageSoluction problemId={problemId?.toString() || ""} />}
-            {(problemInfo && currentTab === "submissions") && <ProblemPageSubmission theme={theme} problemInfo={problemInfo} setCurrentTab={setCurrentTab} setSubmissionOutput={setSubmissionOutput} />}
-            {(problemInfo && currentTab === "testResult") && <ProblemPageTestResult codeOutput={codeOutput} isCodeRunning={isCodeRunning} theme={theme} problemInfo={problemInfo} session={session} submissionOutput={submissionOutput} setSubmissionOutput={setSubmissionOutput} totalTestCases={totalTestCases} runFailedCase={runFailedCase} submitFailedCase={submitFailedCase} setCurrentTab={setCurrentTab} />}
-            <ProblemSideFooter />
-          </ScrollArea>
-
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel defaultSize={50} minSize={30} className='rounded-md'>
-          <ProblemPageCodeEditor theme={theme} selectedLanguage={selectedLanguage} setSelectedLanguage={setSelectedLanguage} setSelectedLanguageCode={setSelectedLanguageCode} sourceCode={sourceCode} setSourceCode={setSourceCode} starterCode={problemInfo?.starterCode} />
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </div>
-  )
+    <ProblemPageClient
+      problemId={problemId}
+      initialProblem={initialProblem}
+      isSolved={isSolved}
+    />
+  );
 }

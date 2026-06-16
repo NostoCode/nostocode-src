@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, forwardRef, useImperativeHandle } from 'react'
 import Editor from '@monaco-editor/react';
 import type { OnMount } from '@monaco-editor/react';
 import { Bookmark, ChevronUp, CodeXml, Copy, Info, Maximize, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
@@ -8,41 +8,30 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useWin98Theme } from '@/context/ThemeContext';
+import { useAppTheme } from '@/context/ThemeContext';
+import {
+    calculateAncientCodeScore,
+    getInternalClipboard,
+    logCodeSnapshot,
+    logEditorEvent,
+    resetEditorEvents,
+    setInternalClipboard,
+    type ScoringResult,
+} from '@/lib/ancientScoring';
 
-// Prop types for this component
 interface ProblemPageCodeEditorType {
     theme: string | undefined;
     selectedLanguage: string;
-    setSelectedLanguage: React.Dispatch<React.SetStateAction<string>>;
     setSelectedLanguageCode: React.Dispatch<React.SetStateAction<number>>;
     sourceCode: string;
     setSourceCode: React.Dispatch<React.SetStateAction<string>>;
 }
 
-// Expose testing helpers on window (used by browser automation)
-declare global {
-    interface Window {
-        getAncientCodeScore?: () => ScoringResult;
-        resetEditorEvents?: () => void;
-    }
+export interface ProblemPageCodeEditorHandle {
+    getScoringResult: () => ScoringResult;
+    resetEvents: () => void;
 }
 
-// ============================================
-// Ancient Coding Mode - Anti-Cheat & Scoring
-// ============================================
-
-// Internal clipboard - never loses content on external clipboard changes
-let internalClipboard = "";
-
-// Event logging for scoring
-interface EditorEvent {
-    type: "insert" | "delete" | "copy_internal" | "paste_internal",
-    length: number,
-    timestamp: number
-}
-
-// Monaco selection shape (subset we need, avoids importing monaco-editor directly)
 interface MonacoSelection {
     isEmpty: () => boolean;
     startLineNumber: number;
@@ -51,222 +40,91 @@ interface MonacoSelection {
     endColumn: number;
 }
 
-// Code-length snapshots used for burst/progression analysis
-interface CodeSnapshot { length: number; timestamp: number }
-
-const editorEvents: EditorEvent[] = [];
-const codeSnapshots: CodeSnapshot[] = [];
-const MAX_EVENTS = 1000;
-
-// Ancient Coding Score System
-interface ScoringResult {
-    score: number;
-    level: string;
-    details: {
-        typingRatio: number;
-        rhythmScore: number;
-        editActivity: number;
-        largeInserts: number;
-        speedScore: number;
-        burstScore: number;
-        sessionSecs: number;
-    }
-}
-
-function logEditorEvent(event: EditorEvent) {
-    editorEvents.push(event);
-    if (editorEvents.length > MAX_EVENTS) {
-        editorEvents.shift();
-    }
-}
-
-// Calculate Ancient Coding Score
-function calculateAncientCodeScore(): ScoringResult {
-    // No events = code was not typed (starter code submitted or externally injected)
-    if (editorEvents.length === 0) {
-        return {
-            score: 0, level: "🔴 Likely AI Generated",
-            details: { typingRatio: 0, rhythmScore: 0, editActivity: 0, largeInserts: 0, speedScore: 0, burstScore: 0, sessionSecs: 0 }
-        };
-    }
-
-    const insertEvents = editorEvents.filter(e => e.type === "insert");
-    const deleteEvents = editorEvents.filter(e => e.type === "delete");
-    const pasteEvents  = editorEvents.filter(e => e.type === "paste_internal");
-
-    const totalActions       = insertEvents.length + deleteEvents.length;
-    const totalInsertedChars = insertEvents.reduce((sum, e) => sum + e.length, 0);
-
-    // --- inputRatio (gameable but still indicative) ---
-    const inputRatio = totalActions > 0 ? insertEvents.length / totalActions : 1;
-
-    // --- rhythmScore: reward irregular (human) timing, penalize uniform (robot) ---
-    let rhythmScore = 0.3;
-    if (insertEvents.length >= 2) {
-        const intervals: number[] = [];
-        for (let i = 1; i < insertEvents.length; i++) {
-            intervals.push(insertEvents[i].timestamp - insertEvents[i - 1].timestamp);
-        }
-        const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-        if (mean > 0) {
-            const variance = intervals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / intervals.length;
-            const cv = Math.sqrt(variance) / mean; // humans: 0.4–1.5; robots: <0.1
-            rhythmScore = Math.min(1, Math.max(0, cv * 2));
-        } else {
-            rhythmScore = 0;
-        }
-    }
-
-    // --- editActivity: fraction of actions that are deletions ---
-    const editActivity = totalActions > 0 ? deleteEvents.length / totalActions : 0;
-
-    // --- Detect large unexplained inserts (injection signal) ---
-    let largeInserts = 0;
-    const pasteTimestamps = pasteEvents.map(e => e.timestamp);
-    for (const ev of editorEvents) {
-        if (ev.type === "insert" && ev.length > 50) {
-            const isPastedInternally = pasteTimestamps.some(pt => Math.abs(pt - ev.timestamp) < 200);
-            if (!isPastedInternally) largeInserts++;
-        }
-    }
-
-    // Internal paste inserts are excluded from speed and burst scoring —
-    // the user typed that code in the editor themselves, it shouldn't be penalised.
-    const genuineInsertEvents = insertEvents.filter(
-        e => !pasteTimestamps.some(pt => Math.abs(pt - e.timestamp) < 200)
-    );
-    const totalGenuineInsertedChars = genuineInsertEvents.reduce((sum, e) => sum + e.length, 0);
-
-    // --- speedScore: avg chars/sec over genuine typing (excludes internal pastes).
-    //     Normal: 2–15 chars/sec. Fast typist: ~15/sec. Script: 100+/sec. ---
-    const sessionSecs = editorEvents.length >= 2
-        ? (editorEvents[editorEvents.length - 1].timestamp - editorEvents[0].timestamp) / 1000
-        : 0;
-    let speedScore = 0.8; // default if we have no timing data
-    if (sessionSecs > 0 && totalGenuineInsertedChars > 0) {
-        const avgSpeed = totalGenuineInsertedChars / sessionSecs; // chars/sec
-        // Full score for ≤15/s, 0 for ≥30/s, linear decay between
-        speedScore = Math.min(1, Math.max(0, 1 - Math.max(0, avgSpeed - 15) / 15));
-    }
-
-    // --- burstScore: max chars inserted in any 1-second sliding window (genuine typing only).
-    //     Humans: ~10 chars/sec in a burst. Scripts: 200+/sec. ---
-    let maxBurst = 0;
-    const BURST_WINDOW_MS = 1000;
-    let windowStart = 0;
-    let windowChars = 0;
-    for (let i = 0; i < genuineInsertEvents.length; i++) {
-        windowChars += genuineInsertEvents[i].length;
-        // drop events older than BURST_WINDOW_MS
-        while (windowStart < i && genuineInsertEvents[i].timestamp - genuineInsertEvents[windowStart].timestamp > BURST_WINDOW_MS) {
-            windowChars -= genuineInsertEvents[windowStart].length;
-            windowStart++;
-        }
-        if (windowChars > maxBurst) maxBurst = windowChars;
-    }
-    // Full score ≤20 chars/s burst, 0 for ≥120 chars/s burst
-    const burstScore = Math.min(1, Math.max(0, 1 - Math.max(0, maxBurst - 20) / 100));
-
-    // --- Weighted formula (sums to 100) ---
-    // antiPasteScore removed: external paste is already blocked at OS level;
-    // internal paste = code the user wrote themselves = no penalty.
-    const rawScore =
-        15 * inputRatio     +  // gameable but still indicative
-        40 * rhythmScore    +  // strongest human signal
-        10 * editActivity   +  // small signal
-        20 * speedScore     +  // overall session speed (genuine typing only)
-        15 * burstScore;       // burst injection detection (genuine typing only)
-
-    // Each unexplained large inject deducts 40 points (hard cap)
-    const largeInsertPenalty = Math.min(rawScore, largeInserts * 40);
-    const score = Math.round(Math.min(100, Math.max(0, rawScore - largeInsertPenalty)));
-
-    let level: string;
-    if (score >= 90) {
-        level = "🟢 Ancient Master";
-    } else if (score >= 70) {
-        level = "🟡 Skilled Human";
-    } else if (score >= 40) {
-        level = "🟠 Suspicious";
-    } else {
-        level = "🔴 Likely AI Generated";
-    }
-
-    return {
-        score,
-        level,
-        details: {
-            typingRatio:   Math.round(inputRatio * 100),
-            rhythmScore:   Math.round(rhythmScore * 100),
-            editActivity:  Math.round(editActivity * 100),
-            largeInserts,
-            speedScore:    Math.round(speedScore * 100),
-            burstScore:    Math.round(burstScore * 100),
-            sessionSecs:   Math.round(sessionSecs),
-        }
-    };
-}
-
-function resetEditorEvents() {
-    editorEvents.length = 0;
-    codeSnapshots.length = 0;
-}
-
-export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSelectedLanguage, setSelectedLanguageCode, sourceCode, setSourceCode, starterCode }: ProblemPageCodeEditorType & { starterCode?: string }) {
+const ProblemPageCodeEditor = forwardRef<ProblemPageCodeEditorHandle, ProblemPageCodeEditorType & { starterCode?: string }>(function ProblemPageCodeEditor(
+    { theme, selectedLanguage, setSelectedLanguageCode, sourceCode, setSourceCode, starterCode },
+    ref
+) {
     const [isFullScreen, setIsFullScreen] = useState(!document.fullscreenElement);
-    const { theme: win98Theme } = useWin98Theme();
-    const monacoTheme = win98Theme === 'win98' || theme === 'light' ? 'vs' : 'vs-dark';
+    const { isWin98, colorMode } = useAppTheme();
+    const monacoTheme = isWin98 || colorMode === 'light' ? 'vs' : 'vs-dark';
+    const editorFontFamily = isWin98
+        ? '"Fixedsys", "Terminal", "Courier New", monospace'
+        : '"Consolas", "Courier New", monospace';
+
+    useImperativeHandle(ref, () => ({
+        getScoringResult: () => calculateAncientCodeScore(),
+        resetEvents: resetEditorEvents,
+    }), []);
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            window.getAncientCodeScore = () => calculateAncientCodeScore();
+            window.resetEditorEvents = resetEditorEvents;
+        }
+        return () => {
+            if (typeof window !== "undefined") {
+                delete window.getAncientCodeScore;
+                delete window.resetEditorEvents;
+            }
+        };
+    }, []);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const editorRef = useRef<any>(null);
 
     useEffect(() => {
         const handleGlobalPaste = (e: ClipboardEvent) => {
-            // Only intercept when Monaco editor has focus
             if (!editorRef.current?.hasTextFocus()) return;
 
-            const externalText = e.clipboardData?.getData('text') || "";
-            const hasInternal = internalClipboard.length > 0;
-            const hasExternal = externalText.length > 0;
-
-            // Case 1: both empty → no-op
-            if (!hasInternal && !hasExternal) return;
-
-            // Prevent browser/Monaco from also pasting
             e.preventDefault();
             e.stopPropagation();
 
-            // Case 2: no internal, has external → block
-            if (!hasInternal && hasExternal) {
-                toast.error("External paste is disabled in Ancient Coding Mode");
-                return;
-            }
-
-            // Cases 3–5: has internal → paste internal into editor
-            if (editorRef.current) {
-                const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
-                if (selections && selections.length > 0) {
-                    const clipLines = internalClipboard.split('\n');
-                    const usePerCursor = selections.length > 1 && clipLines.length === selections.length;
-                    const editOperations = selections.map((sel: MonacoSelection, i: number) => ({
-                        identifier: { major: 1, minor: i },
-                        range: sel,
-                        text: usePerCursor ? clipLines[i] : internalClipboard,
-                        forceMoveMarkers: true
-                    }));
-                    editorRef.current.executeEdits("internal-paste", editOperations);
-                    logEditorEvent({ type: "paste_internal", length: internalClipboard.length, timestamp: Date.now() });
+            void (async () => {
+                let externalText = e.clipboardData?.getData("text") ?? "";
+                if (!externalText) {
+                    try {
+                        externalText = await navigator.clipboard.readText();
+                    } catch {
+                        /* clipboard API unavailable */
+                    }
                 }
-            }
 
-            if (!hasExternal) {
-                // Case 3: paste internal, sync to external done via copy; toast
-                toast.success("Pasted from internal clipboard");
-            } else if (internalClipboard === externalText) {
-                // Case 4: same content → silent paste
-            } else {
-                // Case 5: different → paste internal, warn
-                toast.warning("External paste blocked, pasted from internal clipboard");
-            }
+                const clipboard = getInternalClipboard();
+                const hasInternal = clipboard.length > 0;
+                const hasExternal = externalText.length > 0;
+
+                if (!hasInternal && !hasExternal) return;
+
+                if (!hasInternal && hasExternal) {
+                    toast.error("External paste is disabled in Ancient Coding Mode");
+                    return;
+                }
+
+                if (editorRef.current) {
+                    const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
+                    if (selections && selections.length > 0) {
+                        const clipLines = clipboard.split("\n");
+                        const usePerCursor = selections.length > 1 && clipLines.length === selections.length;
+                        const editOperations = selections.map((sel: MonacoSelection, i: number) => ({
+                            identifier: { major: 1, minor: i },
+                            range: sel,
+                            text: usePerCursor ? clipLines[i] : clipboard,
+                            forceMoveMarkers: true,
+                        }));
+                        editorRef.current.executeEdits("internal-paste", editOperations);
+                        logEditorEvent({
+                            type: "paste_internal",
+                            length: clipboard.length,
+                            timestamp: Date.now(),
+                        });
+                    }
+                }
+
+                if (!hasExternal) {
+                    toast.success("Pasted from internal clipboard");
+                } else if (clipboard !== externalText) {
+                    toast.warning("External paste blocked, pasted from internal clipboard");
+                }
+            })();
         };
 
         document.addEventListener("paste", handleGlobalPaste, { capture: true });
@@ -310,7 +168,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
         }
 
         if (textToCopy) {
-            internalClipboard = textToCopy;
+            setInternalClipboard(textToCopy);
             logEditorEvent({ type: "copy_internal", length: textToCopy.length, timestamp: Date.now() });
             // Sync to system clipboard so paste matrix works correctly
             try { await navigator.clipboard.writeText(textToCopy); } catch { /* permission denied ok */ }
@@ -359,7 +217,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
             }));
         }
 
-        internalClipboard = textToCut;
+        setInternalClipboard(textToCut);
         editorRef.current.executeEdits("internal-cut", editOperations);
         logEditorEvent({ type: "copy_internal", length: textToCut.length, timestamp: Date.now() });
         // Sync to system clipboard so paste matrix works correctly
@@ -368,19 +226,20 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
     };
 
     const handlePasteButton = () => {
-        if (!editorRef.current || !internalClipboard) return;
+        const clipboard = getInternalClipboard();
+        if (!editorRef.current || !clipboard) return;
         const selections = editorRef.current.getSelections() as MonacoSelection[] | null;
         if (!selections || selections.length === 0) return;
-        const clipLines = internalClipboard.split('\n');
+        const clipLines = clipboard.split('\n');
         const usePerCursor = selections.length > 1 && clipLines.length === selections.length;
         const editOperations = selections.map((sel: MonacoSelection, i: number) => ({
             identifier: { major: 1, minor: i },
             range: sel,
-            text: usePerCursor ? clipLines[i] : internalClipboard,
+            text: usePerCursor ? clipLines[i] : clipboard,
             forceMoveMarkers: true
         }));
         editorRef.current.executeEdits("internal-paste", editOperations);
-        logEditorEvent({ type: "paste_internal", length: internalClipboard.length, timestamp: Date.now() });
+        logEditorEvent({ type: "paste_internal", length: clipboard.length, timestamp: Date.now() });
         toast.success("Pasted from internal clipboard");
     };
 
@@ -414,7 +273,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
 
         setSourceCode(value);
         // Track code length snapshot for burst/progression analysis
-        codeSnapshots.push({ length: value.length, timestamp: Date.now() });
+        logCodeSnapshot(value.length);
     };
 
     const handleEditorDidMount: OnMount = (editor, monaco) => {
@@ -460,7 +319,7 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
             setSourceCode("");
         }
         if (selectedLanguage) resetEditorEvents();
-    }, [selectedLanguage, starterCode])
+    }, [selectedLanguage, starterCode, setSelectedLanguageCode, setSourceCode])
 
     const handleResetCode = () => {
         if (selectedLanguage === "Python" && starterCode) {
@@ -484,13 +343,6 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
             setIsFullScreen(!isFullScreen);
         }
     };
-
-    const getScoringResult = () => {
-        return calculateAncientCodeScore();
-    };
-
-    window.getAncientCodeScore = getScoringResult;
-    window.resetEditorEvents = resetEditorEvents;
 
     return (
         <div className="w-full h-full bg-[var(--sidebar-accent)]">
@@ -569,12 +421,19 @@ export default function ProblemPageCodeEditor({ theme, selectedLanguage, setSele
                     minimap: { enabled: false },
                     lineNumbers: "on",
                     pasteAs: { enabled: false },
-                    fontFamily: win98Theme === 'win98'
-                        ? '"Courier New", monospace'
-                        : 'Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace',
+                    fontFamily: editorFontFamily,
                 }}
                 className='w-full h-[calc(100vh-8.7rem)]'
             />
         </div>
     )
+});
+
+export default ProblemPageCodeEditor;
+
+declare global {
+    interface Window {
+        getAncientCodeScore?: () => ScoringResult;
+        resetEditorEvents?: () => void;
+    }
 }

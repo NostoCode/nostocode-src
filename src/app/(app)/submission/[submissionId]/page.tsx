@@ -7,8 +7,9 @@ import { IProblem } from '@/models/Problem';
 import { ApiResponse, codeSubmissionResultType } from '@/types/ApiResponse';
 import MDEditor from '@uiw/react-md-editor';
 import axios from 'axios';
-import { Clock4, Info, SquarePen, Shield } from 'lucide-react';
+import { Clock4, Cpu, Info, SquarePen, Shield } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useAppTheme } from '@/context/ThemeContext';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react'
@@ -16,6 +17,7 @@ import { toast } from 'sonner';
 
 export default function Page() {
   const { data: session } = useSession();
+  const { colorMode } = useAppTheme();
   const [submissionOutput, setSubmissionOutput] = useState<codeSubmissionResultType | null>(null);
   const [avatarError, setAvatarError] = useState(false);
   const { submissionId } = useParams();
@@ -85,8 +87,8 @@ export default function Page() {
             )}
           </div>
           <div className="w-[60%] border p-4 rounded-lg">
-            <div className="flex gap-4">
-              <div className="flex-1 p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
+            <div className="flex gap-4 flex-wrap">
+              <div className="flex-1 min-w-[10rem] p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
                 <div className="w-full flex items-center justify-between">
                   <h2 className={`flex gap-2 items-center ${isAccepted ? '' : 'text-red-500'}`}>
                     <Clock4 className="resize-custom w-4 h-4" /> Runtime
@@ -104,7 +106,19 @@ export default function Page() {
                   {isAccepted ? `${(submissionOutput.time * 1000).toFixed(2)} ms` : 'N/A'}
                 </h2>
               </div>
-              <div className="flex-1 p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
+              <div className="flex-1 min-w-[10rem] p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
+                <div className="w-full flex items-center justify-between">
+                  <h2 className="flex gap-2 items-center">
+                    <Cpu className="resize-custom w-4 h-4" /> Memory
+                  </h2>
+                </div>
+                <h2 className="text-xl">
+                  {isAccepted && submissionOutput.memory > 0
+                    ? `${Number(submissionOutput.memory).toFixed(1)} KB`
+                    : "N/A"}
+                </h2>
+              </div>
+              <div className="flex-1 min-w-[10rem] p-4 rounded-md mt-3 bg-[var(--sidebar-accent)] flex flex-col gap-2">
                 <div className="w-full flex items-center justify-between">
                   <h2 className="flex gap-2 items-center">
                     <Shield className="resize-custom w-4 h-4" /> Ancient Code Score
@@ -147,10 +161,12 @@ export default function Page() {
           </div>
           <div className="w-[60%]">
             <h1 className='text-muted-foreground my-4 font-semibold'>Code | {submissionOutput.language}</h1>
-            <div className="w-full border rounded-md overflow-hidden mb-8" data-color-mode="dark">
+            <div className="w-full border rounded-md overflow-hidden mb-8" data-color-mode={colorMode}>
               <MDEditor.Markdown
-                source={`\`\`\`\n${submissionOutput.sourceCode}\n\`\`\``}
-                className="w-full" style={{ background: "var(--card)" }} />
+                source={`\`\`\`python\n${submissionOutput.sourceCode}\n\`\`\``}
+                className="w-full markdown-body customTextWhite"
+                style={{ background: "var(--card)" }}
+              />
             </div>
             <div className="w-full h-64 customBackground rounded-md py-3">
               <textarea className='w-full h-[90%] resize-none px-3 outline-none' placeholder='Write your notes here'></textarea>

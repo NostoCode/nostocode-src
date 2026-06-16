@@ -2,52 +2,21 @@ import { IProblem } from "@/models/Problem";
 import { ISolution } from "@/models/Solution";
 import { ISubmission } from "@/models/Submission";
 import { IUser } from "@/models/User";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
-export interface CodeRunResult {
-    token: string;
-    status: {
-        id: number;
-        description: string;
-    };
-    stdout?: string | null;
-    stderr?: string | null;
-    compile_output?: string | null;
-    message?: string | null;
-    time?: string | null;
-    memory?: number | null;
-}
-
-export interface codeSubmissionResultType {
-    _id?: string | mongoose.Types.ObjectId,
-    userId: string | mongoose.Types.ObjectId,
-    status: string,
-    language: string,
-    time: number,
-    memory: number,
-    sourceCode: string,
-    problemId: string | mongoose.Types.ObjectId | IProblem,
-    ancientCodeScore?: number,
-    ancientCodeLevel?: string,
-    scoreDetails?: {
-        typingRatio: number;
-        rhythmScore: number;
-        editActivity: number;
-        largeInserts: number;
-        speedScore: number;
-        burstScore: number;
-        sessionSecs: number;
-    },
-    createdAt?: Date,
-    udpatedAt?: Date
-}
-
-export interface FailedCase {
-    index: number;
-    input: string;
-    expected: string;
-    actual: string;
-}
+export type {
+  CodeRunResult,
+  codeSubmissionResultType,
+  FailedCase,
+  ScoreDetails,
+  RunCodeResponse,
+  SubmitCodeResponse,
+  ProblemsListResponse,
+  UserProfileResponse,
+  ProblemDetailResponse,
+  SolutionsResponse,
+} from "./responses";
+import type { CodeRunResult, codeSubmissionResultType, FailedCase } from "./responses";
 
 export interface ApiResponse {
     success: boolean,

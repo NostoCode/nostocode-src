@@ -18,8 +18,9 @@
     inset -2px -2px #808080, inset 2px 2px #ffffff;
   --win98-sunken: inset -1px -1px #ffffff, inset 1px 1px #808080,
     inset -2px -2px #dfdfdf, inset 2px 2px #0a0a0a;
-  --win98-font: "MS Sans Serif", "Microsoft Sans Serif", "Segoe UI", Arial,
+  --win98-font: "MS Sans Serif", "Microsoft Sans Serif", "Tahoma", "Arial",
     sans-serif;
+  --win98-mono-font: "Fixedsys", "Terminal", "Courier New", Courier, monospace;
 
   /* Override Tailwind / Shadcn CSS variables to Win98 palette */
   --background: #c0c0c0;
@@ -805,8 +806,10 @@
 }
 
 /* ---------- Win98 Monaco editor: Courier New in ancient mode ---------- */
-[data-win98="true"] .monaco-editor .view-lines {
-  font-family: "Courier New", Courier, monospace !important;
+[data-win98="true"] .monaco-editor,
+[data-win98="true"] .monaco-editor .view-lines,
+[data-win98="true"] .monaco-editor .monaco-mouse-cursor-text {
+  font-family: var(--win98-mono-font) !important;
 }
 
 /* ---------- Win98 MDEditor light mode code blocks ---------- */
@@ -814,5 +817,27 @@
 [data-win98="true"] [data-color-mode="light"] pre code,
 [data-win98="true"] [data-color-mode="light"] code {
   font-family: "Courier New", Courier, monospace !important;
+}
+
+/* ---------- Win98 visual separators ---------- */
+[data-win98="true"] .problems-outer-container [class*="h-12"][class*="flex"][class*="items-center"] {
+  border-bottom: 1px solid var(--win98-dark);
+}
+
+[data-win98="true"] .customBackground.border,
+[data-win98="true"] .customBackground[class*="border"] {
+  border: 1px solid var(--win98-dark) !important;
+}
+
+[data-win98="true"] [class*="bg-[var(--sidebar-accent)]"][class*="rounded-md"][class*="p-4"] {
+  border: 1px solid var(--win98-dark);
+  margin-bottom: 4px;
+}
+
+/* Discuss / admin: ensure button text readable */
+[data-win98="true"] .w-md-editor-toolbar button,
+[data-win98="true"] [data-color-mode="light"] .w-md-editor-toolbar button {
+  color: var(--win98-black) !important;
+  background: var(--win98-gray) !important;
 }
 

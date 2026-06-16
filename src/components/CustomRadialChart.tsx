@@ -3,8 +3,8 @@ import React from "react";
 import { Label, type LabelProps, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { LevelWiseProblemType } from "@/app/(app)/problems/page";
-import { useWin98Theme } from "@/context/ThemeContext";
+import type { LevelWiseProblemType } from "@/types/problems";
+import { useAppTheme } from "@/context/ThemeContext";
 
 const chartConfig = {
   easy: { label: "Easy", color: "#00c950" },
@@ -61,9 +61,9 @@ function Win98ProgressBars({ totalLevelWiseProblem, userTotalLevelProblem }: { t
 }
 
 export default function CustomRadialChart({ totalLevelWiseProblem, userTotalLevelProblem }: { totalLevelWiseProblem: LevelWiseProblemType, userTotalLevelProblem: LevelWiseProblemType }) {
-  const { theme } = useWin98Theme();
+  const { isWin98 } = useAppTheme();
 
-  if (theme === "win98") {
+  if (isWin98) {
     return (
       <div className="w-full h-full bg-[var(--popover)] win98-groupbox" data-label="Progress">
         <Win98ProgressBars totalLevelWiseProblem={totalLevelWiseProblem} userTotalLevelProblem={userTotalLevelProblem} />
@@ -91,7 +91,7 @@ export default function CustomRadialChart({ totalLevelWiseProblem, userTotalLeve
   return (
     <Card className="w-full h-full bg-[var(--popover)] border-none py-0 gap-0">
       <CardContent className="p-0 h-full flex items-center justify-center">
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square w-full max-w-[200px]">
+        <ChartContainer config={chartConfig} className="mx-auto h-full w-full max-h-[220px] max-w-[220px]">
           <RadialBarChart
             data={chartData}
             startAngle={90}
