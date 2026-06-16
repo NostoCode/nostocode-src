@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { useTheme } from 'next-themes';
+
 import { Input } from '@/components/ui/input';
 import { Loader2, Trash2 } from 'lucide-react';
 import { createProblemValidation } from '@/schemas/createProblemSchema';
@@ -23,15 +23,13 @@ import { ApiResponse } from '@/types/ApiResponse';
 import { toast } from 'sonner';
 import { useParams, useRouter } from 'next/navigation';
 import { IProblem } from '@/models/Problem';
-import { useWin98Theme } from '@/context/ThemeContext';
+import { useAppTheme } from '@/context/ThemeContext';
 
 
 export default function Page() {
 
   const [mounted, setMounted] = useState(false);
-  const { theme, systemTheme, setTheme } = useTheme();
-  const { theme: win98Theme } = useWin98Theme();
-  const colorMode = win98Theme === 'win98' || theme === 'light' ? 'light' : 'dark';
+  const { colorMode } = useAppTheme();
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [problemInfo, setProblemInfo] = useState<IProblem | null>(null);
   const [orderFlag, setOrderFlag] = useState<'' | '# ALLOW_ANY_ORDER' | '# ALLOW_OUTER_ORDER'>('');
@@ -132,13 +130,6 @@ export default function Page() {
   useEffect(() => {
     fetchProblemInfo();
   }, [fetchProblemInfo]);
-
-  useEffect(() => {
-    if (!mounted) return;
-    if (theme && systemTheme) {
-      setTheme(systemTheme);
-    }
-  }, [mounted]);
 
   useEffect(() => setMounted(true), []);
 

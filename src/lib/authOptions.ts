@@ -48,12 +48,12 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user}) {
             if(user){
-                token._id = user._id?.toString(),
-                token.isVerified = user.isVerified,
-                token.username = user.username,
-                token.email = user.email,
-                token.avatar = user.avatar,
-                token.userType = user.userType
+                token._id = user._id?.toString();
+                token.isVerified = user.isVerified;
+                token.username = user.username;
+                token.email = user.email;
+                token.avatar = user.avatar;
+                token.userType = user.userType;
             }
             
             return token
@@ -61,12 +61,12 @@ export const authOptions: NextAuthOptions = {
 
         async session({ session, token }) {
             if(token){
-                session.user._id = token._id,
-                session.user.isVerified = token.isVerified
-                session.user.username = token.username
-                session.user.email = token.email
-                session.user.avatar = token.avatar
-                session.user.userType = token.userType
+                session.user._id = token._id;
+                session.user.isVerified = token.isVerified;
+                session.user.username = token.username;
+                session.user.email = token.email;
+                session.user.avatar = token.avatar;
+                session.user.userType = token.userType;
             }
 
             return session

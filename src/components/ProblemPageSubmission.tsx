@@ -3,7 +3,7 @@ import { formatDate } from '@/helpers/formatDate';
 import { IProblem } from '@/models/Problem';
 import { ApiResponse, codeSubmissionResultType } from '@/types/ApiResponse';
 import axios from 'axios';
-import { ChevronDown, Clock4, Cpu, Shield } from 'lucide-react'
+import { Clock4, Cpu, Shield } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 import { Skeleton } from './ui/skeleton';
@@ -49,15 +49,13 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
 
   return (
     <div style={{ background: "var(--card)" }} className='w-full min-h-[calc(100vh-6.5rem)] flex flex-col p-4 pb-12'>
-      <div className="w-full flex items-center py-1 border-b border-t px-2 gap-2">
-        <p className={`w-10 flex-none ${theme === "dark" ? 'text-neutral-300' : ''}`}>No</p>
-        <h1 className={`w-48 flex-none text-lg ${theme === "dark" ? 'text-neutral-300' : ''}`}>Status</h1>
-        <div className="flex items-center gap-6 flex-1">
-          <h3 className={`w-24 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Language <ChevronDown className='resize-custom w-4' /></h3>
-          <h3 className={`w-28 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Runtime <ChevronDown className='resize-custom w-4' /></h3>
-          <h3 className={`w-24 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}>Memory <ChevronDown className='resize-custom w-4' /></h3>
-          <h3 className={`flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Shield className='resize-custom w-4' /> Ancient Score</h3>
-        </div>
+      <div className="w-full grid grid-cols-[2.5rem_12rem_6rem_7rem_6rem_1fr] items-center py-2 border-b border-t px-2 gap-2 text-sm font-medium text-muted-foreground">
+        <p>No</p>
+        <h1>Status</h1>
+        <h3 className="flex items-center gap-1">Language</h3>
+        <h3 className="flex items-center gap-1">Runtime</h3>
+        <h3 className="flex items-center gap-1">Memory</h3>
+        <h3 className="flex items-center gap-1"><Shield className='resize-custom w-4' /> Ancient Score</h3>
       </div>
 
       {loading && <div className='absolute top-14 left-0 w-full h-14 opacity-50 px-4 flex items-center gap-4'>
@@ -76,17 +74,16 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
       }
 
       {submission && !loading && submission.map((ele, index) =>
-        <div key={index} onClick={()=> handleClick(ele)} className="w-full flex items-center py-1 border-b cursor-pointer px-2 gap-2">
-          <p className='w-10 flex-none'>{index + 1}</p>
-          <div className="w-48 flex-none">
-            <h1 className={`text-lg font-semibold ${ele.status === "Accepted"? 'text-green-500' : 'text-red-500'}`}>{ele.status}</h1>
-            <h2 className={`text-sm ${theme === "dark" ? 'text-neutral-300' : ''}`}>{formatDate(ele.createdAt as Date)}</h2>
+        <div key={index} onClick={()=> handleClick(ele)} className="w-full grid grid-cols-[2.5rem_12rem_6rem_7rem_6rem_1fr] items-center py-2 border-b cursor-pointer px-2 gap-2 hover:bg-[var(--sidebar-accent)]">
+          <p>{index + 1}</p>
+          <div>
+            <h1 className={`text-base font-semibold ${ele.status === "Accepted"? 'text-green-500' : 'text-red-500'}`}>{ele.status}</h1>
+            <h2 className="text-xs text-muted-foreground">{formatDate(ele.createdAt as Date)}</h2>
           </div>
-          <div className="flex items-center gap-6 flex-1">
-            <h3 className="w-24 px-2 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm truncate">{ele.language}</h3>
-            <h3 className={`w-28 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Clock4 className='resize-custom w-4' /> {ele.status === "Accepted"? `${(ele.time * 1000).toFixed(2)} ms` : 'N/A'}</h3>
-            <h3 className={`w-24 flex items-center gap-1 ${theme === "dark" ? 'text-neutral-300' : ''}`}><Cpu className='resize-custom w-4' /> N/A</h3>
-            <h3 className={`flex items-center gap-1 font-semibold ${
+          <h3 className="px-2 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm truncate">{ele.language}</h3>
+          <h3 className="flex items-center gap-1 text-sm"><Clock4 className='resize-custom w-4' /> {ele.status === "Accepted"? `${(ele.time * 1000).toFixed(2)} ms` : 'N/A'}</h3>
+          <h3 className="flex items-center gap-1 text-sm"><Cpu className='resize-custom w-4' /> {ele.status === "Accepted" && ele.memory > 0 ? `${Number(ele.memory).toFixed(1)} KB` : 'N/A'}</h3>
+          <h3 className={`flex items-center gap-1 font-semibold text-sm ${
               ele.ancientCodeScore !== undefined
                 ? ele.ancientCodeScore >= 90 ? 'text-green-500'
                   : ele.ancientCodeScore >= 70 ? 'text-yellow-500'
@@ -97,7 +94,6 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
               <Shield className='resize-custom w-4' />
               {ele.ancientCodeScore !== undefined ? `${ele.ancientCodeScore}` : 'N/A'}
             </h3>
-          </div>
         </div>
       )}
     </div>

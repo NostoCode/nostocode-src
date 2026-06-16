@@ -33,7 +33,7 @@ const submissionSchema = new Schema<ISubmission>({
     },
     status: {
         type: String,
-        required: [true, "Smitted code status required"]
+        required: [true, "Submitted code status required"]
     },
     language: {
         type: String,
@@ -45,7 +45,7 @@ const submissionSchema = new Schema<ISubmission>({
     },
     memory: {
         type: Number,
-        required: [true, "Code run time required"]
+        required: [true, "Code run memory required"]
     },
     sourceCode: {
         type: String,

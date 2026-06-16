@@ -1,6 +1,6 @@
 "use client"
 import { codeSubmissionResultType, CodeRunResult, FailedCase } from '@/types/ApiResponse'
-import { CircleCheckBig, Clock4, Info, Shield, SquarePen, X } from 'lucide-react'
+import { CircleCheckBig, Clock4, Cpu, Info, Shield, SquarePen } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
 import { IProblem } from '@/models/Problem'
@@ -173,10 +173,10 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                     </div>
                     {submissionOutput.status === "Accepted" ?
                         <div className="flex gap-2">
-                            <Button onClick={handleSubmissionClose} variant="outline" className='font-semibold cursor-pointer'><X className='resize-custom w-4 h-4' /> Close</Button>
+                            <Button onClick={handleSubmissionClose} variant="outline" className='font-semibold cursor-pointer'>← Back to Submissions</Button>
                             <Link href={`/add-solution?id=${submissionOutput._id}`}><Button className='bg-green-500 text-white font-semibold cursor-pointer hover:bg-green-600 duration-300'><SquarePen className='resize-custom w-4 h-4' /> Solution</Button></Link>
                         </div> :
-                        <Button onClick={handleSubmissionClose} className='bg-red-500 text-white font-semibold  cursor-pointer hover:bg-red-600 duration-300'><X className='resize-custom w-5 h-5' /> Close</Button>
+                        <Button onClick={handleSubmissionClose} variant="outline" className='font-semibold cursor-pointer'>← Back to Submissions</Button>
                     }
                 </div>
                 <div className="flex gap-4 my-6">
@@ -189,6 +189,14 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
                         </Tooltip>
                     </div>
                     <h2 className={`text-xl ${submissionOutput.status === "Accepted" ? '' : 'text-red-500'}`}>{submissionOutput.status === "Accepted" ? `${(submissionOutput.time * 1000).toFixed(2)} ms` : 'N/A'}</h2>
+                  </div>
+                  <div className="flex-1 p-4 rounded-md bg-[var(--sidebar-accent)] flex flex-col gap-2">
+                    <h2 className="flex gap-2 items-center"><Cpu className="resize-custom w-4 h-4" /> Memory</h2>
+                    <h2 className="text-xl">
+                      {submissionOutput.status === "Accepted" && submissionOutput.memory > 0
+                        ? `${Number(submissionOutput.memory).toFixed(1)} KB`
+                        : "N/A"}
+                    </h2>
                   </div>
                   <div className="flex-1 p-4 rounded-md bg-[var(--sidebar-accent)] flex flex-col gap-2">
                     <div className="w-full flex items-center justify-between">

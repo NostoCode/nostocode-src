@@ -45,8 +45,16 @@ export default function CustomContributorGraph({ submissions }: CustomContributo
     return 0;
   };
 
+  const totalSubs = submissions.length;
+
   return (
-    <div className="p-4 bg-white dark:bg-transparent rounded-lg shadow-sm overflow-x-auto w-full">
+    <div className="p-4 bg-white dark:bg-transparent rounded-lg shadow-sm overflow-x-auto w-full h-full flex flex-col">
+      <div className="mb-3 px-1">
+        <h3 className="font-semibold text-foreground">Submission Activity</h3>
+        <p className="text-xs text-muted-foreground">
+          Last 365 days · {totalSubs} submission{totalSubs !== 1 ? "s" : ""} total
+        </p>
+      </div>
       <div
         className="grid gap-[0.43rem] w-full"
         style={{

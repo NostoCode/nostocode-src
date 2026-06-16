@@ -1,27 +1,44 @@
 import mongoose from "mongoose";
 
-type ConnectionObject = {
-    isConnected?: number
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
 }
 
-const connection: ConnectionObject = {};
+declare global {
+  var mongooseCache: MongooseCache | undefined;
+}
 
-export const connectToDb = async (): Promise<void> => {
-    if(connection.isConnected){
-        console.log("Already connected to mongodb");
-        return;
+const cached: MongooseCache = global.mongooseCache ?? { conn: null, promise: null };
+if (!global.mongooseCache) {
+  global.mongooseCache = cached;
+}
+
+export async function connectToDb(): Promise<typeof mongoose> {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error("MONGODB_URI is not defined");
+  }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(uri, {
+      dbName: process.env.DB_NAME,
+      bufferCommands: false,
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+    if (process.env.NODE_ENV === "development") {
+      console.log("MongoDB connected");
     }
-
-    try {
-        const db = await mongoose.connect(process.env.MONGODB_URI || '', {
-            dbName: process.env.DB_NAME
-        });
-
-        connection.isConnected = db.connections[0].readyState;
-
-        console.log("Db connected successfully");
-    } catch (error) {
-        console.log("Databse connection faild: ", error);
-        process.exit(1);
-    }
+    return cached.conn;
+  } catch (error) {
+    cached.promise = null;
+    throw error;
+  }
 }

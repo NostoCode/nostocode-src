@@ -39,7 +39,7 @@ export default function ForgetPasswordVerificationEmail({ username, otp }: Verif
                 </Row>
                 <Row>
                     <Text>
-                        If you did not request this code, please ignore this email and don't share this code with anyone.
+                        If you did not request this code, please ignore this email and don&apos;t share this code with anyone.
                     </Text>
                 </Row>
             </Section>

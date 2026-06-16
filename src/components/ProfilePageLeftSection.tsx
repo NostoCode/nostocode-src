@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Construction, GraduationCap, MapPin, Tag } from 'lucide-react'
 import { IUser } from '@/models/User'
-import { FilteredLanguageType } from '@/app/(app)/dashboard/[userId]/page'
+import type { FilteredLanguageType } from '@/lib/data/dashboard'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react';
 
@@ -84,7 +84,7 @@ export default function ProfilePageLeftSecond({ fullUserInfo, filterLanguageWise
                     {Object.entries(filterLanguageWiseSubmission).filter(([, count]) => count > 0).map(([lang, count], index) =>
                         <div key={index} className="flex w-full justify-between items-center">
                             <h3 className="px-4 py-0.5 rounded-full bg-[var(--sidebar-accent)] text-sm text-gray-400">{languageName[lang as languageNameType]}</h3>
-                            <h3 className="text-sm text-gray-400 mr-2"><span className="font-semibold text-white">{count}</span> problems solved</h3>
+                            <h3 className="text-sm text-muted-foreground mr-2"><span className="font-semibold text-foreground">{count}</span> problems solved</h3>
                         </div>
                     )}
                 </div>

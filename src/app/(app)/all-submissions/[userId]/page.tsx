@@ -1,129 +1,26 @@
-"use client";
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Skeleton } from '@/components/ui/skeleton';
-import { timeAgoFunction } from '@/helpers/timeAgoFunction';
-import { IProblem } from '@/models/Problem';
-import { ApiResponse, codeSubmissionResultType } from '@/types/ApiResponse';
-import axios from 'axios';
-import { ArrowDownUp, CircleCheckBig, Funnel, Search, SquarePen } from 'lucide-react'
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner';
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/authOptions";
+import { getUserAllSubmissions } from "@/lib/data/submissions";
+import AllSubmissionsClient from "./AllSubmissionsClient";
 
-export default function Page() {
-  const { userId } = useParams()
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [allSubmissions, setAllSubmissions] = useState<codeSubmissionResultType[]>([]);
-  const [filteredSubmissions, setFilteredSubmissions] = useState<codeSubmissionResultType[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+interface PageProps {
+  params: Promise<{ userId: string }>;
+}
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
+export default async function Page({ params }: PageProps) {
+  const { userId } = await params;
+  const session = await getServerSession(authOptions);
 
-    if (!value) {
-      setFilteredSubmissions(allSubmissions);
-      return;
-    }
-
-    const filtered = allSubmissions.filter(submission =>
-      (submission.problemId as IProblem).title.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredSubmissions(filtered);
+  if (!session?.user?._id) {
+    redirect("/sign-in");
   }
 
-  const handleReverseArray = () => {
-    setFilteredSubmissions([...filteredSubmissions].reverse());
+  if (session.user._id !== userId && session.user.userType !== "admin") {
+    redirect(`/all-submissions/${session.user._id}`);
   }
 
-  const fetchAllSubmisssions = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await axios.post<ApiResponse>("/api/code/get-user-allsubmissions", { userId });
+  const submissions = await getUserAllSubmissions(userId);
 
-      setAllSubmissions(res.data.submissions as codeSubmissionResultType[] || []);
-      setFilteredSubmissions(res.data.submissions as codeSubmissionResultType[] || []);
-
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        console.log("Problem occur while fetching all submissions: ", error.response.data.message)
-        toast.error(error.response.data.message || "Problem occur while fetching all submissions")
-      } else {
-        console.log("Error while fetching all submissions: ", error);
-        toast.error("Error while fetching all submissions");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [userId, setAllSubmissions, setFilteredSubmissions]);
-
-  useEffect(() => {
-    fetchAllSubmisssions()
-  }, [fetchAllSubmisssions]);
-
-  return (
-    <div className='w-full h-[calc(100vh-3rem)] flex'>
-      <div className="w-[75%] h-full pt-2 pb-4 px-12">
-        <div className="w-full h-12 mt-4 flex justify-between border-b-2">
-          <div className="flex w-[70%] justify-between">
-            <h1 className='px-4 py-1.5 h-10 customBackground rounded-md'>Submissions</h1>
-            <h1 className='px-4 py-1.5 h-10 transition-all duration-300 cursor-pointer hover:bg-[var(--card)] rounded-md'>Career</h1>
-            <h1 className='px-4 py-1.5 h-10 transition-all duration-300 cursor-pointer hover:bg-[var(--card)] rounded-md'>Contest</h1>
-            <h1 className='px-4 py-1.5 h-10 transition-all duration-300 cursor-pointer hover:bg-[var(--card)] rounded-md'>Compensation</h1>
-            <h1 className='px-4 py-1.5 h-10 transition-all duration-300 cursor-pointer hover:bg-[var(--card)] rounded-md'>Feedback</h1>
-            <h1 className='px-4 py-1.5 h-10 transition-all duration-300 cursor-pointer hover:bg-[var(--card)] rounded-md'>Interview</h1>
-          </div>
-          <Link href="/problems">
-            <Button className='bg-green-500 text-white font-semibold cursor-pointer hover:bg-green-600 duration-300'><SquarePen className='resize-custom w-4 h-4' /> Solve More</Button>
-          </Link>
-        </div>
-        <div className="w-full h-18 py-2 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <div className="w-[20rem] rounded-full overflow-hidden flex gap-1 items-center px-4 bg-input">
-              <Search className='resize-custom w-5 text-gray-400' />
-              <Input onChange={handleSearch} placeholder='Search submissions' className='customTransparent border-none outline-none focus-visible:ring-[0px]' value={searchQuery} />
-            </div>
-            <Button onClick={handleReverseArray} variant="outline" className='rounded-full w-9 h-9 cursor-pointer'><ArrowDownUp className='resize-custom w-4 text-gray-400' /></Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className='rounded-full w-9 h-9 cursor-pointer'><Funnel className='resize-custom w-4 text-gray-400' /></Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem className='justify-between'>Easy</DropdownMenuItem>
-                <DropdownMenuItem className='justify-between'>Medium</DropdownMenuItem>
-                <DropdownMenuItem className='justify-between'>Hard</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-        <ScrollArea className="w-full h-[calc(100vh-12rem)] pr-3">
-          {isLoading && <div>
-            <Skeleton className='w-full h-11'></Skeleton>
-            <Skeleton className='w-full h-11 my-2'></Skeleton>
-            <Skeleton className='w-full h-11'></Skeleton>
-          </div>}
-          {!isLoading && [...filteredSubmissions].reverse().map((ele, index) =>
-            <Link key={index} href={`/submission/${ele._id}`}>
-              <div className={`w-full flex items-center justify-between px-4 py-4 rounded cursor-pointer ${index % 2 == 0 ? 'bg-[var(--sidebar-accent)]' : ''}`}>
-                <h2 className="font-semibold flex gap-3 items-center"><CircleCheckBig className='resize-custom w-4 text-green-500' /> {(ele.problemId as IProblem).title}</h2>
-                <p className="text-gray-500 text-sm font-semibold">{timeAgoFunction(ele.createdAt as Date)}</p>
-              </div>
-            </Link>
-          )}
-
-        </ScrollArea>
-
-      </div>
-      <div className="w-[25%] h-full flex flex-col items-center justify-center py-4">
-        <div className="p-2 border w-[80%] rounded-md customBackground h-[75%]">
-          <Calendar className='w-full h-full customBackground' />
-        </div>
-      </div>
-    </div>
-  )
+  return <AllSubmissionsClient initialSubmissions={submissions} />;
 }

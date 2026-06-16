@@ -41,11 +41,16 @@ export const runCodeBatch = async (
         const responses = await Promise.all(execPromises);
 
         const result = responses.map((res) => {
-            const run = res.data.run;
+            const run = res.data.run ?? {};
+            const rawMemory = run.memory;
+            const memoryKb =
+              typeof rawMemory === "number" && rawMemory > 0
+                ? Math.round(rawMemory / 1024)
+                : 0;
             return {
                 status: mapStatus(run.stdout ?? "", run.status ?? null, run.code ?? 0),
-                time: ((run.wall_time ?? 0) / 1000).toFixed(3),   // ms → seconds string
-                memory: Math.round((run.memory ?? 0) / 1024),      // bytes → KB
+                time: ((run.wall_time ?? 0) / 1000).toFixed(3),
+                memory: memoryKb,
                 stdout: run.stdout ?? "",
                 stderr: run.stderr ?? "",
             };

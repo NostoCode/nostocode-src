@@ -1,9 +1,9 @@
 import React from 'react'
 import ProfilePageLInearChart from './ProfilePageLInearChart'
 import ProblemPageBarChart from './ProfilePageBarChart'
-import { ArrowRight, ChevronRight, ClipboardList, Construction, FileText, MessageCircleMore, SquareCheckBig } from 'lucide-react'
+import { ChevronRight, ClipboardList, Construction, FileText, MessageCircleMore, SquareCheckBig } from 'lucide-react'
 import CustomContributorGraph from './CustomContributorGraph'
-import { LevelWiseProblemType } from '@/app/(app)/problems/page'
+import type { LevelWiseProblemType } from '@/types/problems'
 import CustomRadialChart from './CustomRadialChart'
 import { codeSubmissionResultType } from '@/types/ApiResponse'
 import { IProblem } from '@/models/Problem'
@@ -11,8 +11,6 @@ import { timeAgoFunction } from '@/helpers/timeAgoFunction'
 import Link from 'next/link'
 
 export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQuestioinsLevelWise, allSubmissions, userId }: { levelWiseSolvedQuestions: LevelWiseProblemType, allQuestioinsLevelWise: LevelWiseProblemType, allSubmissions: codeSubmissionResultType[], userId: string }) {
-  console.log(allSubmissions)
-
   return (
     <div className="w-[60%] h-full rounded-lg flex flex-col gap-4">
       <div className="customBackground flex w-full h-60 rounded-md">
@@ -56,25 +54,25 @@ export default function ProfilePageRightSection({ levelWiseSolvedQuestions, allQ
       </div>
       <div className="customBackground flex flex-col w-full h-[34.5rem] rounded-md">
         <div className="w-full h-20 flex justify-between items-center gap-3 px-4">
-          <div className="flex items-center gap-2 text-gray-300">
-            <div className="flex items-center gap-3 px-6 py-3 rounded cursor-pointer bg-[var(--sidebar-accent)]">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <div className="flex items-center gap-3 px-6 py-3 rounded cursor-pointer bg-[var(--sidebar-accent)] text-foreground">
               <ClipboardList className='resize-custom w-5' />
               Recent AC
             </div>
-            <div className="flex items-center gap-3 px-6 py-3 rounded text-gray-300 cursor-pointer">
+            <div className="flex items-center gap-3 px-6 py-3 rounded text-muted-foreground cursor-pointer hover:text-foreground">
               <FileText className='resize-custom w-5' />
               List
             </div>
-            <div className="flex items-center gap-3 px-6 py-3 rounded text-gray-300 cursor-pointer">
+            <div className="flex items-center gap-3 px-6 py-3 rounded text-muted-foreground cursor-pointer hover:text-foreground">
               <SquareCheckBig className='resize-custom w-5' />
               Solutions
             </div>
-            <div className="flex items-center gap-3 px-6 py-3 rounded text-gray-300 cursor-pointer">
+            <div className="flex items-center gap-3 px-6 py-3 rounded text-muted-foreground cursor-pointer hover:text-foreground">
               <MessageCircleMore className='resize-custom w-5' />
-              Discus
+              Discuss
             </div>
           </div>
-          <div className="flex gap-1 items-center text-gray-300 cursor-pointer">
+          <div className="flex gap-1 items-center text-muted-foreground cursor-pointer hover:text-foreground">
             <Link href={`/all-submissions/${userId}`}>
               <h3 className="">View all solutions</h3>
             </Link>

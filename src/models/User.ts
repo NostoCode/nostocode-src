@@ -1,4 +1,4 @@
-import mongoose, {Document, model, models, Schema, Types} from "mongoose";
+import { Document, model, models, Schema, Types } from "mongoose";
 import { IProblem } from "./Problem";
 
 export interface IUser extends Document{
