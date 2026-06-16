@@ -1,11 +1,11 @@
-import { resend } from "@/lib/resend";
+import { getResend } from "@/lib/resend";
 import { ApiResponse } from "@/types/ApiResponse";
 import ForgetPasswordVerificationEmail from "../../emails/ForgetPasswordEmail";
 
 
 export const sendForgetPasswordVerificationEmail = async (email: string, username: string, verifyCode: string): Promise<ApiResponse> => {
     try {
-        await resend.emails.send({
+        await getResend().emails.send({
             from: 'onboarding@resend.dev',
             to: email,
             subject: "NostoCode — Password Reset",
