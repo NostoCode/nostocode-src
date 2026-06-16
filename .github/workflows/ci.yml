@@ -38,3 +38,4 @@ jobs:
           MONGODB_URI: mongodb://localhost:27017/nostocode-ci
           NEXTAUTH_SECRET: ci-build-placeholder-secret-32chars-min
           NEXTAUTH_URL: http://localhost:3000
+          RESEND_API_KEY: re_ci_placeholder_key
