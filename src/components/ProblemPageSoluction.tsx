@@ -1,5 +1,5 @@
 import { ISolution } from '@/models/Solution';
-import axios, { isAxiosError } from 'axios';
+import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner';
 import { Input } from './ui/input';
@@ -14,10 +14,9 @@ export default function ProblemPageSoluction({ problemId }: { problemId: string 
   const [selectedSolution, setSelectedSolution] = useState<ISolution | null>(null);
   const [isSolutionTapOpen, setIsSolutionTabOpen] = useState<boolean>(false);
   const [filteredAllSolutions, setFilteredAllSolutions] = useState<ISolution[]>([]);
-  console.log(filteredAllSolutions)
-  const [likes, setLikes] = useState<number>(Math.floor(Math.random() * (999 - 100 + 1)) + 100);
-  const [views, setViews] = useState<string>(((Math.random() * (99 - 10 + 1)) + 10).toFixed(1));
-  const [comments, setComments] = useState<number>(Math.floor(Math.random() * (99 - 10 + 1)) + 10);
+  const [likes] = useState<number>(Math.floor(Math.random() * (999 - 100 + 1)) + 100);
+  const [views] = useState<string>(((Math.random() * (99 - 10 + 1)) + 10).toFixed(1));
+  const [comments] = useState<number>(Math.floor(Math.random() * (99 - 10 + 1)) + 10);
 
   useEffect(() => {
     const fetchAllSolutions = async () => {
@@ -30,10 +29,8 @@ export default function ProblemPageSoluction({ problemId }: { problemId: string 
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           toast.error(error.response.data.message || "Something went wrong while fetching solutions");
-          console.log("Problem fetching submissions: ", error.response.data.message);
         } else {
           toast.error("Error while fetching all solutions");
-          console.log("Error while fetching all solutions: ", error);
         }
       } finally {
         setIsLoading(false);
@@ -41,7 +38,7 @@ export default function ProblemPageSoluction({ problemId }: { problemId: string 
     }
 
     fetchAllSolutions()
-  }, []);
+  }, [problemId]);
 
   const handleSolutionTabOpen = (ele: ISolution) => {
     if (!ele) return;

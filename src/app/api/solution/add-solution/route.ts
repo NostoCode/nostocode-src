@@ -57,7 +57,6 @@ export async function POST(req: NextRequest) {
         });
 
         if(!newSolution){
-            console.log("Submission Failed");
             return NextResponse.json({
                 success: false,
                 message: "Submission Failed",
@@ -75,8 +74,7 @@ export async function POST(req: NextRequest) {
             solution: newSolution
         }, { status: 201 })
 
-    } catch (error) {
-        console.error("Something went wrong while adding solution: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while adding solution"

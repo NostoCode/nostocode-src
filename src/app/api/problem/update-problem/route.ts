@@ -48,8 +48,7 @@ export async function PATCH(req:NextRequest) {
             message: "Problem updated successfully",
             problem: updatedProblem
         }, {status: 200});
-    } catch (error) {
-        console.log("Something went wrong while updating problem: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while updating problem"

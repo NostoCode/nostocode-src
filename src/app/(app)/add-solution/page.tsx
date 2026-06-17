@@ -63,9 +63,7 @@ function AddSolutionContent() {
     } catch (error) {
       if(axios.isAxiosError(error) && error.response){
         toast.error(error.response.data.message || "Something went wrong while submitting solution")
-        console.log(error.response.data.message || "Something went wrong while submitting solution")
       } else{
-        console.log("Error while submitting solution: ", error);
         toast.error("Error while submitting solution");
       }
     } finally{
@@ -97,9 +95,7 @@ function AddSolutionContent() {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         toast.error(error.response.data.message || "Problem occur while fetching submission details");
-        console.log(error.response.data.message || "Problem occur while fetching submission details");
       } else {
-        console.log("Error in solution fetching route", error);
         toast.error("Error in solutiion fetching route");
       }
     } finally {
@@ -109,6 +105,7 @@ function AddSolutionContent() {
 
   useEffect(() => {
     fetchSubmissionDetails();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
   useEffect(() => setMounted(true), []);

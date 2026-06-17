@@ -5,7 +5,7 @@ import { Session } from "next-auth";
 import { ListVideo, Shuffle } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { ApiResponse } from "@/types/ApiResponse";
+import { ProblemsListResponse } from "@/types/ApiResponse";
 import { IProblem } from "@/models/Problem";
 
 export const PROBLEM_RUN_SUBMIT_PORTAL_ID = "problem-run-submit-portal";
@@ -27,7 +27,7 @@ export default function NavLinks({
     if (isShuffling) return;
     setIsShuffling(true);
     try {
-      const res = await axios.get<ApiResponse>("/api/problem/all-problems");
+      const res = await axios.get<ProblemsListResponse>("/api/problem/all-problems");
       const problems: IProblem[] = res.data.allProblems || [];
       if (problems.length > 0) {
         const randomProblem = problems[Math.floor(Math.random() * problems.length)];

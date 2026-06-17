@@ -41,8 +41,7 @@ export async function GET(req: NextRequest) {
             submissionOutput: submission
         }, { status: 200 });
 
-    } catch (error) {
-        console.log("Something went wrong while fetching submission details: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while fetching submission details"

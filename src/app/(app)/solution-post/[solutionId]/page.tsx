@@ -29,10 +29,8 @@ export default function Page() {
         } catch (error) {
             if (axios.isAxiosError(error) && error.response) {
                 toast.error(error.response.data.message || "Problem while fetching solution");
-                console.log("Problem while fetching solution: ", error.response.data.message);
             } else {
                 toast.error("Error while fetching solution");
-                console.log("Error while fetching solution: ", error);
             }
         } finally {
             setIsLoading(false)

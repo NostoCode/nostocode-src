@@ -1,6 +1,7 @@
 "use client";
 
 import { useAppTheme } from "@/context/ThemeContext";
+import Image from "next/image";
 
 export function Win98Shell({ children }: { children: React.ReactNode }) {
   const { isWin98 } = useAppTheme();
@@ -13,7 +14,7 @@ export function Win98Shell({ children }: { children: React.ReactNode }) {
     <div className="win98-app-window">
       <div className="win98-chrome-titlebar" aria-hidden="true">
         <span className="win98-titlebar-text">
-          <img src="/favicon.ico" alt="" className="win98-titlebar-icon" />
+          <Image src="/favicon.ico" alt="" width={16} height={16} className="win98-titlebar-icon" />
           NostoCode
         </span>
         <div className="win98-window-controls">

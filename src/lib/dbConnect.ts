@@ -34,6 +34,7 @@ export async function connectToDb(): Promise<typeof mongoose> {
   try {
     cached.conn = await cached.promise;
     if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
       console.log("MongoDB connected");
     }
     return cached.conn;

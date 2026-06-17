@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from "axios";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -32,7 +31,6 @@ export default function Page() {
   const [isShowingPassword, setIsShowingPassword] = useState<boolean>(false);
   const router = useRouter();
   const { theme, systemTheme, setTheme } = useTheme();
-  console.log("theme: ", theme)
 
   // zod validation + react hook form
   const form = useForm<z.infer<typeof signInValidation>>({
@@ -54,10 +52,8 @@ export default function Page() {
 
       if (res?.error) {
         if (res.error === "CredentialsSignin") {
-          console.log("Login failed: incorrect username or password: ", res.error);
           toast.error("Login failed: incorrect username or password");
         } else {
-          console.log(`Error: ${res.error}`)
           toast.error(`Error: ${res.error}`);
         }
       }
@@ -71,9 +67,8 @@ export default function Page() {
           router.replace('/problems');
         }
       }
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong. Please try again.");
-      console.error("Sign in error:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +79,7 @@ export default function Page() {
     if (theme && systemTheme) {
       setTheme(systemTheme);
     }
-  }, [mounted]);
+  }, [mounted, theme, systemTheme, setTheme]);
 
   useEffect(() => {
     setMounted(true);

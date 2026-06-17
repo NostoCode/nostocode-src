@@ -72,8 +72,7 @@ export async function GET(req: NextRequest) {
             message: "Submission fetched successfully",
             submissions: submittedCodes[0]?.submissionDetails || []
         });
-    } catch (error) {
-        console.error("Something went wrong while fetching submissions for this problem: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while fetching submissions for this problem"

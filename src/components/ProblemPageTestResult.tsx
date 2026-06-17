@@ -43,7 +43,7 @@ export default function ProblemPageTestResult({ codeOutput, isCodeRunning, theme
             }
         }
         setInputAndOutputValues();
-    }, [viewTestCase]);
+    }, [viewTestCase, problemInfo.testCases, problemInfo.testCode]);
 
     useEffect(() => {
         const checkIsAllTestCasePass = () => {

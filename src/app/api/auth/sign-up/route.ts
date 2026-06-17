@@ -88,8 +88,7 @@ export async function POST(req: NextRequest) {
             message: "User registered successfully. Please verify your email",
             userId
         }, {status: 201});
-    } catch (error) {
-        console.error("Something went wrong while registering user: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while registering user"

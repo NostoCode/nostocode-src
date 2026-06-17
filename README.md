@@ -103,10 +103,13 @@ npm run dev        # starts on http://localhost:3000 with Turbopack
 src/
 ├── app/
 │   ├── (app)/            # Authenticated app routes
-│   │   ├── problem/      # Problem page (editor, run/submit, test results)
-│   │   ├── problems/     # Problem list
-│   │   ├── dashboard/    # User dashboard (stats, submissions)
+│   │   ├── problem/      # Problem page (RSC + ProblemPageClient)
+│   │   ├── problems/     # Problem list (RSC + ProblemsListClient)
+│   │   ├── dashboard/    # User dashboard (RSC + DashboardClient)
+│   │   ├── profile/      # User profile (RSC + ProfileClient)
 │   │   └── ...
+│   ├── (auth)/           # Sign-in, sign-up, verify, forget-password
+│   ├── (admin)/          # Add/update problems (admin only)
 │   ├── api/              # Next.js API routes
 │   │   ├── auth/         # Sign-up, sign-in, email verification
 │   │   ├── code/         # run-code, submit-code, submissions
@@ -114,13 +117,24 @@ src/
 │   │   └── user/         # User profile API
 │   └── page.tsx          # Landing page
 ├── components/
-│   ├── ProblemPageCodeEditor.tsx   # Monaco + Ancient Mode logic
-│   ├── NavRunButtonsContainer.tsx  # Run/Submit buttons in header nav
+│   ├── ProblemPageCodeEditor.tsx   # Monaco + Ancient Mode wiring
+│   ├── ProblemRunSubmitBar.tsx     # Run/Submit via portal into header
+│   ├── Win98Shell.tsx              # Win98 window chrome wrapper
 │   └── ...
 ├── context/
-│   ├── ThemeContext.tsx            # Win98/Modern theme toggle
-│   └── ProblemPageContext.tsx      # Passes run/submit state to header
-├── models/               # Mongoose models (User, Problem, Submission)
+│   └── ThemeContext.tsx            # useAppTheme hook (Win98/Modern)
+├── lib/
+│   ├── execution.ts               # Shared harness prep, submit logic
+│   ├── ancientScoring.ts          # Pure scoring functions + event tracking
+│   ├── data/                      # RSC data fetchers (problems, dashboard, profile, submissions)
+│   ├── buildDetailedHarness.ts    # Template-mode judge harness builder
+│   ├── pistonApiFunction.ts       # Piston API client
+│   └── apiError.ts                # Error handling utility
+├── models/               # Mongoose models (User, Problem, Submission, Solution)
+├── types/
+│   ├── ApiResponse.ts             # Legacy catch-all (re-exports from responses.ts)
+│   └── responses.ts               # Focused types: RunCodeResponse, SubmitCodeResponse, etc.
+├── schemas/              # Zod validation schemas
 └── styles/
     └── win98-theme.css   # All Win98/Ancient theme overrides
 ```
@@ -129,11 +143,26 @@ src/
 
 ## Key Design Decisions
 
-- **Run/Submit buttons live in the header nav row** (alongside "Problem List"), so they appear consistently at the same position regardless of OS/browser/theme.
+- **Run/Submit buttons via portal** — `ProblemRunSubmitBar` renders into the header nav row via `createPortal`. No global state store needed; the problem page owns the handlers.
+- **RSC data layer** — Read-heavy pages (problems, problem, dashboard, profile, all-submissions) fetch data on the server via `src/lib/data/`. Client components receive serialized props.
+- **Shared execution layer** (`src/lib/execution.ts`) — Template detection, harness building, result normalization, and submission recording are shared between run-code and submit-code routes.
+- **Ancient scoring extracted** (`src/lib/ancientScoring.ts`) — Pure functions for score calculation, testable in isolation. Editor component only does Monaco wiring.
 - **Internal clipboard** uses a module-level variable (`internalClipboard`) so it persists across React re-renders.
 - **Paste detection** uses `document.addEventListener("paste", ..., { capture: true })` + `e.clipboardData.getData('text')` — no permission dialogs, reliable cross-browser.
 - **AC count deduplication**: `solvedQuestions` is checked before adding a problem ID, so solving the same problem multiple times doesn't inflate the counter.
-- **Dashboard charts** (Contest Rating, Top) show "Coming Soon" while backend data is not yet collected.
+
+---
+
+## Testing
+
+```bash
+npm run test          # Vitest unit tests (ancientScoring, formatMath)
+npm run test:e2e      # Playwright E2E (smoke, code-run, visual-verify)
+npm run lint          # ESLint
+npm run build         # Production build
+```
+
+CI runs lint → unit tests → build on every push/PR to main. E2E (`npm run test:e2e`) runs locally against a seeded MongoDB instance.
 
 ---
 

@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import NavDropdown from "./NavDropdown";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import Image from "next/image";
 import NavLinks from "./NavLinks";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
@@ -27,9 +28,9 @@ export default function Header() {
     <header className="w-full h-12 border-b-2 flex items-center justify-between px-8 relative z-30">
       <Link href="/problems">
         {theme === "dark" ? (
-          <img src="/navLogo-dark.svg" alt="" className="h-6" />
+          <Image src="/navLogo-dark.svg" alt="NostoCode" width={120} height={24} className="h-6 w-auto" />
         ) : (
-          <img src="/navLogo-light.svg" alt="" className="h-6" />
+          <Image src="/navLogo-light.svg" alt="NostoCode" width={120} height={24} className="h-6 w-auto" />
         )}
       </Link>
       <NavLinks theme={theme} session={session} pathname={pathname} />

@@ -13,8 +13,7 @@ export const sendForgetPasswordVerificationEmail = async (email: string, usernam
         });
         
         return { success: true, message: "Verification email send successfully" };
-    } catch (error) {
-        console.error("Error sending forget password email: ", error);
+    } catch {
         return { success: false, message: "Failed to send verification email" }
     }
 }

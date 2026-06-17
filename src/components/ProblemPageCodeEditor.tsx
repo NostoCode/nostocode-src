@@ -319,6 +319,7 @@ const ProblemPageCodeEditor = forwardRef<ProblemPageCodeEditorHandle, ProblemPag
             setSourceCode("");
         }
         if (selectedLanguage) resetEditorEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedLanguage, starterCode, setSelectedLanguageCode, setSourceCode])
 
     const handleResetCode = () => {

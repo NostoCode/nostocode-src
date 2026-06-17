@@ -1,5 +1,6 @@
 "use client";
 import React from 'react'
+import Image from 'next/image'
 import { ModeToggle } from './modeToggle'
 import {
     DropdownMenu,
@@ -66,7 +67,7 @@ export default function NavDropdown({ session, signOut, theme }: NavDropdownProp
                                 </div>
                                 <div className="w-[70%] relative">
                                     <h2 className="text-2xl font-semibold truncate w-full">{session?.user.username}</h2>
-                                    {session?.user.userType === "admin" &&  <img src="/admin text dark.png" className={`w-16 mt-1 mb-2`} alt="" />
+                                    {session?.user.userType === "admin" &&  <Image src="/admin text dark.png" width={64} height={16} className="w-16 mt-1 mb-2" alt="Admin" />
                                     }
 
                                     <p className="w-full text-sm leading-4 text-yellow-300">Access all features with our Premium subscription!</p>

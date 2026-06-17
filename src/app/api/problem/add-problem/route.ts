@@ -69,8 +69,7 @@ export async function POST(req: NextRequest) {
             problemId: newProblem._id
         }, { status: 201 });
 
-    } catch (error) {
-        console.error("Something went wrong while adding problem: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while adding problem"

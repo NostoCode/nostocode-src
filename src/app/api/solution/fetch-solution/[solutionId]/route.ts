@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, {params }: { params: Promise<{ solut
             message: "Solution fetched successfully",
             solution
         }, {status: 200});
-    } catch (error) {
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while fetching solution"

@@ -224,3 +224,76 @@ export function resolveSubmitStatus(
     return { status: stderr ? "Runtime Error" : "Wrong Answer", failedCase: null };
   }
 }
+
+export interface SubmissionData {
+  userId: string;
+  status: string;
+  language: string;
+  time: number;
+  memory: number;
+  sourceCode: string;
+  ancientCodeScore?: number;
+  ancientCodeLevel?: string;
+  scoreDetails?: unknown;
+  problemId: string;
+}
+
+export async function recordSubmission(
+  data: SubmissionData,
+  pistonResults: PistonRunResult[],
+  isTemplateMode: boolean
+) {
+  const { default: submissionModel } = await import("@/models/Submission");
+  const { default: problemModel } = await import("@/models/Problem");
+  const { default: userModel } = await import("@/models/User");
+
+  let sumOfTime = 0;
+  let sumOfMemory = 0;
+  if (isTemplateMode) {
+    sumOfTime = parseFloat(pistonResults[0]?.time || "0") || 0;
+    sumOfMemory = pistonResults[0]?.memory || 0;
+  } else {
+    for (const r of pistonResults) {
+      sumOfTime += parseFloat(r.time || "0") || 0;
+      sumOfMemory += r.memory || 0;
+    }
+  }
+
+  const newSubmission = await submissionModel.create({
+    ...data,
+    time: sumOfTime / pistonResults.length,
+    memory: sumOfMemory / pistonResults.length,
+    ancientCodeScore: data.ancientCodeScore ?? 100,
+    ancientCodeLevel: data.ancientCodeLevel ?? "🟢 Ancient Master",
+    scoreDetails: data.scoreDetails ?? undefined,
+  });
+
+  const problem = await problemModel.findById(data.problemId);
+  if (!problem) {
+    await submissionModel.findByIdAndDelete(newSubmission._id);
+    return { error: "Problem not found", status: 404 };
+  }
+
+  const user = await userModel.findById(data.userId);
+  if (!user) {
+    await submissionModel.findByIdAndDelete(newSubmission._id);
+    return { error: "User not found", status: 404 };
+  }
+
+  user.submissions.push(newSubmission._id);
+  if (data.status === "Accepted") {
+    const alreadySolved = (user.solvedQuestions as unknown[]).some(
+      (q) => (q as { toString(): string })?.toString() === data.problemId.toString()
+    );
+    if (!alreadySolved) {
+      user.solvedQuestions.push(data.problemId);
+      user.solvedProblems = user.solvedProblems + 1;
+    }
+  }
+  await user.save();
+
+  return {
+    submission: newSubmission,
+    totalTestCases: problem.testCases?.length || 0,
+  };
+}
