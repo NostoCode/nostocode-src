@@ -13,8 +13,7 @@ export const sendVerificationEmail = async (email: string, username: string, ver
         });
         
         return { success: true, message: "Verification email send successfully" };
-    } catch (error) {
-        console.error("Error sending verification email: ", error);
+    } catch {
         return { success: false, message: "Failed to send verification email" }
     }
 }

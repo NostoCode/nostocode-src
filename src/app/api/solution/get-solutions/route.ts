@@ -34,8 +34,7 @@ export async function GET(req: NextRequest) {
             message: "All solutions are fetched successfully",
             solutions: allSolutions
         }, { status: 200 });
-    } catch (error) {
-        console.log("Something went wrong while fetching all solutions: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while fetching all solutions"

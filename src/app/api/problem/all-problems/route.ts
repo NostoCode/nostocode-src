@@ -72,8 +72,7 @@ export async function GET(req: NextRequest) {
                 headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" }
             }
         );
-    } catch (error) {
-        console.log("Something went wrong while fetching all problems: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while fetching all problems"

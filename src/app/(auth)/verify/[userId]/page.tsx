@@ -45,7 +45,7 @@ export default function Page() {
   const onSubmit = async (data: z.infer<typeof verifyCodeValidation>) => {
     setIsSubmitting(true);
     try {
-      const res = await axios.post<ApiResponse>("/api/auth/verify-code", {
+      await axios.post<ApiResponse>("/api/auth/verify-code", {
         id: userId,
         code: data.code
       });
@@ -54,10 +54,8 @@ export default function Page() {
       router.replace("/sign-in");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log("Account verification error: ", error.response.data.message);
         toast.error(error.response.data.message);
       } else {
-        console.error("Error while user verification: ", error);
         toast.error("User verification failed");
       }
     } finally {
@@ -74,7 +72,7 @@ export default function Page() {
       if(theme && systemTheme){
         setTheme(systemTheme);
       }
-    }, [mounted]);
+    }, [mounted, theme, systemTheme, setTheme]);
 
   // this line help us to avoid theme hydration error
   if (!mounted) {

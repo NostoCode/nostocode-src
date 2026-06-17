@@ -12,18 +12,18 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import ProblemSideFooter from "@/components/ProblemPageSideFooter";
 import { toast } from "sonner";
 import axios from "axios";
-import { ApiResponse, codeSubmissionResultType, CodeRunResult, FailedCase } from "@/types/ApiResponse";
+import { codeSubmissionResultType, CodeRunResult, FailedCase, RunCodeResponse, SubmitCodeResponse } from "@/types/ApiResponse";
 import { IProblem } from "@/models/Problem.js";
 import ProblemPageDescription from "@/components/ProblemPageDescription";
 import ProblemPageCodeEditor, {
   ProblemPageCodeEditorHandle,
 } from "@/components/ProblemPageCodeEditor";
-import { useAppTheme } from "@/context/ThemeContext";
 import { useSession } from "next-auth/react";
 import { codeRunValidation } from "@/schemas/codeRunSchema";
 import ProblemPageSoluction from "@/components/ProblemPageSoluction";
 import ProblemPageSubmission from "@/components/ProblemPageSubmission";
 import ProblemPageTestResult from "@/components/ProblemPageTestResult";
+import { useAppTheme } from "@/context/ThemeContext";
 import { codeSubmissionValidation } from "@/schemas/codeSubmissionSchema";
 import confetti from "canvas-confetti";
 import ProblemRunSubmitBar from "@/components/ProblemRunSubmitBar";
@@ -91,7 +91,7 @@ export default function ProblemPageClient({
         return;
       }
 
-      const res = await axios.post<ApiResponse>("/api/code/run-code", data);
+      const res = await axios.post<RunCodeResponse>("/api/code/run-code", data);
       toast.success("Code run successfully");
       setCodeOutput(res.data.results ?? null);
       setRunFailedCase(res.data.failedCase ?? null);
@@ -136,7 +136,7 @@ export default function ProblemPageClient({
         return;
       }
 
-      const res = await axios.post<ApiResponse>("/api/code/submit-code", data);
+      const res = await axios.post<SubmitCodeResponse>("/api/code/submit-code", data);
       toast.success("Code submitted successfully");
       setSubmissionOutput(res.data.submissionOutput ?? null);
       setTotalTestCases(res.data.totalTestCases ?? 0);
@@ -191,7 +191,6 @@ export default function ProblemPageClient({
             )}
             {problemInfo && currentTab === "submissions" && (
               <ProblemPageSubmission
-                theme={theme}
                 problemInfo={problemInfo}
                 setCurrentTab={setCurrentTab}
                 setSubmissionOutput={setSubmissionOutput}

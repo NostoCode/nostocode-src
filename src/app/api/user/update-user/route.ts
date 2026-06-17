@@ -36,8 +36,7 @@ export async function POST(req: NextRequest) {
             message: "User updated successfully",
             user: updatedUser
         }, { status: 200 })
-    } catch (error) {
-        console.log("Something went wrong while updating user: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while updating user"

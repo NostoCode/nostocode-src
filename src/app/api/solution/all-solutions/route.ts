@@ -1,9 +1,9 @@
 import { connectToDb } from "@/lib/dbConnect";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import "@/models/User";
 import solutionModel from "@/models/Solution";
 
-export async function GET(req: NextRequest){
+export async function GET(){
     await connectToDb()
 
     try {
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest){
             message: "All solutions are fetched successfully",
             solutions: allSolutions
         }, {status: 200})
-    } catch (error) {
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while fetching all solutions"

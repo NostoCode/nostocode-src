@@ -59,7 +59,6 @@ export const runCodeBatch = async (
         return { success: true as const, result };
     } catch (error: unknown) {
         const err = error as { response?: { data?: { message?: string } }; message?: string };
-        console.error("Piston API error:", err.response?.data ?? err.message);
         return {
             success: false as const,
             result: err.response?.data?.message ?? "Piston execution error",

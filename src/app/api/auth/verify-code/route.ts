@@ -66,8 +66,7 @@ export async function POST(req: NextRequest){
                 message: "Incorrect verification code"
             }, {status: 400});
         }
-    } catch (error) {
-        console.error("Something went wrong while veifying code: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while verifying code"

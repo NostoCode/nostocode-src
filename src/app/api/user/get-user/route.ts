@@ -34,8 +34,7 @@ export async function GET(req: NextRequest) {
             message: "User found successfully",
             user
         }, { status: 200 });
-    } catch (error) {
-        console.log("Something went wrong while fetching the user info: ", error);
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while fetching the user info"

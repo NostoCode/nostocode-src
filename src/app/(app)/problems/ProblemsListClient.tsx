@@ -21,6 +21,7 @@ import {
   Star,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import React, { useCallback, useState } from "react";
 import { useAppTheme } from "@/context/ThemeContext";
 import { useRouter } from "next/navigation";
@@ -195,7 +196,7 @@ export default function ProblemsListClient({
       </div>
       <div className="w-[35%] h-full py-4 px-12">
         <div className="w-full h-full bg-[var(--sidebar-accent)] rounded-md p-6 flex flex-col gap-2">
-          <img src="/problem page logo.png" alt="" className="w-22 rounded-md" />
+          <Image src="/problem page logo.png" alt="" width={88} height={88} className="w-22 rounded-md" />
           <h2 className="text-2xl font-semibold">All Problems</h2>
           <p className="text-gray-500 text-sm mb-2">
             NostoCode — {allProblems.length} problems · {solvedCount} solved

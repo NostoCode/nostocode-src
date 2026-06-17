@@ -10,8 +10,7 @@ export default function ProblemPageCollapseButton({ problemInfo }: { problemInfo
     const [openTages, setOpenTags] = useState<boolean>(false);
     const [openCompanies, setOpenCompanies] = useState<boolean>(false);
     const [openSimilarQeustions, setOpenSimilarQuestions] = useState<boolean>(false);
-    const {data:session, status} = useSession();
-    console.log("session: ", session)
+    const {data:session} = useSession();
 
     return (
         <div className="mt-8">

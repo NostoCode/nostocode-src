@@ -58,10 +58,8 @@ export default function Page() {
       router.replace(`/verify/${res.data.userId}`);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log("Sign up route error: ", error.response.data.message);
         toast.error(error.response.data.message);
       } else {
-        console.error("Error in signup of user: ", error);
         toast.error("Sign up failed");
       }
     } finally {
@@ -78,7 +76,7 @@ export default function Page() {
     if (theme && systemTheme) {
       setTheme(systemTheme);
     }
-  }, [mounted]);
+  }, [mounted, theme, systemTheme, setTheme]);
 
   const handlePasswordShow = () => {
     setIsShowingPassword(!isShowingPassword);

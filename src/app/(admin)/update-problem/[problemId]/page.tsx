@@ -1,5 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState } from 'react'
+import Image from 'next/image';
 import MDEditor from '@uiw/react-md-editor';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from "@/components/ui/button"
@@ -35,7 +36,6 @@ export default function Page() {
   const [orderFlag, setOrderFlag] = useState<'' | '# ALLOW_ANY_ORDER' | '# ALLOW_OUTER_ORDER'>('');
   const router = useRouter();
   const { problemId } = useParams();
-  console.log("problem: ", problemInfo)
 
 
   // zod validation + react hook form
@@ -53,8 +53,6 @@ export default function Page() {
     }
   })
 
-  const allValues = form.watch();
-  // console.log("Form values:", allValues);
   const descriptionValue = form.watch("description");
   const examplesValue = form.watch("examples");
   const constraintsValue = form.watch("constraints");
@@ -77,15 +75,13 @@ export default function Page() {
           : problemInfo.testCode;
         payload.testCode = orderFlag ? `${orderFlag}\n${baseCode}` : baseCode;
       }
-      const res = await axios.patch<ApiResponse>(`/api/problem/update-problem?problemId=${problemId}`, payload);
+      await axios.patch<ApiResponse>(`/api/problem/update-problem?problemId=${problemId}`, payload);
       toast.success("Problem updated successfully");
       router.replace(`/problem/${problemId}`);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log("Error while fetching problem info: ", error.response.data.message);
         toast.error(error.response.data.message || "Error while fetching problem info");
       } else {
-        console.log("Something went wrong while fetching error info: ", error);
         toast.error("Something went wrong while fetching error info");
       }
     } finally {
@@ -118,14 +114,12 @@ export default function Page() {
       })
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log("Error while fetching problem info: ", error.response.data.message);
         toast.error(error.response.data.message || "Error while fetching problem info");
       } else {
         toast.error("Something went wrong while fetching problem information");
-        console.log("Something went wrong while fetching problem information: ", error);
       }
     }
-  }, [setProblemInfo, problemId]);
+  }, [setProblemInfo, problemId, form]);
 
   useEffect(() => {
     fetchProblemInfo();
@@ -140,7 +134,7 @@ export default function Page() {
       <ScrollArea className='relative w-1/2 h-[calc(100vh-3rem)] px-4 py-2'>
         <div className="w-full border-2 py-8 px-8 rounded-2xl flex flex-col items-center relative">
           <div className="logo">
-            <img src="/logo.svg" alt="" />
+            <Image src="/logo.svg" alt="NostoCode" width={150} height={40} />
           </div>
           <div className="w-full">
             <h1 className='text-3xl mt-8 mb-2 font-semibold'>Update Problem</h1>
@@ -233,7 +227,7 @@ export default function Page() {
               <FormField
                 name="testCases"
                 control={form.control}
-                render={({ field }) => (
+                render={({ field: _field }) => (
                   <FormItem>
                     <FormLabel>Test Cases</FormLabel>
                     <div className="flex flex-col gap-4">

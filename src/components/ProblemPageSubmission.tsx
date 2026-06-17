@@ -9,12 +9,11 @@ import { toast } from 'sonner';
 import { Skeleton } from './ui/skeleton';
 
 interface ProblemPageSubmissionType {
-  theme: string | undefined,
   problemInfo: IProblem,
   setCurrentTab: React.Dispatch<React.SetStateAction<string>>, setSubmissionOutput: React.Dispatch<React.SetStateAction<codeSubmissionResultType | null>> 
 }
 
-export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTab, setSubmissionOutput }: ProblemPageSubmissionType) {
+export default function ProblemPageSubmission({ problemInfo, setCurrentTab, setSubmissionOutput }: ProblemPageSubmissionType) {
   const [submission, setSubmission] = useState<codeSubmissionResultType[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -28,17 +27,15 @@ export default function ProblemPageSubmission({ theme, problemInfo, setCurrentTa
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           toast.error(error.response.data.message);
-          console.log("Problem fetching submissions: ", error.response.data.message);
         } else {
           toast.error("Error while fetching submissions");
-          console.log("Error while fetching submissions: ", error);
         }
       } finally{
         setLoading(false);
       }
     }
     fetchSubmission();
-  }, []);
+  }, [problemInfo._id]);
 
   const handleClick = (ele: codeSubmissionResultType) => {
     if(!submission) return;

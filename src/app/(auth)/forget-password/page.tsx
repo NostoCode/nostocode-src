@@ -46,16 +46,14 @@ export default function Page() {
   const onSubmit = async (data: z.infer<typeof forgetPasswordValidation>) => {
     setIsSubmitting(true);
     try {
-      const res = await axios.post<ApiResponse>("/api/auth/forget-password" , data);
+      await axios.post<ApiResponse>("/api/auth/forget-password" , data);
 
       toast.success("Password updated successfully, please sign in");
       router.replace("/sign-in");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log("Forget password route error: ", error.response.data.message);
         toast.error(error.response.data.message);
       } else {
-        console.error("Error in forget password: ", error);
         toast.error("Password Updation Failed");
       }
     } finally {
@@ -72,7 +70,7 @@ export default function Page() {
     if (theme && systemTheme) {
       setTheme(systemTheme);
     }
-  }, [mounted]);
+  }, [mounted, theme, systemTheme, setTheme]);
 
   const handlePasswordShow = () => {
     setIsShowingPassword(!isShowingPassword);
@@ -83,21 +81,18 @@ export default function Page() {
 
     if(!parsedData.success){
       toast.error(parsedData.error.issues[0].message);
-      console.log(parsedData.error.issues[0].message);
       return;
     }
     
     try {
       setIsSendingMail(true);
-      const res = await axios.post<ApiResponse>("/api/auth/forget-password-mail", {email});
+      await axios.post<ApiResponse>("/api/auth/forget-password-mail", {email});
 
       toast.success("Check your inbox! We’ve sent a password reset code");
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        console.log("Forget password mail route error: ", error.response.data.message);
         toast.error(error.response.data.message);
       } else {
-        console.error("Error in forget password mail route: ", error);
         toast.error("Forget password mail failed");
       }
     } finally{

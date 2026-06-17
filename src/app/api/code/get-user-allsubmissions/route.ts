@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
             message: "All submission are fetched successfully",
             submissions: allSubmissions
         }, { status: 200 });
-    } catch (error) {
+    } catch {
         return NextResponse.json({
             success: false,
             message: "Something went wrong while fetching all solutions"
