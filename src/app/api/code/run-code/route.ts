@@ -1,20 +1,26 @@
 import { NextResponse, NextRequest } from "next/server";
 import { codeRunValidation } from "@/schemas/codeRunSchema";
 import { runCodeBatch } from "@/lib/pistonApiFunction";
-import { getToken } from "next-auth/jwt";
+import { getAuthToken, unauthorizedResponse } from "@/lib/apiAuth";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import {
   prepareForRun,
   normalizeExecutionResult,
 } from "@/lib/execution";
 
+const RUN_LIMIT = 30; // runs per minute per user
+const RUN_WINDOW_MS = 60_000;
+
 export async function POST(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getAuthToken(req);
 
   if (!token) {
-    return NextResponse.json(
-      { success: false, message: "Unauthorized" },
-      { status: 400 }
-    );
+    return unauthorizedResponse();
+  }
+
+  const rate = checkRateLimit(`run:${token._id}`, RUN_LIMIT, RUN_WINDOW_MS);
+  if (!rate.allowed) {
+    return rateLimitResponse(rate);
   }
 
   try {

@@ -1,17 +1,18 @@
 import { connectToDb } from "@/lib/dbConnect";
 import problemModel from "@/models/Problem";
 import { createProblemValidation } from "@/schemas/createProblemSchema";
-import { getToken } from "next-auth/jwt";
+import { getAuthToken, unauthorizedResponse, forbiddenResponse, isAdminToken } from "@/lib/apiAuth";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function PATCH(req:NextRequest) {
-    const token = getToken({req, secret: process.env.NEXTAUTH_SECRET});
+    const token = await getAuthToken(req);
     if(!token){
-        return NextResponse.json({
-            success: false,
-            message: "Unauthorized"
-        }, {status: 400});
+        return unauthorizedResponse();
+    }
+
+    if(!isAdminToken(token)){
+        return forbiddenResponse("Only admin can access this route");
     }
 
     const { searchParams } = new URL(req.url);
@@ -32,7 +33,7 @@ export async function PATCH(req:NextRequest) {
             return NextResponse.json({
                 success: false,
                 message: parsedData.error.issues[0].message
-            })
+            }, {status: 400})
         }
 
         const updatedProblem = await problemModel.findByIdAndUpdate(

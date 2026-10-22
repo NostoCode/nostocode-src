@@ -47,7 +47,7 @@ export interface codeSubmissionResultType {
   ancientCodeLevel?: string;
   scoreDetails?: ScoreDetails;
   createdAt?: Date;
-  udpatedAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface RunCodeResponse {

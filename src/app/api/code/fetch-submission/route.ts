@@ -1,16 +1,13 @@
 import { connectToDb } from "@/lib/dbConnect";
 import submissionModel from "@/models/Submission";
-import { getToken } from "next-auth/jwt";
+import { getAuthToken, unauthorizedResponse, forbiddenResponse, isAdminToken } from "@/lib/apiAuth";
 import { NextRequest, NextResponse } from "next/server";
 import "@/models/Problem";
 
 export async function GET(req: NextRequest) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getAuthToken(req);
     if (!token) {
-        return NextResponse.json({
-            success: false,
-            message: "Unauthorized"
-        }, { status: 400 });
+        return unauthorizedResponse();
     }
 
     await connectToDb();
@@ -33,6 +30,10 @@ export async function GET(req: NextRequest) {
                 success: false,
                 message: "Submitted code not found",
             }, { status: 404 });
+        }
+
+        if (String(submission.userId) !== String(token._id) && !isAdminToken(token)) {
+            return forbiddenResponse("You can only view your own submissions");
         }
 
         return NextResponse.json({

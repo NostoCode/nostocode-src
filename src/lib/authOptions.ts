@@ -22,7 +22,10 @@ export const authOptions: NextAuthOptions = {
                 try {
                     await connectToDb();
 
-                    const user = await userModel.findOne({ email: credentials.email });
+                    // password has select:false on the schema; opt back in for bcrypt.compare
+                    const user = await userModel
+                        .findOne({ email: credentials.email })
+                        .select("+password");
 
                     if (!user) {
                         throw new Error("No user found through this email");

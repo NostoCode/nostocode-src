@@ -3,16 +3,13 @@ import problemModel from "@/models/Problem";
 import solutionModel from "@/models/Solution";
 import userModel from "@/models/User";
 import { solutionValidation } from "@/schemas/solutiionSchema";
-import { getToken } from "next-auth/jwt";
+import { getAuthToken, unauthorizedResponse } from "@/lib/apiAuth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getAuthToken(req);
     if (!token) {
-        return NextResponse.json({
-            success: false,
-            message: "Unauthorized"
-        }, { status: 400 });
+        return unauthorizedResponse();
     }
 
     await connectToDb();

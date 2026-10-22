@@ -1,15 +1,12 @@
 import { connectToDb } from "@/lib/dbConnect";
 import submissionModel from "@/models/Submission";
-import { getToken } from "next-auth/jwt";
+import { getAuthToken, unauthorizedResponse } from "@/lib/apiAuth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getAuthToken(req);
     if (!token) {
-        return NextResponse.json({
-            success: false,
-            message: "Unauthorized"
-        }, { status: 400 });
+        return unauthorizedResponse();
     }
 
     await connectToDb();

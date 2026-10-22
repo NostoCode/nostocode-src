@@ -1,15 +1,24 @@
 import { connectToDb } from "@/lib/dbConnect";
 import { runCodeBatch } from "@/lib/pistonApiFunction";
-import { codeRunValidation } from "@/schemas/codeRunSchema";
 import { codeSubmissionValidation } from "@/schemas/codeSubmissionSchema";
+import { codeRunValidation } from "@/schemas/codeRunSchema";
 import { prepareForSubmit, resolveSubmitStatus, recordSubmission } from "@/lib/execution";
-import { getToken } from "next-auth/jwt";
+import { getAuthToken, unauthorizedResponse, forbiddenResponse } from "@/lib/apiAuth";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { NextRequest, NextResponse } from "next/server";
 
+const SUBMIT_LIMIT = 20; // submissions per minute per user
+const SUBMIT_WINDOW_MS = 60_000;
+
 export async function POST(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getAuthToken(req);
   if (!token) {
-    return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 400 });
+    return unauthorizedResponse();
+  }
+
+  const rate = checkRateLimit(`submit:${token._id}`, SUBMIT_LIMIT, SUBMIT_WINDOW_MS);
+  if (!rate.allowed) {
+    return rateLimitResponse(rate);
   }
 
   await connectToDb();
@@ -17,6 +26,11 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { userId, language, problemId, sourceCode, languageId, testCases, ancientCodeScore, ancientCodeLevel, scoreDetails } = body;
+
+    // never let one user submit on behalf of another
+    if (String(userId) !== String(token._id)) {
+      return forbiddenResponse("You can only submit code for your own account");
+    }
 
     const v1 = codeSubmissionValidation.safeParse({ userId, language, sourceCode, problemId });
     if (!v1.success) {

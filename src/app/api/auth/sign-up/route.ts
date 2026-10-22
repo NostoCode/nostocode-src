@@ -3,10 +3,16 @@ import userModel from "@/models/User";
 import bcrypt from "bcryptjs";
 import { sendVerificationEmail } from "@/helpers/sendVerificationEmail";
 import { connectToDb } from "@/lib/dbConnect";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rateLimit";
 
 import { signUpValidation } from "@/schemas/signUpSchema";
 
 export async function POST(req: NextRequest) {
+    const rate = checkRateLimit(`signup:${getClientIp(req)}`, 10, 60_000);
+    if (!rate.allowed) {
+        return rateLimitResponse(rate);
+    }
+
     await connectToDb();
 
     try {

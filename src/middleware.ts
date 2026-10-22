@@ -5,12 +5,12 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
   const url = request.nextUrl;
 
-  if (token && (url.pathname.startsWith("/sign-in") || url.pathname.startsWith("/sign-up") || url.pathname.startsWith("/verify-code") || url.pathname.startsWith("/forget-password") || url.pathname.startsWith("/login") || url.pathname === "/")) {
+  if (token && (url.pathname.startsWith("/sign-in") || url.pathname.startsWith("/sign-up") || url.pathname.startsWith("/verify") || url.pathname.startsWith("/forget-password") || url.pathname.startsWith("/login") || url.pathname === "/")) {
     return NextResponse.redirect(new URL(`/dashboard/${token._id}`, request.url))
   }
 
-  // admin condition
-  if (token && token.userType === "user" && (url.pathname.startsWith("/add-problem") || url.pathname.startsWith("/update-problem"))) {
+  // admin condition: anything that is not an admin is blocked
+  if (token && token.userType !== "admin" && (url.pathname.startsWith("/add-problem") || url.pathname.startsWith("/update-problem"))) {
     return NextResponse.redirect(new URL(`/dashboard/${token._id}`, request.url));
   }
 

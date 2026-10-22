@@ -3,22 +3,16 @@ import problemModel from "@/models/Problem";
 import { createProblemValidation } from "@/schemas/createProblemSchema";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { getAuthToken, unauthorizedResponse, forbiddenResponse, isAdminToken } from "@/lib/apiAuth";
 
 export async function POST(req: NextRequest) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getAuthToken(req);
     if (!token) {
-        return NextResponse.json({
-            success: false,
-            message: "Unauthorized"
-        }, { status: 400 });
+        return unauthorizedResponse();
     }
 
-    if (token?.userType !== "admin") {
-        return NextResponse.json({
-            success: false,
-            message: "Only admin can access this routes"
-        }, { status: 400 });
+    if (!isAdminToken(token)) {
+        return forbiddenResponse("Only admin can access this route");
     }
 
     await connectToDb();

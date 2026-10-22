@@ -3,8 +3,14 @@ import { emailValidation } from "@/schemas/forgetPasswordSchema";
 import userModel from "@/models/User";
 import { sendForgetPasswordVerificationEmail } from "@/helpers/sendForgetPasswordVerificationEmail";
 import { connectToDb } from "@/lib/dbConnect";
+import { checkRateLimit, getClientIp, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
+    const rate = checkRateLimit(`forget-pw:${getClientIp(req)}`, 5, 60_000);
+    if (!rate.allowed) {
+        return rateLimitResponse(rate);
+    }
+
     await connectToDb();
 
     try {

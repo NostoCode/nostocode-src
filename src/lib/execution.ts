@@ -259,26 +259,25 @@ export async function recordSubmission(
     }
   }
 
-  const newSubmission = await submissionModel.create({
-    ...data,
-    time: sumOfTime / pistonResults.length,
-    memory: sumOfMemory / pistonResults.length,
-    ancientCodeScore: data.ancientCodeScore ?? 100,
-    ancientCodeLevel: data.ancientCodeLevel ?? "🟢 Ancient Master",
-    scoreDetails: data.scoreDetails ?? undefined,
-  });
-
   const problem = await problemModel.findById(data.problemId);
   if (!problem) {
-    await submissionModel.findByIdAndDelete(newSubmission._id);
     return { error: "Problem not found", status: 404 };
   }
 
   const user = await userModel.findById(data.userId);
   if (!user) {
-    await submissionModel.findByIdAndDelete(newSubmission._id);
     return { error: "User not found", status: 404 };
   }
+
+  const caseCount = Math.max(pistonResults.length, 1);
+  const newSubmission = await submissionModel.create({
+    ...data,
+    time: sumOfTime / caseCount,
+    memory: sumOfMemory / caseCount,
+    ancientCodeScore: data.ancientCodeScore ?? 100,
+    ancientCodeLevel: data.ancientCodeLevel ?? "🟢 Ancient Master",
+    scoreDetails: data.scoreDetails ?? undefined,
+  });
 
   user.submissions.push(newSubmission._id);
   if (data.status === "Accepted") {
