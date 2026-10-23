@@ -7,6 +7,11 @@ import {
 import { serializeForClient } from "@/lib/serialize";
 import ProblemsListClient from "./ProblemsListClient";
 
+// Render at request time (not during build): the build environment must not
+// depend on the database being reachable. Data-layer caching via
+// unstable_cache (revalidate: 30) still applies.
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   const { allProblems, totalLevelWiseProblem } = await getProblemsListData();
   const session = await getServerSession(authOptions);
